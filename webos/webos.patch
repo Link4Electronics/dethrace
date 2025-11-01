@@ -1,0 +1,58 @@
+diff --git a/src/DETHRACE/main.c b/src/DETHRACE/main.c
+index 7b6eb51..d4aea2f 100644
+--- a/src/DETHRACE/main.c
++++ b/src/DETHRACE/main.c
+@@ -5,6 +5,7 @@
+ #include <io.h>
+ #include <stdio.h>
+ #include <windows.h>
++#include <stdlib.h>
+ #endif
+ 
+ #include "brender.h"
+@@ -29,9 +30,21 @@ void BR_CALLBACK _BrBeginHook(void) {
+ void BR_CALLBACK _BrEndHook(void) {
+ }
+ 
++void ensure_xdg_runtime_dir() {
++// compatibility with webOS 3 - 5
++if (getenv("EGL_PLATFORM") == NULL) {
++    setenv("EGL_PLATFORM", "wayland", 0);
++}
++if(getenv("XDG_RUNTIME_DIR") == NULL) {
++    setenv("XDG_RUNTIME_DIR", "/tmp/xdg", 0);
++}
++}
++
+ int main(int argc, char* argv[]) {
++    ensure_xdg_runtime_dir();
+     int result;
+ 
++
+ #ifdef _WIN32
+ #if _MSC_VER != 1020
+     /* Attach to the console that started us if any */
+diff --git a/src/harness/platforms/sdl2.c b/src/harness/platforms/sdl2.c
+index 55c5df8..d86d873 100644
+--- a/src/harness/platforms/sdl2.c
++++ b/src/harness/platforms/sdl2.c
+@@ -258,7 +258,7 @@ static void SDL2_Harness_CreateWindow(const char* title, int width, int height,
+             SDL_WINDOWPOS_CENTERED,
+             SDL_WINDOWPOS_CENTERED,
+             window_width, window_height,
+-            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
++            SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+ 
+         if (window == NULL) {
+             LOG_PANIC2("Failed to create window: %s", SDL2_GetError());
+@@ -285,8 +285,8 @@ static void SDL2_Harness_CreateWindow(const char* title, int width, int height,
+         window = SDL2_CreateWindow(title,
+             SDL_WINDOWPOS_CENTERED,
+             SDL_WINDOWPOS_CENTERED,
+-            window_width, window_height,
+-            SDL_WINDOW_RESIZABLE);
++            1280, 720,
++            SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN);
+         if (window == NULL) {
+             LOG_PANIC2("Failed to create window: %s", SDL2_GetError());
+         }

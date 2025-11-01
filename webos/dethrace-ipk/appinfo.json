@@ -1,0 +1,13 @@
+{
+  "id": "com.dethrace-labs.dethrace",
+  "version": "0.9.0",
+  "vendor": "Link4Electronics",
+  "type": "native",
+  "main": "dethrace",
+  "title": "dethrace-demo",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "iconColor": "#000000",
+  "splashBackground": "splash.png",
+  "appDescription": "dethrace-demo port for webOS"
+}
