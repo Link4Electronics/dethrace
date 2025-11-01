@@ -19,8 +19,11 @@ make -j9
 ## Packaging dethrace
 
 wget https://rr2000.cwaboard.co.uk/R4/PC/carmdemo.zip
+
 mkdir dethrace-ipk
+
 extract only DATA folder and move inside dethrace-ipk/
+
 ```sh
 ares-package dethrace-ipk/
 ```
