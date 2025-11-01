@@ -1,5 +1,7 @@
 # webos dethrace
 
+Rquires SDL2-2.30.12-webos-abi
+
 ## Building dethrace
 
 ```sh
