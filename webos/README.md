@@ -10,6 +10,7 @@
 #   Don't run in Visual Studio Code terminal if you have less than 64GB RAM
 #   Adjust WSL swap space so you have 64GB of pagable memory space
 git clone --recursive https://github.com/dethrace-labs/dethrace
+cd dethrace
 mkdir build
 cd build
 cmake .. -DCMAKE_TOOLCHAIN_FILE=/opt/arm-webos-linux-gnueabi_sdk-buildroot/share/buildroot/toolchainfile.cmake -DCMAKE_BUILD_TYPE=Release
@@ -18,12 +19,11 @@ make -j9
 
 ## Packaging dethrace
 
+```sh
 wget https://rr2000.cwaboard.co.uk/R4/PC/carmdemo.zip
-
 mkdir dethrace-ipk
-
 extract only DATA folder and move inside dethrace-ipk/
-
+```
 ```sh
 ares-package dethrace-ipk/
 ```
