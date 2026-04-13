@@ -591,7 +591,7 @@ void F4Key(void) {
     tEdit_mode old_edit_mode;
 
     old_edit_mode = gWhich_edit_mode;
-    if (gI_am_cheating != 0xa11ee75d && (gI_am_cheating != 0x564e78b9 || gNet_mode != eNet_mode_none)) {
+    if (!(gI_am_cheating == 0xa11ee75d || (gI_am_cheating == 0x564e78b9 && gNet_mode == eNet_mode_none))) {
         gWhich_edit_mode = eEdit_mode_options;
         return;
     }
@@ -657,11 +657,9 @@ void ShowSpecialVolumesIfRequ(void) {
 void DoEditModeKey(int pIndex) {
     int modifiers;
 
-    if (gI_am_cheating != 0xa11ee75d) {
-        if (gI_am_cheating != 0x564e78b9 || gNet_mode != eNet_mode_none) {
-            gWhich_edit_mode = eEdit_mode_options;
-            return;
-        }
+    if (!(gI_am_cheating == 0xa11ee75d || (gI_am_cheating == 0x564e78b9 && gNet_mode == eNet_mode_none))) {
+        gWhich_edit_mode = eEdit_mode_options;
+        return;
     }
 
     if (PDKeyDown(KEY_SHIFT_ANY)) {
@@ -2516,6 +2514,8 @@ void DrawSomeText2(tDR_font* pFont) {
 // IDA: void __cdecl DrawSomeText()
 // FUNCTION: CARM95 0x00485d80
 void DrawSomeText(void) {
+#ifdef DETHRACE_FIX_BUGS
+    // Font test present in DOS version, but disabled by default
     DrawSomeText2(&gFonts[kFont_ORANGHED]);
     DrawSomeText2(&gFonts[kFont_BLUEHEAD]);
     DrawSomeText2(&gFonts[kFont_GREENHED]);
@@ -2523,6 +2523,7 @@ void DrawSomeText(void) {
     DrawSomeText2(&gFonts[kFont_NEWHITE]);
     DrawSomeText2(&gFonts[kFont_NEWRED]);
     DrawSomeText2(&gFonts[kFont_NEWBIGGR]);
+#endif
 }
 
 // IDA: void __cdecl SaySorryYouLittleBastard()
@@ -2709,14 +2710,13 @@ void InitAbuseomatic(void) {
         if (fgets(s, COUNT_OF(s) - 1, f) == NULL) {
             break;
         }
-        len = strlen(s);
-        if (len > 63) {
+        if (strlen(s) > 63) {
             s[63] = '\0';
         }
         len = strlen(s);
         while (len != 0 && s[len - 1] < ' ') {
-            s[len - 1] = '\0';
             len--;
+            s[len] = '\0';
         }
         gAbuse_text[i] = BrMemAllocate(strlen(s) + 1, kMem_abuse_text);
         strcpy(gAbuse_text[i], s);
