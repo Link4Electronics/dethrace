@@ -124,10 +124,10 @@ void AllocateCamera(void) {
 
     gRearview_camera->t.t.mat.m[2][2] = -1.0f;
     camera_ptr = (br_camera*)gRearview_camera->type_data;
-    camera_ptr->hither_z = gCamera_hither;
     camera_ptr->type = BR_CAMERA_PERSPECTIVE_FOV;
-    camera_ptr->yon_z = gCamera_yon;
     camera_ptr->field_of_view = BrDegreeToAngle(gCamera_angle);
+    camera_ptr->hither_z = gCamera_hither;
+    camera_ptr->yon_z = gCamera_yon;
     camera_ptr->aspect = (double)gWidth / (double)gHeight;
     gRearview_camera = BrActorAdd(gSelf, gRearview_camera);
     if (gRearview_camera == NULL) {
@@ -657,6 +657,8 @@ void InitialiseApplication(int pArgc, char** pArgv) {
 // IDA: void __usercall InitialiseDeathRace(int pArgc@<EAX>, char **pArgv@<EDX>)
 // FUNCTION: CARM95 0x004bba24
 void InitialiseDeathRace(int pArgc, char** pArgv) {
+    tPath_name the_path;
+
     PDInitialiseSystem();
     InitialiseApplication(pArgc, pArgv);
     gInitialisation_finished = 1;

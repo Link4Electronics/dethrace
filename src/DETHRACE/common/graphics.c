@@ -3359,12 +3359,14 @@ void DrawTellyLine(br_pixelmap* pImage, int pLeft, int pTop, int pPercentage) {
 void DrawTellyImage(br_pixelmap* pImage, int pLeft, int pTop, int pPercentage) {
     int the_height;
 
-    BrPixelmapRectangleFill(gBack_screen, pLeft, pTop, pImage->width, pImage->height, 0);
-    if (pPercentage != 1000) {
+    the_height = pImage->height;
+    BrPixelmapRectangleFill(gBack_screen, pLeft, pTop, pImage->width, the_height, 0);
+    if (pPercentage == 1000) {
+    } else {
         DRPixelmapRectangleVScaledCopy(
             gBack_screen,
             pLeft,
-            pTop + pImage->height * (100 - pPercentage) / 200,
+            pTop + the_height * (100 - pPercentage) / 200,
             pImage,
             0,
             0,
@@ -3399,22 +3401,14 @@ void TellyOutImage(br_pixelmap* pImage, int pLeft, int pTop) {
     int drop_distance;
 
     start_time = PDGetTotalTime();
-    while (1) {
-        the_time = PDGetTotalTime();
-        if (start_time + 100 <= the_time) {
-            break;
-        }
-        DrawTellyImage(pImage, pLeft, pTop, 100 * (start_time + 100 - the_time) / 100);
+    while (start_time + 100 > (the_time = PDGetTotalTime())) {
+        DrawTellyImage(pImage, pLeft, pTop, (100 - the_time + start_time) * 100 / 100);
     }
     DrawTellyImage(pImage, pLeft, pTop, 1000);
 
     start_time = PDGetTotalTime();
-    while (1) {
-        the_time = PDGetTotalTime();
-        if (start_time + 100 <= the_time) {
-            break;
-        }
-        DrawTellyLine(pImage, pLeft, pTop, 100 * (start_time + 100 - the_time) / 100);
+    while (start_time + 100 > (the_time = PDGetTotalTime())) {
+        DrawTellyLine(pImage, pLeft, pTop, (100 - the_time + start_time) * 100 / 100);
     }
     DrawTellyLine(pImage, pLeft, pTop, 0);
 }

@@ -138,12 +138,11 @@ void ClearHeadupSlot(int pSlot_index) {
     tHeadup* the_headup;
 
     the_headup = gHeadups;
-    for (i = 0; i < COUNT_OF(gHeadups); i++) {
+    for (i = 0; i < COUNT_OF(gHeadups); i++, the_headup++) {
         if (the_headup->type != eHeadup_unused && the_headup->slot_index == pSlot_index) {
             ClearHeadup(i);
             return;
         }
-        the_headup++;
     }
 }
 
@@ -187,14 +186,13 @@ void DRPixelmapText(br_pixelmap* pPixelmap, int pX, int pY, tDR_font* pFont, cha
     int ch_width;
     unsigned char* ch;
 
+    x = pX;
     len = strlen(pText);
-    ch = (unsigned char*)pText;
-    if (pX >= 0 && pPixelmap->width >= pRight_edge && pY >= 0 && (pY + pFont->height) <= pPixelmap->height) {
-        x = pX;
-        for (i = 0; i < len; i++) {
-            chr = ch[i] - pFont->offset;
+    if (pX < 0 || pPixelmap->width < pRight_edge || pY < 0 || (pY + pFont->height) > pPixelmap->height) {
+        for (i = 0, ch = (unsigned char*)pText; i < len; i++, ch++) {
+            chr = *ch - pFont->offset;
             ch_width = pFont->width_table[chr];
-            DRPixelmapRectangleOnscreenCopy(
+            DRPixelmapRectangleMaskedCopy(
                 gBack_screen,
                 x,
                 pY,
@@ -207,11 +205,10 @@ void DRPixelmapText(br_pixelmap* pPixelmap, int pX, int pY, tDR_font* pFont, cha
             x += ch_width + pFont->spacing;
         }
     } else {
-        x = pX;
-        for (i = 0; i < len; i++) {
-            chr = ch[i] - pFont->offset;
+        for (i = 0, ch = (unsigned char*)pText; i < len; i++, ch++) {
+            chr = *ch - pFont->offset;
             ch_width = pFont->width_table[chr];
-            DRPixelmapRectangleMaskedCopy(
+            DRPixelmapRectangleOnscreenCopy(
                 gBack_screen,
                 x,
                 pY,
@@ -332,29 +329,29 @@ void DimRectangle(br_pixelmap* pPixelmap, int pLeft, int pTop, int pRight, int p
 
     ptr = (tU8*)pPixelmap->pixels + pLeft + pPixelmap->row_bytes * pTop;
     line_skip = pPixelmap->row_bytes - pRight + pLeft;
-    depth_table_ptr = gDepth_shade_table->pixels;
-    x = gDepth_shade_table->row_bytes * gDim_amount;
+    depth_table_ptr = (tU8*)gDepth_shade_table->pixels + gDepth_shade_table->row_bytes * gDim_amount;
     width = pRight - pLeft;
 
     if (pKnock_out_corners) {
         ptr++;
         for (right_ptr = ptr + width - 2; ptr < right_ptr; ptr++) {
-            *ptr = depth_table_ptr[*ptr + x];
+            *ptr = depth_table_ptr[*ptr];
         }
         ptr += line_skip + 1;
-        for (y = pTop + 1; y < (pBottom - 1); y++, ptr += line_skip) {
+        for (y = pTop + 1; y < (pBottom - 1); y++) {
             for (right_ptr = ptr + width; ptr < right_ptr; ptr++) {
-                *ptr = depth_table_ptr[*ptr + x];
+                *ptr = depth_table_ptr[*ptr];
             }
+            ptr += line_skip;
         }
         ptr++;
         for (right_ptr = ptr + width - 2; ptr < right_ptr; ptr++) {
-            *ptr = depth_table_ptr[*ptr + x];
+            *ptr = depth_table_ptr[*ptr];
         }
     } else {
         for (y = pTop; y < pBottom; y++) {
             for (right_ptr = ptr + width; ptr < right_ptr; ptr++) {
-                *ptr = depth_table_ptr[*ptr + x];
+                *ptr = depth_table_ptr[*ptr];
             }
             ptr += line_skip;
         }
@@ -411,11 +408,13 @@ void DoPSPowerHeadup(int pY, int pLevel, char* pName, int pBar_colour) {
     DimRectangle(gBack_screen, gCurrent_graf_data->ps_dim_left, pY, gCurrent_graf_data->ps_dim_right, gCurrent_graf_data->ps_dim_height + pY, 1);
     TransDRPixelmapText(gBack_screen, gCurrent_graf_data->ps_name_left, gCurrent_graf_data->ps_name_top_border + pY, gFonts + 6, pName, gBack_screen->width);
 
-    for (i = (6 - gCurrent_graf_data->ps_bars_per_level) * gCurrent_graf_data->ps_bars_per_level + 1; i > (gCurrent_graf_data->ps_bars_per_level * pLevel + 1); i--) {
-        DubreyBar(i, pY + gCurrent_graf_data->ps_bar_top_border, 0);
+    pLevel = gCurrent_graf_data->ps_bars_per_level * pLevel;
+    pY += gCurrent_graf_data->ps_bar_top_border;
+    for (i = (6 - gCurrent_graf_data->ps_bars_per_level) * gCurrent_graf_data->ps_bars_per_level + 1; i > pLevel + 1; i--) {
+        DubreyBar(i, pY, 0);
     }
-    for (i = gCurrent_graf_data->ps_bars_per_level * pLevel + 1; i >= 0; i--) {
-        DubreyBar(i, pY + gCurrent_graf_data->ps_bar_top_border, pBar_colour);
+    for (i = pLevel + 1; i >= 0; i--) {
+        DubreyBar(i, pY, pBar_colour);
     }
 }
 
@@ -703,12 +702,12 @@ int FindAHeadupHoleWoofBarkSoundsABitRude(int pSlot_index) {
     int empty_one;
     tHeadup* the_headup;
 
+    the_headup = gHeadups;
     empty_one = -1;
-    for (i = 0, the_headup = gHeadups; i < COUNT_OF(gHeadups); i++, the_headup++) {
+    for (i = 0; i < COUNT_OF(gHeadups); i++, the_headup++) {
         if (pSlot_index >= 0 && the_headup->slot_index == pSlot_index) {
             return i;
-        }
-        if (the_headup->type == eHeadup_unused) {
+        } else if (the_headup->type == eHeadup_unused) {
             empty_one = i;
         }
     }
@@ -723,13 +722,11 @@ int DRTextWidth(tDR_font* pFont, char* pText) {
     int result;
     char* c;
 
-    c = pText;
     result = 0;
     len = strlen(pText);
 
-    for (i = 0; i < len; i++) {
+    for (i = 0, c = pText; i < len; i++, c++) {
         result += pFont->width_table[*c - pFont->offset];
-        c++;
     }
     return result + pFont->spacing * (len - 1);
 }
@@ -743,16 +740,13 @@ int DRTextCleverWidth(tDR_font* pFont, signed char* pText) {
     unsigned char* c;
 
     result = 0;
-    len = strlen((char*)pText) + 1;
+    len = strlen((char*)pText);
 
     for (i = 0, c = (unsigned char*)pText; i < len; i++, c++) {
-        if (*c < 224) {
-            if (i < (len - 1)) {
-                result += pFont->spacing;
-            }
-            result += pFont->width_table[*c - pFont->offset];
+        if (*c >= 224) {
+            pFont = &gFonts[256] - *c;
         } else {
-            pFont = &gFonts[256 - *c];
+            result += pFont->width_table[*c - pFont->offset] + (i < (len - 1) ? pFont->spacing : 0);
         }
     }
     return result;
@@ -772,10 +766,9 @@ void DRPixelmapCentredText(br_pixelmap* pPixelmap, int pX, int pY, tDR_font* pFo
 int IsHeadupTextClever(signed char* pText) {
 
     while (*pText) {
-        if (*pText < 0) {
+        if (*pText++ < 0) {
             return 1;
         }
-        pText++;
     }
     return 0;
 }
@@ -1032,11 +1025,12 @@ void MoveHeadupTo(int pHeadup_index, int pNew_x, int pNew_y) {
 void ChangeHeadupText(int pHeadup_index, char* pNew_text) {
     tHeadup* the_headup;
 
-    if (pHeadup_index >= 0) {
-        the_headup = &gHeadups[pHeadup_index];
-        strcpy(the_headup->data.text_info.text, pNew_text);
-        MungeHeadupWidth(the_headup);
+    if (pHeadup_index < 0) {
+        return;
     }
+    the_headup = &gHeadups[pHeadup_index];
+    strcpy(the_headup->data.text_info.text, pNew_text);
+    MungeHeadupWidth(the_headup);
 }
 
 // IDA: void __usercall ChangeHeadupImage(int pHeadup_index@<EAX>, int pNew_image@<EDX>)
@@ -1044,18 +1038,19 @@ void ChangeHeadupText(int pHeadup_index, char* pNew_text) {
 void ChangeHeadupImage(int pHeadup_index, int pNew_image) {
     tHeadup* the_headup;
 
-    if (pHeadup_index >= 0) {
+    if (pHeadup_index < 0) {
+    } else {
         the_headup = &gHeadups[pHeadup_index];
         the_headup->data.image_info.image = gHeadup_images[pNew_image];
         switch (the_headup->justification) {
         case eJust_left:
             the_headup->x = the_headup->original_x;
             break;
-        case eJust_right:
-            the_headup->x = the_headup->original_x - the_headup->data.image_info.image->width;
-            break;
         case eJust_centre:
             the_headup->x = the_headup->original_x - the_headup->data.image_info.image->width / 2;
+            break;
+        case eJust_right:
+            the_headup->x = the_headup->original_x - the_headup->data.image_info.image->width;
             break;
         }
     }
@@ -1606,17 +1601,18 @@ void OoerrIveGotTextInMeBoxMissus(int pFont_index, char* pText, br_pixelmap* pPi
     int font_needed_loading;
     char line[256];
 
-    font = &gFonts[pFont_index];
     current_width = 0;
+    current_y = pTop;
+    font = &gFonts[pFont_index];
     font_needed_loading = font->images == NULL;
     if (font_needed_loading) {
         LoadFont(pFont_index);
     }
     centre = (pRight + pLeft) / 2;
-    current_y = pTop;
-    width = pRight - pLeft;
-    line_char_index = 0;
+    line[0] = 0;
     input_str_index = 0;
+    line_char_index = 0;
+    width = pRight - pLeft;
     start_line = 0;
 
     while (pText[input_str_index]) {
@@ -1624,7 +1620,7 @@ void OoerrIveGotTextInMeBoxMissus(int pFont_index, char* pText, br_pixelmap* pPi
         line[line_char_index + 1] = 0;
         current_width += font->spacing + font->width_table[pText[input_str_index] - font->offset];
         if (current_width > width) {
-            for (i = input_str_index; i >= start_line; i--) {
+            for (i = input_str_index; i > start_line; i--) {
                 if (pText[i] == ' ') {
                     break;
                 }
@@ -1632,8 +1628,9 @@ void OoerrIveGotTextInMeBoxMissus(int pFont_index, char* pText, br_pixelmap* pPi
             if (i == start_line) {
                 i = input_str_index;
             }
-            line_char_index += i - input_str_index;
+            line_char_index = i - start_line;
             input_str_index = i;
+            line[line_char_index + 1] = 0;
             if (pText[input_str_index] == ' ') {
                 input_str_index++;
             }
@@ -1643,10 +1640,10 @@ void OoerrIveGotTextInMeBoxMissus(int pFont_index, char* pText, br_pixelmap* pPi
             } else {
                 TransDRPixelmapText(gBack_screen, pLeft, current_y, font, line, pRight);
             }
-            current_width = 0;
             current_y += 3 * (font->height - (TranslationMode() ? 2 : 0)) / 2;
-            line_char_index = 0;
             start_line = input_str_index;
+            line_char_index = 0;
+            current_width = 0;
         } else {
             line_char_index++;
             input_str_index++;
@@ -1654,7 +1651,7 @@ void OoerrIveGotTextInMeBoxMissus(int pFont_index, char* pText, br_pixelmap* pPi
     }
     if (line_char_index != 0) {
         if (pCentred) {
-            TransDRPixelmapText(gBack_screen, centre - (DRTextWidth(font, line) / 2), current_y, font, line, (DRTextWidth(font, line) / 2) + centre);
+            DRPixelmapCentredText(gBack_screen, centre, current_y, font, line);
         } else {
             TransDRPixelmapText(gBack_screen, pLeft, current_y, font, line, pRight);
         }
@@ -1691,11 +1688,15 @@ void TransDRPixelmapText(br_pixelmap* pPixelmap, int pX, int pY, tDR_font* pFont
 // FUNCTION: CARM95 0x004c7fd5
 void TransDRPixelmapCleverText(br_pixelmap* pPixelmap, int pX, int pY, tDR_font* pFont, char* pText, int pRight_edge) {
 
-    if (gAusterity_mode && FlicsPlayedFromDisk() && gCached_font != pFont) {
-        if (gCached_font && gCached_font - gFonts > 13) {
-            DisposeFont(gCached_font - gFonts);
+    if (gAusterity_mode) {
+        if (FlicsPlayedFromDisk()) {
+            if (pFont != gCached_font) {
+                if (gCached_font && gFonts - gCached_font <= -13) {
+                    DisposeFont(gCached_font - gFonts);
+                }
+                gCached_font = pFont;
+            }
         }
-        gCached_font = pFont;
     }
     LoadFont(pFont - gFonts);
     DRPixelmapCleverText2(pPixelmap, pX, pY - (TranslationMode() == 0 ? 0 : 2), pFont, pText, pRight_edge);
