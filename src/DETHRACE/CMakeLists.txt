@@ -49,12 +49,6 @@ if(DETHRACE_3DFX_PATCH)
     target_compile_definitions(dethrace_obj PRIVATE DETHRACE_3DFX_PATCH)
 endif()
 
-if(IS_BIGENDIAN)
-    target_compile_definitions(dethrace_obj PRIVATE BR_ENDIAN_BIG=1)
-else()
-    target_compile_definitions(dethrace_obj PRIVATE BR_ENDIAN_LITTLE=1)
-endif()
-
 if(DETHRACE_REPLAY_DEBUG)
     target_compile_definitions(dethrace_obj PRIVATE DETHRACE_REPLAY_DEBUG)
 endif()

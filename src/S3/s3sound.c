@@ -54,18 +54,19 @@ int S3LoadSample(tS3_sound_id id) {
     }
     sample->freeptr = buf;
     if (memcmp(buf, "RIFF", 4) == 0) {
-        wav_header* hdr = (wav_header*)buf;
+        wav_header hdr;
+        memcpy(&hdr, buf, sizeof(wav_header));
         sample->dataptr = &buf[sizeof(wav_header)];
 #if BR_ENDIAN_BIG
-        sample->size = BrSwap32(hdr->data_bytes);
-        sample->rate = BrSwap32(hdr->sample_rate);
-        sample->resolution = BrSwap16(hdr->bit_depth);
-        sample->channels = BrSwap16(hdr->num_channels);
+        sample->size = BrSwap32(hdr.data_bytes);
+        sample->rate = BrSwap32(hdr.sample_rate);
+        sample->resolution = BrSwap16(hdr.bit_depth);
+        sample->channels = BrSwap16(hdr.num_channels);
 #else
-        sample->size = hdr->data_bytes;
-        sample->rate = hdr->sample_rate;
-        sample->resolution = hdr->bit_depth;
-        sample->channels = hdr->num_channels;
+        sample->size = hdr.data_bytes;
+        sample->rate = hdr.sample_rate;
+        sample->resolution = hdr.bit_depth;
+        sample->channels = hdr.num_channels;
 #endif
     } else {
         sample->rate = 16000;

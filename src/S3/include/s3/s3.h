@@ -1,6 +1,8 @@
 #ifndef S3_SOUND_H
 #define S3_SOUND_H
 
+#include <stdint.h>
+
 // External typedefs
 
 typedef float tF32;
@@ -12,9 +14,9 @@ typedef int tS3_type;
 typedef int tS3_repeats;
 typedef int tS3_volume;
 typedef int tS3_effect_tag;
-typedef long tS3_priority;
-typedef long tS3_pitch;
-typedef long tS3_speed;
+typedef int32_t tS3_priority;
+typedef int32_t tS3_pitch;
+typedef int32_t tS3_speed;
 typedef struct tS3_outlet tS3_outlet;
 typedef tS3_outlet* tS3_outlet_ptr;
 

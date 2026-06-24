@@ -664,18 +664,9 @@ void PDSetPalette(br_pixelmap* pThe_palette) {
 // IDA: void __usercall PDSetPaletteEntries(br_pixelmap *pPalette@<EAX>, int pFirst_colour@<EDX>, int pCount@<EBX>)
 // FUNCTION: CARM95 0x004a79d0
 void PDSetPaletteEntries(br_pixelmap* pPalette, int pFirst_colour, int pCount) {
-    int i;
-    tU8* p;
-
-    p = pPalette->pixels;
-    p += pFirst_colour * 4;
-    for (i = pFirst_colour; i < pFirst_colour + pCount; i++) {
-#if BR_ENDIAN_BIG
-        BrDevPaletteSetEntryOld(i, (p[1] << 16) | (p[2] << 8) | p[3]);
-#else
-        BrDevPaletteSetEntryOld(i, (p[2] << 16) | (p[1] << 8) | *p);
-#endif
-        p += 4;
+    br_colour *entries = (br_colour *)pPalette->pixels;
+    for (int i = pFirst_colour; i < pFirst_colour + pCount; i++) {
+        BrDevPaletteSetEntryOld(i, entries[i]);
     }
 }
 
