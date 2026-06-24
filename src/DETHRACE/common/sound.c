@@ -105,6 +105,7 @@ extern int gS3_last_error;
 // IDA: void __cdecl UsePathFileToDetermineIfFullInstallation()
 // FUNCTION: CARM95 0x00463fb0
 void UsePathFileToDetermineIfFullInstallation(void) {
+    // changed by dethrace for compatibility
 #ifdef DETHRACE_FIX_BUGS
     char line1[MAX_PATH_LENGTH];
     char line2[MAX_PATH_LENGTH];
