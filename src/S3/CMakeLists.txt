@@ -23,12 +23,6 @@ if(DETHRACE_FIX_BUGS)
     target_compile_definitions(s3 PRIVATE DETHRACE_FIX_BUGS)
 endif()
 
-if(IS_BIGENDIAN)
-    target_compile_definitions(s3 PRIVATE BR_ENDIAN_BIG=1)
-else()
-    target_compile_definitions(s3 PRIVATE BR_ENDIAN_LITTLE=1)
-endif()
-
 target_sources(s3 PRIVATE
     3d.c
     3d.h

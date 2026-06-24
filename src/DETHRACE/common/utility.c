@@ -1059,13 +1059,11 @@ void DRMatrix34TApplyP(br_vector3* pA, br_vector3* pB, br_matrix34* pC) {
 
 // IDA: tU16 __usercall PaletteEntry16Bit@<AX>(br_pixelmap *pPal@<EAX>, int pEntry@<EDX>)
 tU16 PaletteEntry16Bit(br_pixelmap* pPal, int pEntry) {
-    tU32* src_entry;
-    int red;
-    int green;
-    int blue;
-
-    src_entry = pPal->pixels;
-    return ((tU8)src_entry[pEntry] >> 3) | (((src_entry[pEntry] >> 19) & 0x1F) << 11) | (32 * ((tU16)src_entry[pEntry] >> 10));
+    br_colour entry = ((br_colour *)pPal->pixels)[pEntry];
+    int red   = BR_RED(entry);
+    int green = BR_GRN(entry);
+    int blue  = BR_BLU(entry);
+    return ((tU16)(red >> 3) << 11) | ((tU16)(green >> 2) << 5) | (blue >> 3);
 }
 
 // IDA: br_pixelmap* __usercall PaletteOf16Bits@<EAX>(br_pixelmap *pSrc@<EAX>)
