@@ -265,14 +265,37 @@ The sound segfault on PPC64 BE was caused by:
 
 ### 7. Electro-Bastard Ray — Not Rendered on OpenGL
 
-- **Status:** Broken (cross-platform — x86_64 and PPC BE both affected)
-- **Symptoms:** The electro-bastard ray weapon effect doesn't render when using the OpenGL driver. Renders correctly with the software rasterizer (pentrim).
-- **Suspected cause:** The ray uses specific BRender rendering primitives (transparency, additive blending, or line/polygon types) that lack OpenGL equivalents.
-- **Files to check:**
-  - `lib/BRender-v1.3.2/drivers/glrend/` — OpenGL driver dispatch
-  - `src/DETHRACE/common/graphics.c` — ray rendering code
+- **Status:** Fixed
+- **Root cause:** Three independent bugs:
+  1. `DrawLine3DThroughBRender` in `spark.c:197` called `BrModelUpdate(gLine_model, BR_MODU_VERTEX_POSITIONS)` which only updates vertex positions in the prepared model. The material has `BR_MATF_PRELIT`, so colours come from `vertex_colours` in the stored geometry — but colours were never copied. The prepared model's group `vertex_colours[v2]` stayed at initial 0 (black), making the triangle invisible on GL.
+  2. `RenderProximityRays` (pedestrn.c) called `DrawLine3D` without calling `SetLineModelCols` first, so the model's vertex colours were stale/uninitialized. The spark path (`ReplaySparks`) did call it, but the ray path didn't.
+  3. `RenderProximityRays` didn't reparent `gLine_actor` under `pCamera` before `BrZbSceneRenderAdd`. The vertices are in camera-space (transformed via `DRMatrix34TApplyP`), but the actor remained under `gDont_render_actor`, so the camera-space coordinates got double-transformed by the world→view pipeline → triangle off-screen.
+- **Fix:** 
+  1. Changed `BR_MODU_VERTEX_POSITIONS` to `BR_MODU_VERTEX_POSITIONS | BR_MODU_VERTEX_COLOURS` in `spark.c:197` so vertex colours propagate to stored geometry.
+  2. Added `SetLineModelCols(1)` call in `RenderProximityRays` (`pedestrn.c:3915`) so the electro-bastard ray's BRender path has valid vertex colours.
+  3. Added `BrActorRemove/Add(pCamera)` reparenting in `RenderProximityRays` (`pedestrn.c:3937-3942, 3988-3993`) matching the pattern used in `ReplaySparks` (spark.c:484-496).
 
-### 8. Z-Fighting on Distant Geometry (OpenGL — GPU-Dependent)
+### 8. Cockpit White Screen on OpenGL (Twister/Screwie — Cross-Platform)
+
+- **Status:** Open
+- **Symptoms:** The eagle car's cockpit renders correctly on OpenGL. Other cars with custom cockpits (twister, screwie) show an all-white screen instead of the cockpit interior. The rearview mirror works (shows 3D scene). The software renderer works fine for all cars.
+- **Suspected cause:** Likely a pixel format issue in the cockpit strip-map conversion or rendering path. The cockpit image is loaded as an 8-bit indexed `.PIX` file, converted to RLE strip-map format via `ConvertPixTo16BitStripMap` (for 16-bit backbuffers), then drawn via `CopyStripImage`. If the conversion produces invalid data for certain image formats, or if the rendered viewport rectangles (`render_left/top/right/bottom`) are wrong, the result would be a white screen.
+- **Files to check:**
+  - `src/DETHRACE/common/loading.c` — `ConvertPixTo16BitStripMap`, `ConvertPixToStripMap`
+  - `src/DETHRACE/common/graphics.c` — `CopyStripImage`, cockpit rendering at lines 2071-2085/2235-2259
+  - `src/DETHRACE/common/pedestrn.c` — `RenderProximityRays` (verify no cross-contamination with cockpit state)
+
+### 9. Cockpit Inverted Hood on Cheat Cars (Stella/Electric Blue — Both Platforms)
+
+- **Status:** Open
+- **Symptoms:** In cockpit view, cheat cars (Stella, Electric blue) show the hood rendered upside-down. The cockpit interior is otherwise visible (not white). Affects both x86_64 and PPC64 BE.
+- **Suspected cause:** Likely a coordinate system issue in the cockpit camera setup or car model orientation. The camera offset (`driver_y_offset`) or the car's principal render model might have a sign flip in the Z or Y axis for these specific car data files.
+- **Files to check:**
+  - `src/DETHRACE/common/init.c` — `ReinitialiseForwardCamera`, camera position setup
+  - `src/DETHRACE/common/car.c` — `MungeCarGraphics`, `SwitchCarActor`
+  - `src/DETHRACE/common/loading.c` — cockpit data loading for cheat cars
+
+### 10. Z-Fighting on Distant Geometry (OpenGL — GPU-Dependent)
 
 - **Status:** Not a code bug (cross-platform, GPU-dependent)
 - **Symptoms:** Z-fighting / depth-flickering on distant geometry when using the OpenGL driver. Objects render correctly when viewed up close.
