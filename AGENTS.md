@@ -275,27 +275,25 @@ The sound segfault on PPC64 BE was caused by:
   2. Added `SetLineModelCols(1)` call in `RenderProximityRays` (`pedestrn.c:3915`) so the electro-bastard ray's BRender path has valid vertex colours.
   3. Added `BrActorRemove/Add(pCamera)` reparenting in `RenderProximityRays` (`pedestrn.c:3937-3942, 3988-3993`) matching the pattern used in `ReplaySparks` (spark.c:484-496).
 
-### 8. Cockpit White Screen on OpenGL (Twister/Screwie — Cross-Platform)
+### 8. Cockpit White Screen + Broken Mirror on OpenGL (3DFX Path — Cross-Platform)
 
-- **Status:** Open
-- **Symptoms:** The eagle car's cockpit renders correctly on OpenGL. Other cars with custom cockpits (twister, screwie) show an all-white screen instead of the cockpit interior. The rearview mirror works (shows 3D scene). The software renderer works fine for all cars.
-- **Suspected cause:** Likely a pixel format issue in the cockpit strip-map conversion or rendering path. The cockpit image is loaded as an 8-bit indexed `.PIX` file, converted to RLE strip-map format via `ConvertPixTo16BitStripMap` (for 16-bit backbuffers), then drawn via `CopyStripImage`. If the conversion produces invalid data for certain image formats, or if the rendered viewport rectangles (`render_left/top/right/bottom`) are wrong, the result would be a white screen.
-- **Files to check:**
-  - `src/DETHRACE/common/loading.c` — `ConvertPixTo16BitStripMap`, `ConvertPixToStripMap`
-  - `src/DETHRACE/common/graphics.c` — `CopyStripImage`, cockpit rendering at lines 2071-2085/2235-2259
-  - `src/DETHRACE/common/pedestrn.c` — `RenderProximityRays` (verify no cross-contamination with cockpit state)
+- **Status:** Fixed
+- **Symptoms:** On levels with fog/DepthEffect active, the cockpit view showed an all-white screen instead of the cockpit interior. The rearview mirror was invisible on fog maps (and later on all maps during development). A lightblue/cyan flash appeared in the windscreen area on damage.
+- **Root cause:** Three bugs in the 3DFX overlay rendering path (`graphics.c, devpixmp.c`):
+  1. **Sub-pixelmap rectangleFill row stride bug** — The GL driver's `rectangleFill` (`devpixmp.c:342-346`) wrote `px16[y * self->pm_width + x]` but for sub-pixelmaps `pm_width` is the sub-rect width, not the parent's row stride. This wrote pixels at wrong buffer locations → **corrupted lockedPixels, view distance clipping artifacts, cyan flash**.
+  2. **No-op sub-pixelmap flush in CFWS** — `ConditionallyFillWithSky`'s `BrPixelmapFlush(pPixelmap)` on a sub-pixelmap (`gRender_screen`) was a no-op because `asBack.possiblyDirty` was never managed on sub-pixelmaps. The fog/sky fill stayed in `lockedPixels` but was never uploaded to the overlay → **white screen foreground**.
+  3. **Mirror fill covering mirror 3D scene** — `ConditionallyFillWithSky(gRearview_screen)` filled the mirror area of `lockedPixels` (with fog color) just before the mirror 3D scene, but the subsequent flush uploaded the filled overlay ON TOP of the mirror scene → **mirror invisible on fog maps**.
+- **Fix (three parts):**
+  - **devpixmp.c rectangleFill row stride fix**: Changed inner loops to use `(y + pm_base_y) * (pm_row_bytes / Bpp) + (x + pm_base_x)` instead of `y * pm_width + x`, correctly handling sub-pixelmap base offsets and parent row stride.
+  - **devpixmp.c sub-pixelmap flush safety**: Added early return in `BrPixelmapFlush` for sub-pixelmaps — the parent always handles flushing.
+  - **graphics.c**: Added `BrPixelmapFlush(gBack_screen)` after `PDUnlockRealBackScreen(1)` and before the 3D scene loop, ensuring the sky/fog fill (and any 2D content) is always uploaded to the overlay regardless of whether CFWS's internal flush was a no-op.
+  - **graphics.c mirror**: Removed `ConditionallyFillWithSky(gRearview_screen)` from the mirror block — the buffer is already freshly reset to transparent purple by the preceding flush, so the mirror area is transparent without an explicit fill. The mirror 3D scene renders ON TOP of the overlay.
+  - **graphics.c cockpit**: Re-enabled the 3DFX cockpit `CopyStripImage` call (was wrapped in `#if 0`).
+- **Files changed:**
+  - `src/DETHRACE/common/graphics.c`
+  - `lib/BRender-v1.3.2/drivers/glrend/devpixmp.c`
 
-### 9. Cockpit Inverted Hood on Cheat Cars (Stella/Electric Blue — Both Platforms)
-
-- **Status:** Open
-- **Symptoms:** In cockpit view, cheat cars (Stella, Electric blue) show the hood rendered upside-down. The cockpit interior is otherwise visible (not white). Affects both x86_64 and PPC64 BE.
-- **Suspected cause:** Likely a coordinate system issue in the cockpit camera setup or car model orientation. The camera offset (`driver_y_offset`) or the car's principal render model might have a sign flip in the Z or Y axis for these specific car data files.
-- **Files to check:**
-  - `src/DETHRACE/common/init.c` — `ReinitialiseForwardCamera`, camera position setup
-  - `src/DETHRACE/common/car.c` — `MungeCarGraphics`, `SwitchCarActor`
-  - `src/DETHRACE/common/loading.c` — cockpit data loading for cheat cars
-
-### 10. Z-Fighting on Distant Geometry (OpenGL — GPU-Dependent)
+### 9. Z-Fighting on Distant Geometry (OpenGL — GPU-Dependent)
 
 - **Status:** Not a code bug (cross-platform, GPU-dependent)
 - **Symptoms:** Z-fighting / depth-flickering on distant geometry when using the OpenGL driver. Objects render correctly when viewed up close.

@@ -2016,6 +2016,7 @@ void RenderAFrame(int pDepth_mask_on) {
             gProgram_state.current_render_bottom - gProgram_state.current_render_top,
             0);
     }
+
     gRendering_mirror = 0;
     DoSpecialCameraEffect(gCamera, &gCamera_to_world);
 
@@ -2036,6 +2037,11 @@ void RenderAFrame(int pDepth_mask_on) {
 
 #ifdef DETHRACE_3DFX_PATCH
     PDUnlockRealBackScreen(1);
+
+    // Flush the backbuffer before the 3D scene so the sky/fog fill and any
+    // other 2D writes are visible. This is needed because ConditionallyFillWithSky's
+    // flush may be a no-op when called on a sub-pixelmap (gRender_screen).
+    BrPixelmapFlush(gBack_screen);
 #endif
 
 #if !defined(DETHRACE_FIX_BUGS)
@@ -2103,15 +2109,14 @@ void RenderAFrame(int pDepth_mask_on) {
         BrPixelmapFill(gRearview_depth_buffer, 0xFFFFFFFF);
         gRendering_mirror = 1;
         DoSpecialCameraEffect(gRearview_camera, &gRearview_camera_to_world);
-        ConditionallyFillWithSky(gRearview_screen);
 #ifdef DETHRACE_3DFX_PATCH
         PDUnlockRealBackScreen(1);
 
-        // Added by dethrace
-        // Rearview mirror is drawn on top of the 2d cockpit, so we must ensure that all the 2d pixel
-        // writes have been flushed to the framebuffer first
+        // Flush before the mirror 3D scene so the mirror renders ON TOP of
+        // the overlay, not behind it. The buffer is already freshly reset to
+        // transparent purple by the preceding flush, so the mirror area is
+        // transparent without needing an explicit fill.
         BrPixelmapFlush(gBack_screen);
-        // ---
 #endif
         BrZbSceneRenderBegin(gUniverse_actor, gRearview_camera, gRearview_screen, gRearview_depth_buffer);
         ProcessNonTrackActors(
