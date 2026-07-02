@@ -3927,10 +3927,7 @@ static br_token_value gProxRayBlendTokens[3] = {
 
 static void DrawProxRaySegmentBR(br_vector3* pStart, br_vector3* pEnd) {
     br_vector3 dir, perp;
-    br_scalar  len, thickness;
-
-    gLine_model->vertices[0].p = *pStart;
-    gLine_model->vertices[1].p = *pEnd;
+    br_scalar  len, half_w;
 
     BrVector3Sub(&dir, pEnd, pStart);
     perp.v[0] = dir.v[1];
@@ -3941,13 +3938,31 @@ static void DrawProxRaySegmentBR(br_vector3* pStart, br_vector3* pEnd) {
         BrVector3Set(&perp, 1.f, 0.f, 0.f);
         len = 1.f;
     }
-    thickness = -(pStart->v[2] + pEnd->v[2]) * 0.0015f;
-    BrVector3Scale(&perp, &perp, thickness / len);
+    half_w = -(pStart->v[2] + pEnd->v[2]) * 0.0008f * 0.5f;
+    if (half_w < 0.0003f) {
+        half_w = 0.0003f;
+    }
+    BrVector3Scale(&perp, &perp, half_w / len);
 
+    // Quad: two triangles forming a constant-width beam
+    // Face is (0, 2, 1)
+    // Triangle 1: start-left, end-left, end-right
+    gLine_model->vertices[0].p.v[0] = pStart->v[0] - perp.v[0];
+    gLine_model->vertices[0].p.v[1] = pStart->v[1] - perp.v[1];
+    gLine_model->vertices[0].p.v[2] = pStart->v[2];
+    gLine_model->vertices[1].p.v[0] = pEnd->v[0] - perp.v[0];
+    gLine_model->vertices[1].p.v[1] = pEnd->v[1] - perp.v[1];
+    gLine_model->vertices[1].p.v[2] = pEnd->v[2];
     gLine_model->vertices[2].p.v[0] = pEnd->v[0] + perp.v[0];
     gLine_model->vertices[2].p.v[1] = pEnd->v[1] + perp.v[1];
     gLine_model->vertices[2].p.v[2] = pEnd->v[2];
+    BrModelUpdate(gLine_model, BR_MODU_VERTEX_POSITIONS);
+    BrZbSceneRenderAdd(gLine_actor);
 
+    // Triangle 2: start-left, end-right, start-right
+    gLine_model->vertices[1].p.v[0] = pStart->v[0] + perp.v[0];
+    gLine_model->vertices[1].p.v[1] = pStart->v[1] + perp.v[1];
+    gLine_model->vertices[1].p.v[2] = pStart->v[2];
     BrModelUpdate(gLine_model, BR_MODU_VERTEX_POSITIONS);
     BrZbSceneRenderAdd(gLine_actor);
 }
