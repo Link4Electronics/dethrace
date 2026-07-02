@@ -3941,10 +3941,7 @@ static void DrawProxRaySegmentBR(br_vector3* pStart, br_vector3* pEnd) {
         BrVector3Set(&perp, 1.f, 0.f, 0.f);
         len = 1.f;
     }
-    thickness = -pEnd->v[2] * 0.001f;
-    if (thickness < 0.003f) {
-        thickness = 0.003f;
-    }
+    thickness = -(pStart->v[2] + pEnd->v[2]) * 0.0015f;
     BrVector3Scale(&perp, &perp, thickness / len);
 
     gLine_model->vertices[2].p.v[0] = pEnd->v[0] + perp.v[0];
