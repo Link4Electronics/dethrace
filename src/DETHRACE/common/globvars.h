@@ -122,6 +122,7 @@ extern int gShow_opponents;
 extern int gTotal_laps;
 extern int gFree_repairs;
 extern int gFreeze_timer;
+extern int gFreeze_powerups;
 extern int gRoll_over_creds[3];
 extern int gShow_peds_on_map;
 extern int gOn_drugs;

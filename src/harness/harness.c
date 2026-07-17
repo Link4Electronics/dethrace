@@ -57,6 +57,8 @@ tHarness_game_info harness_game_info;
 // Configuration options
 tHarness_game_config harness_game_config;
 
+int g_wireframe_mode = 0;
+
 // Platform hooks
 tHarness_platform gHarness_platform;
 

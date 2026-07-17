@@ -128,6 +128,9 @@ endif()
 if(DETHRACE_PLATFORM_SDL_DYNAMIC)
     target_compile_definitions(harness PRIVATE DETHRACE_SDL_DYNAMIC)
     target_link_libraries(harness PRIVATE ${CMAKE_DL_LIBS})
+elseif(DETHRACE_PLATFORM_SDL2 OR DETHRACE_PLATFORM_SDL3)
+    add_subdirectory(imgui)
+    target_link_libraries(harness PUBLIC imgui_manager)
 endif()
 
 

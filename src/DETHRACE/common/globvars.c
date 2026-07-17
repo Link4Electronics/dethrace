@@ -351,6 +351,8 @@ int gFree_repairs;
 // GLOBAL: CARM95 0x00546924
 int gFreeze_timer;
 
+int gFreeze_powerups;
+
 // GLOBAL: CARM95 0x00549ea0
 int gRoll_over_creds[3];
 

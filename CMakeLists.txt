@@ -4,9 +4,10 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo" FORCE)
 endif()
 
-project(dethrace C)
+project(dethrace C CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+include(FetchContent)
 
 if(MSVC)
     set(CMAKE_INSTALL_BINDIR "." CACHE PATH "User executables")

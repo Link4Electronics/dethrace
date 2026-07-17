@@ -6,6 +6,7 @@
 #include "harness/trace.h"
 #include "sdl2_scancode_map.h"
 #include "sdl2_syms.h"
+#include "imgui/imgui_manager.h"
 
 SDL_COMPILE_TIME_ASSERT(sdl2_platform_requires_SDL2, SDL_MAJOR_VERSION == 2);
 
@@ -34,6 +35,18 @@ static struct {
 // Callbacks back into original game code
 extern void QuitGame(void);
 extern br_pixelmap* gBack_screen;
+extern br_uint_32 gI_am_cheating;
+extern int gFreeze_powerups;
+extern void ToggleTimerFreeze(void);
+extern void TogglePowerupFreeze(void);
+extern void ToggleInvulnerability(void);
+extern void ToggleFlying(void);
+extern void TotalRepair(void);
+extern void IncrementLap(void);
+extern void MoreTime(void);
+extern void EarnDosh(void);
+extern void LoseDosh(void);
+extern void GetPowerup(int pNum);
 
 #ifdef DETHRACE_SDL_DYNAMIC
 #ifdef _WIN32
@@ -114,6 +127,7 @@ static int SDL2_Harness_SetWindowPos(void* hWnd, int x, int y, int nWidth, int n
 
 static void SDL2_Harness_DestroyWindow(void) {
     // SDL2_GL_DeleteContext(context);
+    ImGuiManager_Shutdown();
     if (window != NULL) {
         SDL2_DestroyWindow(window);
     }
@@ -131,6 +145,19 @@ static void SDL2_Harness_ProcessWindowMessages(void) {
     SDL_Event event;
 
     while (SDL2_PollEvent(&event)) {
+        ImGuiManager_ProcessEvent(&event);
+
+        if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_F1 && event.key.windowID == SDL2_GetWindowID(window)) {
+            ImGuiManager_SetVisible(!ImGuiManager_IsVisible());
+            continue;
+        }
+
+        if (ImGuiManager_WantsCaptureKeyboard() || ImGuiManager_WantsCaptureMouse()) {
+            if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+                continue;
+            }
+        }
+
         switch (event.type) {
         case SDL_KEYDOWN:
         case SDL_KEYUP:
@@ -242,6 +269,49 @@ static int SDL2_Harness_ShowErrorMessage(char* title, char* message) {
     return 0;
 }
 
+static void toggle_fullscreen_sdl2(void) {
+    SDL2_SetWindowFullscreen(window, (SDL2_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+}
+
+static int get_freeze_timer(void) { return harness_game_config.freeze_timer; }
+static void set_freeze_timer(int v) { harness_game_config.freeze_timer = v; }
+static int get_freeze_powerups(void) { return gFreeze_powerups; }
+static void set_freeze_powerups(int v) { gFreeze_powerups = v; }
+static int get_cheating(void) { return gI_am_cheating != 0; }
+static void set_cheating(int v) { gI_am_cheating = v ? 0xa11ee75d : 0; }
+static void toggle_timer_freeze_sdl2(void) { ToggleTimerFreeze(); }
+static void toggle_powerup_freeze_sdl2(void) { TogglePowerupFreeze(); }
+static void toggle_invulnerability_sdl2(void) { ToggleInvulnerability(); }
+static void toggle_flying_sdl2(void) { ToggleFlying(); }
+static void total_repair_sdl2(void) { TotalRepair(); }
+static void increment_lap_sdl2(void) { IncrementLap(); }
+static void more_time_sdl2(void) { MoreTime(); }
+static void earn_dosh_sdl2(void) { EarnDosh(); }
+static void lose_dosh_sdl2(void) { LoseDosh(); }
+static void give_powerup_sdl2(int n) { GetPowerup(n); }
+static int get_game_type_sdl2(void) { return harness_game_info.mode; }
+static ImGuiManager_Callbacks imgui_callbacks = {
+    .toggle_fullscreen = toggle_fullscreen_sdl2,
+    .quit_game = QuitGame,
+    .get_freeze_timer = get_freeze_timer,
+    .set_freeze_timer = set_freeze_timer,
+    .get_freeze_powerups = get_freeze_powerups,
+    .set_freeze_powerups = set_freeze_powerups,
+    .get_cheating = get_cheating,
+    .set_cheating = set_cheating,
+    .toggle_timer_freeze = toggle_timer_freeze_sdl2,
+    .toggle_powerup_freeze = toggle_powerup_freeze_sdl2,
+    .toggle_invulnerability = toggle_invulnerability_sdl2,
+    .toggle_flying = toggle_flying_sdl2,
+    .total_repair = total_repair_sdl2,
+    .increment_lap = increment_lap_sdl2,
+    .more_time = more_time_sdl2,
+    .earn_dosh = earn_dosh_sdl2,
+    .lose_dosh = lose_dosh_sdl2,
+    .give_powerup = give_powerup_sdl2,
+    .get_game_type = get_game_type_sdl2,
+};
+
 static void SDL2_Harness_CreateWindow(const char* title, int width, int height, tHarness_window_type window_type) {
     int window_width, window_height;
     Uint32 extra_window_flags;
@@ -326,6 +396,8 @@ static void SDL2_Harness_CreateWindow(const char* title, int width, int height, 
 
     SDL2_ShowCursor(SDL_DISABLE);
 
+    ImGuiManager_Init(window, renderer, window_type == eWindow_type_opengl, &imgui_callbacks);
+
     viewport.x = 0;
     viewport.y = 0;
     viewport.scale_x = 1;
@@ -341,6 +413,7 @@ static void SDL2_Harness_Swap(br_pixelmap* back_buffer) {
     SDL2_Harness_ProcessWindowMessages();
 
     if (gl_context != NULL) {
+        ImGuiManager_Render();
         SDL2_GL_SwapWindow(window);
     } else {
         src_pixels = back_buffer->pixels;
@@ -354,8 +427,13 @@ static void SDL2_Harness_Swap(br_pixelmap* back_buffer) {
         SDL2_UnlockTexture(screen_texture);
         SDL2_RenderClear(renderer);
         SDL2_RenderCopy(renderer, screen_texture, NULL, NULL);
+        ImGuiManager_Render();
         SDL2_RenderPresent(renderer);
         last_screen_src = back_buffer;
+    }
+
+    if (!ImGuiManager_IsVisible()) {
+        SDL2_ShowCursor(SDL_DISABLE);
     }
 
     if (harness_game_config.fps != 0) {
