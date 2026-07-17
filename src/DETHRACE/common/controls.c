@@ -2186,6 +2186,17 @@ void ToggleTimerFreeze(void) {
     }
 }
 
+// IDA: void __cdecl TogglePowerupFreeze()
+void TogglePowerupFreeze(void) {
+
+    gFreeze_powerups = !gFreeze_powerups;
+    if (gFreeze_powerups) {
+        NewTextHeadupSlot(eHeadupSlot_misc, 0, 1000, -kFont_MEDIUMHD, "Powerups frozen");
+    } else {
+        NewTextHeadupSlot(eHeadupSlot_misc, 0, 1000, -kFont_MEDIUMHD, "Powerups thawed out");
+    }
+}
+
 // IDA: void __cdecl EarnDosh()
 // FUNCTION: CARM95 0x004a47c7
 void EarnDosh(void) {

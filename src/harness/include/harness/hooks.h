@@ -64,6 +64,8 @@ typedef struct tPlatform_bootstrap {
 
 extern tHarness_platform gHarness_platform;
 
+extern int g_wireframe_mode;
+
 extern int Harness_Init(int* argc, char* argv[]);
 
 extern void Harness_Quit(void);

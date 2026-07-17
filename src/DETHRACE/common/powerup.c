@@ -516,6 +516,9 @@ void DoPowerupPeriodics(tU32 pFrame_period) {
     the_time = GetTotalTime();
     for (i = 0, the_powerup = gPowerup_array; i < gNumber_of_powerups; i++, the_powerup++) {
         if (the_powerup->got_time != 0) {
+            if (gFreeze_powerups && the_powerup->type == ePowerup_timed) {
+                the_powerup->lose_time += pFrame_period;
+            }
             if (the_powerup->type == ePowerup_timed && the_powerup->lose_time <= the_time) {
                 LosePowerup(the_powerup);
             } else if (the_powerup->current_value == 0) {
