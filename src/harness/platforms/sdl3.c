@@ -1,4 +1,8 @@
 #include <SDL3/SDL.h>
+#include <stdio.h>
+#ifndef DETHRACE_SDL_DYNAMIC
+#include <dlfcn.h>
+#endif
 
 #include "harness.h"
 #include "harness/config.h"
@@ -350,7 +354,18 @@ static void SDL3_Harness_CreateWindow(const char* title, int width, int height, 
         extra_window_flags |= SDL_WINDOW_FULLSCREEN;
     }
 
-    if (window_type == eWindow_type_opengl) {
+    if (window_type == eWindow_type_vulkan) {
+        window = SDL3_CreateWindow(title,
+            window_width, window_height,
+            extra_window_flags | SDL_WINDOW_VULKAN);
+        if (window == NULL) {
+            LOG_PANIC2("Failed to create Vulkan window: %s", SDL3_GetError());
+        }
+
+        SDL3_PumpEvents();
+        SDL3_ShowWindow(window);
+
+    } else if (window_type == eWindow_type_opengl) {
         SDL3_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL3_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL3_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
@@ -411,7 +426,9 @@ static void SDL3_Harness_CreateWindow(const char* title, int width, int height, 
 
     SDL3_HideCursor();
 
-    ImGuiManager_Init(window, renderer, window_type == eWindow_type_opengl, &imgui_callbacks);
+    ImGuiManager_Init(window,
+        window_type == eWindow_type_vulkan ? NULL : renderer,
+        window_type == eWindow_type_opengl, &imgui_callbacks);
 
     SDL3_GetWindowSize(window, &gHarness_window_width, &gHarness_window_height);
     viewport.x = 0;
@@ -427,6 +444,8 @@ static void SDL3_Harness_Swap(br_pixelmap* back_buffer) {
     if (gl_context != NULL) {
         ImGuiManager_Render();
         SDL3_GL_SwapWindow(window);
+    } else if (SDL3_GetWindowFlags(window) & SDL_WINDOW_VULKAN) {
+        // VK handles its own presentation and ImGui via external callback
     } else {
         uint8_t* src_pixels = back_buffer->pixels;
         uint32_t* dest_pixels;
@@ -504,6 +523,46 @@ static void* SDL3_Harness_GL_GetProcAddress(const char* name) {
     return SDL3_GL_GetProcAddress(name);
 }
 
+/*
+ * Vulkan callbacks
+ */
+static void* vkGetInstanceExtensions_fn;
+static void* vkCreateSurface_fn;
+
+static void LoadVulkanSymbols(void) {
+#ifdef DETHRACE_SDL_DYNAMIC
+    vkGetInstanceExtensions_fn = Harness_LoadFunction(sdl3_so, "SDL_Vulkan_GetInstanceExtensions");
+    vkCreateSurface_fn = Harness_LoadFunction(sdl3_so, "SDL_Vulkan_CreateSurface");
+#else
+    vkGetInstanceExtensions_fn = dlsym(RTLD_DEFAULT, "SDL_Vulkan_GetInstanceExtensions");
+    vkCreateSurface_fn = dlsym(RTLD_DEFAULT, "SDL_Vulkan_CreateSurface");
+#endif
+}
+
+static const char** SDL3_Harness_VK_GetInstanceExtensions(uint32_t* count) {
+    if (!vkGetInstanceExtensions_fn)
+        return NULL;
+    uint32_t sdlCount = 0;
+    char const * const * (*fn)(unsigned int*) = (void*)vkGetInstanceExtensions_fn;
+    const char** exts = (const char**)fn(&sdlCount);
+    *count = sdlCount;
+    fprintf(stderr, "[VK_SDL] GetInstanceExtensions: count=%u exts[0]=%s\n",
+        sdlCount, sdlCount > 0 && exts ? (exts[0] ? exts[0] : "(null)") : "(null)");
+    return exts;
+}
+
+static void* SDL3_Harness_VK_CreateSurface(void* instance) {
+    if (!vkCreateSurface_fn)
+        return NULL;
+    void* surface = NULL;
+    {   int (*fn)(void*, void*, void*, void**) = (void*)vkCreateSurface_fn;
+        int ret = fn(window, instance, NULL, &surface);
+        if (ret)
+            return surface;
+    }
+    return NULL;
+}
+
 static int SDL3_Harness_Platform_Init(tHarness_platform* platform) {
     if (SDL3_LoadSymbols() != 0) {
         return 1;
@@ -525,12 +584,16 @@ static int SDL3_Harness_Platform_Init(tHarness_platform* platform) {
     platform->PaletteChanged = SDL3_Harness_PaletteChanged;
     platform->GL_GetProcAddress = SDL3_Harness_GL_GetProcAddress;
     platform->GetViewport = SDL3_Harness_GetViewport;
+
+    LoadVulkanSymbols();
+    platform->VK_CreateSurface = SDL3_Harness_VK_CreateSurface;
+    platform->VK_GetInstanceExtensions = SDL3_Harness_VK_GetInstanceExtensions;
     return 0;
 };
 
 const tPlatform_bootstrap SDL3_bootstrap = {
     "sdl3",
     "SDL3 video backend (libsdl.org)",
-    ePlatform_cap_software | ePlatform_cap_opengl,
+    ePlatform_cap_software | ePlatform_cap_opengl | ePlatform_cap_vulkan,
     SDL3_Harness_Platform_Init,
 };
