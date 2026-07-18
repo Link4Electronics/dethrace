@@ -26,6 +26,7 @@ lib/
       inc/          — headers (colour.h)
     drivers/
       glrend/       — OpenGL driver (video.c, v1model.c, devpixmp.c)
+      vkrend/       — Vulkan driver (video.c, renderer.c, devpmvkf.c)
       softrend/     — software rasterizer (faceops.c, convert.c)
     x86emu/         — x86 fpu emulation for non-x86 targets
 ```
@@ -323,7 +324,7 @@ The sound segfault on PPC64 BE was caused by:
    - When `BR_DO_NOT_USE_X86_FPU` or `BR_HAS_X86EMU` is defined, the x86 FPU instructions in BRender are emulated via the `x86emu/` library
    - This is required on PPC64 for BRender's software rasterizer
 
-## Files Requiring Endianness Care
+## Files Requiring Endianness Care (already done)
 
 | File | What to watch |
 |------|---------------|
@@ -359,20 +360,130 @@ CMake-based. Target architecture is detected automatically. Key variables:
 - `BR_HAS_X86EMU` — enables x86 FPU emulation for non-x86 targets
 - Build with `-DBRETHR=ON` for original BRender or the bundled copy
 
-## Quick Reference: Typical Byte-Swap Patterns
+## Future Work: Audio Backend (Replace miniaudio with SDL Audio)
 
-```c
-// Pattern 1: Raw file I/O — file is LE, conditional swap on BE
-ReadU32:  raw = BrSwap32(raw)  // #if BR_ENDIAN_BIG
+### Current Architecture
 
-// Pattern 2: BRender datafile — file is BE, conditional swap on LE
-DfBlockReadBinary:  BrSwapBlock(...)  // #if !BR_ENDIAN_BIG
+The `AudioBackend_*` API (defined in `src/harness/include/harness/audio.h`) provides a 15-function abstraction over the audio system:
 
-// Pattern 3: Palette byte writes — platform order
-DoColourMap:  write {B,G,R,0} LE / {0,R,G,B} BE  // #if BR_ENDIAN_BIG
+- **SFX:** `AudioBackend_Init/UnInit`, `AudioBackend_AllocateSampleTypeStruct`, `AudioBackend_PlaySample`, `AudioBackend_SoundIsPlaying`, `AudioBackend_StopSample`, `AudioBackend_SetVolume`, `AudioBackend_SetPan`, `AudioBackend_SetFrequency`, `AudioBackend_SetVolumeSeparate`
+- **Music (CD Audio):** `AudioBackend_InitCDA/UnInitCDA`, `AudioBackend_PlayCDA/StopCDA`, `AudioBackend_CDAIsPlaying`, `AudioBackend_SetCDAVolume`
+- **Streaming (Smacker video):** `AudioBackend_StreamOpen/Write/Close`
 
-// Pattern 4: br_colour → RGB_565 — uses integer macros, BE-safe
-PaletteEntry16Bit:
-  entry = ((br_colour*)pal->pixels)[i];
-  return ((RED(entry)>>3)<<11) | ((GRN(entry)>>2)<<5) | (BLU(entry)>>3);
-```
+Current implementation: `src/harness/audio/miniaudio.c` (uses miniaudio single-header lib + stb_vorbis for OGG).
+Stub implementation: `src/harness/audio/null.c`.
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `src/harness/include/harness/audio.h` | `AudioBackend_*` abstraction header |
+| `src/harness/audio/miniaudio.c` | miniaudio backend (active when `DETHRACE_SOUND_ENABLED=ON`) |
+| `src/harness/audio/null.c` | Stub backend (active when `DETHRACE_SOUND_ENABLED=OFF`) |
+| `lib/miniaudio/include/miniaudio/miniaudio.h` | Single-header miniaudio v0.11.25 |
+| `lib/miniaudio/CMakeLists.txt` | INTERFACE library |
+| `lib/stb/` | stb_vorbis for OGG decoding (used by miniaudio) |
+| `src/S3/` | Game-level audio management (talks to `AudioBackend_*`) |
+| `src/harness/CMakeLists.txt:54-59` | Conditional miniaudio vs null compilation |
+
+### Replacing with SDL Audio
+
+The `AudioBackend_*` abstraction makes the swap feasible. A new `src/harness/audio/sdl.c` would implement it using SDL2/SDL3 audio.
+
+**SDK differences:**
+- **SDL2:** Queue-based model (`SDL_QueueAudio`). No per-stream volume/pan/pitch. Requires manual mixing callback for concurrent sounds. Pitch needs external resampling.
+- **SDL3:** Stream-based (`SDL_AudioStream`). Has `SDL_SetAudioStreamGain` (volume) and `SDL_SetAudioStreamFrequencyRatio` (pitch). Closer to miniaudio's model.
+- Neither has OGG built-in — keep stb_vorbis for music decoding.
+- Neither has built-in pan — manual L/R channel mixing required.
+
+**Required symbols to add to `sdl2_syms.h` / `sdl3_syms.h`:**
+- SDL2: `OpenAudioDevice`, `CloseAudioDevice`, `PauseAudioDevice`, `QueueAudio`, `GetQueuedAudioSize`, `ClearQueuedAudio`, `LoadWAV`, `FreeWAV`, `BuildAudioCVT`, `ConvertAudio`
+- SDL3: `OpenAudioDevice`, `CloseAudioDevice`, `PauseAudioDevice`, `ResumeAudioDevice`, `LoadWAV`, `FreeWAV`, `CreateAudioStream`, `DestroyAudioStream`, `BindAudioStream`, `UnbindAudioStream`, `PutAudioStreamData`, `GetAudioStreamData`, `GetAudioStreamAvailable`, `SetAudioStreamGain`, `SetAudioStreamFrequencyRatio`, `ClearAudioStream`
+
+## Vulkan Render Driver
+
+### Scope
+
+### VK Driver Files
+
+| VK File | Lines | Vulkan Equivalent |
+|---------|-------|-------------------|
+| `lib/BRender-v1.3.2/drivers/vkrend/video.c` | ~1000 | VkInstance/device/swapchain, SPIR-V pipelines, render passes, framebuffers |
+| `lib/BRender-v1.3.2/drivers/vkrend/video.h` | ~150 | Vulkan equivalents of GL state (descriptor sets, pipeline layouts) |
+| `lib/BRender-v1.3.2/drivers/vkrend/v1buffer.c` | ~500 | VkBuffer/memory management, descriptor pools |
+| `lib/BRender-v1.3.2/drivers/vkrend/v1model.c` | ~600 | Command buffer generation, indexed draws for each model |
+| `lib/BRender-v1.3.2/drivers/vkrend/devpixmp.c` | ~500 | VkImage staging, blit commands, layout transitions, flush |
+| `lib/BRender-v1.3.2/drivers/vkrend/cache.c` | ~200 | Matrix computation pipeline (`UpdateMatrices`, `StateVKUpdateModel`, `StateVKUpdateScene`) |
+| `lib/BRender-v1.3.2/drivers/vrend/renderer.c` | ~200 | Primary command buffer, sync (semaphores/fences), dynamic state |
+| `lib/BRender-v1.3.2/drivers/vkrend/ext_procs.c` | ~20 | Present queue submission, swapchain acquire |
+| `lib/BRender-v1.3.2/drivers/vkrend/brender.vert.glsl` | ~290 | SPIR-V vertex shader |
+| `lib/BRender-v1.3.2/drivers/vkrend/brender.frag.glsl` | | SPIR-V fragment shader |
+
+### New Dependencies
+
+- Vulkan SDK (headers, loader, validation layers)
+- SPIR-V toolchain: compile GLSL to SPIR-V at build time or bundle pre-compiled `.spv` binaries
+- SDL Vulkan surface symbols: `SDL_Vulkan_LoadLibrary`, `SDL_Vulkan_GetInstanceExtensions`, `SDL_Vulkan_CreateSurface`
+
+### Runtime Config
+
+In `dethrace.ini`, `Emulate3DFX` use value `2` to select Vulkan. In `allsys.c`, the init path would check `harness_game_config.opengl_3dfx_mode >= 2` to create the Vulkan device via `BrDevBeginVar` with the `"vkrend"` driver identifier.
+
+### Architecture Notes
+
+- BRender's rendering model: single pass, indexed triangles, 2 UBOs (model-view + shade table), one combined image sampler per material, prelit or lit with flat shading.
+- The GL driver uses `GL_UNSIGNED_INT_8_8_8_8_REV` + `GL_BGRA` for pixel uploads — Vulkan equivalent would be `VK_FORMAT_B8G8R8A8_UNORM` with `VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL`.
+- The software renderer's shade tables and palettes are not used by the GL driver — the GL driver does all lighting in shaders. Vulkan would follow the same approach.
+- The `byteswap_ubo` fix (removed endian-conditional swap in UBO uploads) applies equally to Vulkan push constants / uniform buffers. Vulkan spec: "The data in the buffer is stored in the byte order of the client."
+
+### Development Status
+
+- **Texture upload (staging buffer → VkImage):** Done
+- **Pixelmap flush:** Done
+- **Rectangle fill/copy:** Done
+- **Scene begin/end, viewport, render pass:** Done
+- **Swapchain + present:** Done
+- **3D overlay compositing:** Done
+- **Fog/DepthEffect overlay layer:** Done
+- **Cockpit view (3DFX path):** Done
+- **Mirror rendering:** Done
+- **Map view mode:** Done
+- **Normal mode 3D environment:** Done (see Known VK Bug below)
+- **Cursor/HUD overlay:** Done
+
+### Known VK Bug: Environment Not Rendered in Normal View (Fixed)
+
+- **Status:** Fixed
+- **Symptoms:** 3D environment (track columns, buildings, scenery) rendered black in normal mode while the player car was visible. Map view mode worked correctly.
+- **Root cause:** `sceneUploaded` guard in `renderer.c:sceneBegin` only uploaded the scene UBO (containing lights, camera, matrices) once per frame. The shadow pass (first `sceneBegin` of each frame) ran with lights disabled by `DisableLights()` — so the UBO was populated with zero lights. The main view's `sceneBegin` recalculated the cache with real lights but the `sceneUploaded` flag prevented re-upload. The environment models use dynamic lighting (not prelit) so they rendered black without light data. The car model uses prelit vertex colours, so it was unaffected. This did not affect the GL driver because it uploads the scene UBO on every `sceneBegin` call unconditionally.
+- **Fix:** Removed the `sceneUploaded` guard — the scene UBO is now uploaded on every `sceneBegin` call, matching the GL driver's behaviour.
+- **File:** `lib/BRender-v1.3.2/drivers/vkrend/renderer.c:74-77`
+
+### Known VK Bug: Short View Distance / Black 3D Scene (Fixed)
+
+- **Status:** Fixed
+- **Symptoms:** Distant environment geometry cut off sharply much closer than the GL driver. The black region rotated with the camera (view-aligned). Zooming out made the cut-off much closer; zooming in pushed it further. The GL driver showed the same geometry correctly.
+- **Root cause:** Two-layer problem:
+  1. BRender's projection matrix (originally designed for OpenGL's `[-1, 1]` Z NDC range) fails VK's `[0, w]` clip test after `negate_z_column` negates column 2. The BRender `A = (far+near)/(near-far)` and `B = 2*far*near/(near-far)` coefficients give `clip_z >> clip_w` for near-plane geometry, which OpenGL tolerates via depth clamping but VK strictly rejects.
+  2. The previous Z remap formula `m[2][col] = 0.5*p_br[2][col] + 0.5*p_br[3][col]` corrupts `clip_w` because `m[2][3]` (row 2, col 3) maps to GLSL `col[3].z`, which is the perspective-divide denominator. Changing it from `B` to `B/2` made `clip_w` 50% too small, and combined with `negate_z_column` it produced NDC z ≈ 2 for near geometry.
+- **Fix:** Keep the same BRender matrix as the GL driver (`negate_z_column` + `negate_y_row` in `cache.c:72-73`), and clamp `gl_Position.z` to `[0, w]` in the vertex shader (`brender.vert.glsl:291`):
+  ```glsl
+  pos.z = max(0.0, min(pos.w, pos.z));
+  ```
+- **Files:**
+  - `lib/BRender-v1.3.2/drivers/vkrend/cache.c:72-73` — matrix setup (`negate_z_column`, `negate_y_row`, no special Z remap)
+  - `lib/BRender-v1.3.2/drivers/vkrend/brender.vert.glsl:291` — Z-clamp in `main()`
+- **Alternative approaches that failed:** Direct VK perspective coefficients (`m[2][2] = far/(near-far)`, `m[2][3] = far*near/(near-far)`, `m[3][2] = -1`) produces correct Z but drastically shrinks `clip_w` (from `-1*z_view` to `B_vk*z_view` ≈ `-0.02*z_view`), making NDC X/Y cluster near 0 and breaking view-frustum culling → all-black screen. Removing `negate_z_column` without Z-clamp also fails because BRender's native `clip_z` goes negative for near vertices, failing VK's `0 ≤ clip_z ≤ clip_w`.
+
+### Known VK Bug: FPSLimit Ignored on Vulkan (Fixed)
+
+- **Status:** Fixed
+- **Symptoms:** The `FPSLimit` setting in `dethrace.ini` was respected by the GL driver (due to `SDL_GL_SetSwapInterval(1)` vsync) but ignored by the VK driver, which ran at uncapped frame rate.
+- **Root cause:** The VK driver's `doubleBuffer` method (`devpmvkf.c:423`) called `DevicePixelmapVKSwapBuffers` which handles VK submit/present inline but **never called** `self->asFront.callbacks.swap_buffers`. The GL driver's `DevicePixelmapGLSwapBuffers` (`ext_procs.c:16`) DOES call this callback, which is set to `gHarness_platform.Swap` → `SDL2_Harness_Swap` / `SDL3_Harness_Swap`. The FPS limiter (`limit_fps()` at `sdl2.c:264`, `sdl3.c:267`) lives inside `SDL*_Harness_Swap`, so it was never invoked from the VK path.
+- **Fix (two parts):**
+  1. `devpmvkf.c:436` — Added `self->asFront.callbacks.swap_buffers((br_pixelmap*)self)` call after `DevicePixelmapVKSwapBuffers` in `doubleBuffer`, matching the GL driver pattern.
+  2. `sdl2.c:486`, `sdl3.c:447` — Added `SDL_WINDOW_VULKAN` guard in `SDL*_Harness_Swap` to skip the software-rendering pixel-copy path when the window is a VK window (VK handles its own presentation and ImGui via external callback). Without this guard, the callback would try to read `back_buffer->pixels` which is NULL for VK pixelmaps (`BR_PMF_NO_ACCESS`).
+- **Files:**
+  - `lib/BRender-v1.3.2/drivers/vkrend/devpmvkf.c:436` — callback call added
+  - `src/harness/platforms/sdl2.c:486` — VK guard added
+  - `src/harness/platforms/sdl3.c:447` — VK guard added
