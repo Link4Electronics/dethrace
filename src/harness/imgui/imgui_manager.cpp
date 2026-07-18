@@ -20,6 +20,7 @@ static int g_visible = 1;
 static int g_initialized = 0;
 static int g_renderer_initialized = 0;
 extern int g_wireframe_mode;
+extern int gWidescreen_mode;
 static ImGuiManager_Callbacks g_callbacks;
 
 static bool g_cheat_freeze_time = false;
@@ -96,6 +97,11 @@ static void DrawMenuBar(void)
                 if (ImGui::Button(" - ##WiiUFPS")) { }
                 ImGui::SameLine();
                 if (ImGui::Button(" + ##WiiUFPS")) { }
+                {
+                    bool ws = gWidescreen_mode != 0;
+                    if (ImGui::MenuItem("Widescreen (in-race only)", NULL, &ws))
+                        gWidescreen_mode = ws ? 1 : 0;
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();

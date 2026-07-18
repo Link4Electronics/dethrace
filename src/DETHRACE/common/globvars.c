@@ -403,3 +403,5 @@ int gNumber_of_races;
 
 // GLOBAL: CARM95 0x00549eac
 char gDir_separator[3];
+
+int gWidescreen_mode;

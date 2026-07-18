@@ -59,6 +59,12 @@ tHarness_game_config harness_game_config;
 
 int g_wireframe_mode = 0;
 
+int gHarness_sw_widescreen = 0;
+int gHarness_gl_viewport_override = 0;
+
+int gHarness_window_width = 0;
+int gHarness_window_height = 0;
+
 // Platform hooks
 tHarness_platform gHarness_platform;
 
