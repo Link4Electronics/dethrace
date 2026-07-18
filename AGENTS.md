@@ -359,20 +359,94 @@ CMake-based. Target architecture is detected automatically. Key variables:
 - `BR_HAS_X86EMU` — enables x86 FPU emulation for non-x86 targets
 - Build with `-DBRETHR=ON` for original BRender or the bundled copy
 
-## Quick Reference: Typical Byte-Swap Patterns
+## Future Work: Audio Backend (Replace miniaudio with SDL Audio)
 
-```c
-// Pattern 1: Raw file I/O — file is LE, conditional swap on BE
-ReadU32:  raw = BrSwap32(raw)  // #if BR_ENDIAN_BIG
+### Current Architecture
 
-// Pattern 2: BRender datafile — file is BE, conditional swap on LE
-DfBlockReadBinary:  BrSwapBlock(...)  // #if !BR_ENDIAN_BIG
+The `AudioBackend_*` API (defined in `src/harness/include/harness/audio.h`) provides a 15-function abstraction over the audio system:
 
-// Pattern 3: Palette byte writes — platform order
-DoColourMap:  write {B,G,R,0} LE / {0,R,G,B} BE  // #if BR_ENDIAN_BIG
+- **SFX:** `AudioBackend_Init/UnInit`, `AudioBackend_AllocateSampleTypeStruct`, `AudioBackend_PlaySample`, `AudioBackend_SoundIsPlaying`, `AudioBackend_StopSample`, `AudioBackend_SetVolume`, `AudioBackend_SetPan`, `AudioBackend_SetFrequency`, `AudioBackend_SetVolumeSeparate`
+- **Music (CD Audio):** `AudioBackend_InitCDA/UnInitCDA`, `AudioBackend_PlayCDA/StopCDA`, `AudioBackend_CDAIsPlaying`, `AudioBackend_SetCDAVolume`
+- **Streaming (Smacker video):** `AudioBackend_StreamOpen/Write/Close`
 
-// Pattern 4: br_colour → RGB_565 — uses integer macros, BE-safe
-PaletteEntry16Bit:
-  entry = ((br_colour*)pal->pixels)[i];
-  return ((RED(entry)>>3)<<11) | ((GRN(entry)>>2)<<5) | (BLU(entry)>>3);
-```
+Current implementation: `src/harness/audio/miniaudio.c` (uses miniaudio single-header lib + stb_vorbis for OGG).
+Stub implementation: `src/harness/audio/null.c`.
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `src/harness/include/harness/audio.h` | `AudioBackend_*` abstraction header |
+| `src/harness/audio/miniaudio.c` | miniaudio backend (active when `DETHRACE_SOUND_ENABLED=ON`) |
+| `src/harness/audio/null.c` | Stub backend (active when `DETHRACE_SOUND_ENABLED=OFF`) |
+| `lib/miniaudio/include/miniaudio/miniaudio.h` | Single-header miniaudio v0.11.25 |
+| `lib/miniaudio/CMakeLists.txt` | INTERFACE library |
+| `lib/stb/` | stb_vorbis for OGG decoding (used by miniaudio) |
+| `src/S3/` | Game-level audio management (talks to `AudioBackend_*`) |
+| `src/harness/CMakeLists.txt:54-59` | Conditional miniaudio vs null compilation |
+
+### Replacing with SDL Audio
+
+The `AudioBackend_*` abstraction makes the swap feasible. A new `src/harness/audio/sdl.c` would implement it using SDL2/SDL3 audio.
+
+**SDK differences:**
+- **SDL2:** Queue-based model (`SDL_QueueAudio`). No per-stream volume/pan/pitch. Requires manual mixing callback for concurrent sounds. Pitch needs external resampling.
+- **SDL3:** Stream-based (`SDL_AudioStream`). Has `SDL_SetAudioStreamGain` (volume) and `SDL_SetAudioStreamFrequencyRatio` (pitch). Closer to miniaudio's model.
+- Neither has OGG built-in — keep stb_vorbis for music decoding.
+- Neither has built-in pan — manual L/R channel mixing required.
+
+**Required symbols to add to `sdl2_syms.h` / `sdl3_syms.h`:**
+- SDL2: `OpenAudioDevice`, `CloseAudioDevice`, `PauseAudioDevice`, `QueueAudio`, `GetQueuedAudioSize`, `ClearQueuedAudio`, `LoadWAV`, `FreeWAV`, `BuildAudioCVT`, `ConvertAudio`
+- SDL3: `OpenAudioDevice`, `CloseAudioDevice`, `PauseAudioDevice`, `ResumeAudioDevice`, `LoadWAV`, `FreeWAV`, `CreateAudioStream`, `DestroyAudioStream`, `BindAudioStream`, `UnbindAudioStream`, `PutAudioStreamData`, `GetAudioStreamData`, `GetAudioStreamAvailable`, `SetAudioStreamGain`, `SetAudioStreamFrequencyRatio`, `ClearAudioStream`
+
+## Future Work: Vulkan Render Driver
+
+### Scope
+
+A Vulkan driver would be a new BRender device driver alongside `glrend/` and `softrend/`. It would need to implement the same device pixelmap interface that GL uses.
+
+### GL Driver Files to Port
+
+| GL File | Lines | Vulkan Equivalent |
+|---------|-------|-------------------|
+| `lib/BRender-v1.3.2/drivers/glrend/video.c` | ~1000 | VkInstance/device/swapchain, SPIR-V pipelines, render passes, framebuffers |
+| `lib/BRender-v1.3.2/drivers/glrend/video.h` | ~150 | Vulkan equivalents of GL state (descriptor sets, pipeline layouts) |
+| `lib/BRender-v1.3.2/drivers/glrend/v1buffer.c` | ~500 | VkBuffer/memory management, descriptor pools |
+| `lib/BRender-v1.3.2/drivers/glrend/v1model.c` | ~600 | Command buffer generation, indexed draws for each model |
+| `lib/BRender-v1.3.2/drivers/glrend/devpixmp.c` | ~500 | VkImage staging, blit commands, layout transitions, flush |
+| `lib/BRender-v1.3.2/drivers/glrend/renderer.c` | ~200 | Primary command buffer, sync (semaphores/fences), dynamic state |
+| `lib/BRender-v1.3.2/drivers/glrend/ext_procs.c` | ~20 | Present queue submission, swapchain acquire |
+| `lib/BRender-v1.3.2/drivers/glrend/brender.vert.glsl` | | SPIR-V vertex shader |
+| `lib/BRender-v1.3.2/drivers/glrend/brender.frag.glsl` | | SPIR-V fragment shader |
+
+### New Dependencies
+
+- Vulkan SDK (headers, loader, validation layers)
+- SPIR-V toolchain: compile GLSL to SPIR-V at build time or bundle pre-compiled `.spv` binaries
+- SDL Vulkan surface symbols: `SDL_Vulkan_LoadLibrary`, `SDL_Vulkan_GetInstanceExtensions`, `SDL_Vulkan_CreateSurface`
+
+### CMake Wiring
+
+New directory: `lib/BRender-v1.3.2/drivers/vkrend/`. New device identifier would be `"vkrend"`. Add a build option akin to `DETHRACE_VULKAN=ON` that links against Vulkan::Vulkan and compiles the vkrend sources.
+
+### Runtime Config
+
+In `dethrace.ini`, `Emulate3DFX` would use value `2` to select Vulkan. In `allsys.c`, the init path would check `harness_game_config.opengl_3dfx_mode >= 2` to create the Vulkan device via `BrDevBeginVar` with the `"vkrend"` driver identifier.
+
+### Architecture Notes
+
+- BRender's rendering model: single pass, indexed triangles, 2 UBOs (model-view + shade table), one combined image sampler per material, prelit or lit with flat shading.
+- The GL driver uses `GL_UNSIGNED_INT_8_8_8_8_REV` + `GL_BGRA` for pixel uploads — Vulkan equivalent would be `VK_FORMAT_B8G8R8A8_UNORM` with `VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL`.
+- The software renderer's shade tables and palettes are not used by the GL driver — the GL driver does all lighting in shaders. Vulkan would follow the same approach.
+- The `byteswap_ubo` fix (removed endian-conditional swap in UBO uploads) applies equally to Vulkan push constants / uniform buffers. Vulkan spec: "The data in the buffer is stored in the byte order of the client."
+
+### Development Milestones
+
+1. Get a single triangle on screen via Vulkan WSI (SDL surface + swapchain)
+2. Port `brender.vert/frag` to SPIR-V, render a BRender model with correct MVP transform
+3. Implement texture upload (BR_PMT_RGBX_888 → VK_FORMAT_B8G8R8A8_UNORM)
+4. Implement pixelmap flush (staging buffer → image)
+5. Pixelmap fill/copy operations (rectangleFill, rectangleCopyTo)
+6. Scene begin/end (clear depth, set dynamic viewport)
+7. Swap buffers (present with semaphore sync)
+8. 3D overlay compositing (sub-pixelmap handling, purple-key like the GL driver)
