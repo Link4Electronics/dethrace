@@ -35,6 +35,7 @@ static struct {
 // Callbacks back into original game code
 extern void QuitGame(void);
 extern br_pixelmap* gBack_screen;
+extern int gHarness_sw_widescreen;
 extern br_uint_32 gI_am_cheating;
 extern int gFreeze_powerups;
 extern void ToggleTimerFreeze(void);
@@ -142,7 +143,16 @@ static int is_only_key_modifier(int modifier_flags, int flag_check) {
 }
 
 static void SDL2_Harness_ProcessWindowMessages(void) {
+    static int viewport_initialized = 0;
     SDL_Event event;
+
+    // Initialize viewport on first frame, once gBack_screen exists and we have window dimensions
+    if (!viewport_initialized && gBack_screen != NULL && gHarness_window_width > 0 && gHarness_window_height > 0) {
+        if (gHarness_window_width != gBack_screen->width || gHarness_window_height != gBack_screen->height) {
+            calculate_viewport(gHarness_window_width, gHarness_window_height);
+        }
+        viewport_initialized = 1;
+    }
 
     while (SDL2_PollEvent(&event)) {
         ImGuiManager_ProcessEvent(&event);
@@ -194,6 +204,8 @@ static void SDL2_Harness_ProcessWindowMessages(void) {
 
         case SDL_WINDOWEVENT:
             if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                gHarness_window_width = event.window.data1;
+                gHarness_window_height = event.window.data2;
                 calculate_viewport(event.window.data1, event.window.data2);
             }
             break;
@@ -398,6 +410,7 @@ static void SDL2_Harness_CreateWindow(const char* title, int width, int height, 
 
     ImGuiManager_Init(window, renderer, window_type == eWindow_type_opengl, &imgui_callbacks);
 
+    SDL2_GetWindowSize(window, &gHarness_window_width, &gHarness_window_height);
     viewport.x = 0;
     viewport.y = 0;
     viewport.scale_x = 1;
@@ -426,7 +439,15 @@ static void SDL2_Harness_Swap(br_pixelmap* back_buffer) {
         }
         SDL2_UnlockTexture(screen_texture);
         SDL2_RenderClear(renderer);
-        SDL2_RenderCopy(renderer, screen_texture, NULL, NULL);
+        if (gHarness_sw_widescreen) {
+            int win_w, win_h;
+            SDL2_GetWindowSize(window, &win_w, &win_h);
+            SDL2_RenderSetLogicalSize(renderer, win_w, win_h);
+            SDL2_RenderCopy(renderer, screen_texture, NULL, NULL);
+            SDL2_RenderSetLogicalSize(renderer, render_width, render_height);
+        } else {
+            SDL2_RenderCopy(renderer, screen_texture, NULL, NULL);
+        }
         ImGuiManager_Render();
         SDL2_RenderPresent(renderer);
         last_screen_src = back_buffer;
@@ -452,10 +473,17 @@ static void SDL2_Harness_PaletteChanged(br_colour entries[256]) {
 }
 
 static void SDL2_Harness_GetViewport(int* x, int* y, float* width_multipler, float* height_multiplier) {
-    *x = viewport.x;
-    *y = viewport.y;
-    *width_multipler = viewport.scale_x;
-    *height_multiplier = viewport.scale_y;
+    if (gHarness_gl_viewport_override > 0 && gBack_screen != NULL) {
+        *x = 0;
+        *y = viewport.y;
+        *width_multipler = (float)gHarness_gl_viewport_override / gBack_screen->width;
+        *height_multiplier = viewport.scale_y;
+    } else {
+        *x = viewport.x;
+        *y = viewport.y;
+        *width_multipler = viewport.scale_x;
+        *height_multiplier = viewport.scale_y;
+    }
 }
 
 static int SDL2_Harness_Platform_Init(tHarness_platform* platform) {

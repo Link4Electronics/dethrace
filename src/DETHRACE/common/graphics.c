@@ -2036,6 +2036,19 @@ void RenderAFrame(int pDepth_mask_on) {
     BrPixelmapFlush(gBack_screen);
 #endif
 
+    gHarness_sw_widescreen = 0;
+
+    if (gWidescreen_mode) {
+        br_camera* cam = (br_camera*)gCamera->type_data;
+        cam->aspect = 16.0f / 9.0f;
+        if (gHarness_window_width > 0 && gHarness_window_height > 0) {
+            gHarness_gl_viewport_override = gHarness_window_width;
+        }
+        if (!gVoodoo_rush_mode) {
+            gHarness_sw_widescreen = 1;
+        }
+    }
+
 #if !defined(DETHRACE_FIX_BUGS)
     // in map mode, the scene is rendered 3 times. We have no idea why.
     for (i = 0; i < (gMap_mode ? 3 : 1); i++)
@@ -2059,6 +2072,12 @@ void RenderAFrame(int pDepth_mask_on) {
         RenderSparks(gRender_screen, gDepth_buffer, gCamera, &gCamera_to_world, gFrame_period);
         RenderProximityRays(gRender_screen, gDepth_buffer, gCamera, &gCamera_to_world, gFrame_period);
         BrZbSceneRenderEnd();
+    }
+
+    if (gWidescreen_mode) {
+        br_camera* cam = (br_camera*)gCamera->type_data;
+        cam->aspect = (double)gWidth / (double)gHeight;
+        gHarness_gl_viewport_override = 0;
     }
 #ifdef DETHRACE_3DFX_PATCH
     PDLockRealBackScreen(1);
@@ -2285,6 +2304,7 @@ void RenderAFrame(int pDepth_mask_on) {
     gRender_screen->pixels = old_pixels;
     if (!gPalette_fade_time || GetRaceTime() > gPalette_fade_time + 500) {
         PDScreenBufferSwap(0);
+        gHarness_sw_widescreen = 0;
     }
     if (gAction_replay_mode) {
         DoActionReplayPostSwap();

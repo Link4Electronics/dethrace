@@ -35,6 +35,7 @@ static struct {
 // Callbacks back into original game code
 extern void QuitGame(void);
 extern br_pixelmap* gBack_screen;
+extern int gHarness_sw_widescreen;
 extern br_uint_32 gI_am_cheating;
 extern int gFreeze_powerups;
 extern void ToggleTimerFreeze(void);
@@ -143,7 +144,16 @@ static int is_only_key_modifier(SDL_Keymod modifier_flags, SDL_Keymod flag_check
 }
 
 static void SDL3_Harness_ProcessWindowMessages(void) {
+    static int viewport_initialized = 0;
     SDL_Event event;
+
+    // Initialize viewport on first frame, once gBack_screen exists and we have window dimensions
+    if (!viewport_initialized && gBack_screen != NULL && gHarness_window_width > 0 && gHarness_window_height > 0) {
+        if (gHarness_window_width != gBack_screen->width || gHarness_window_height != gBack_screen->height) {
+            calculate_viewport(gHarness_window_width, gHarness_window_height);
+        }
+        viewport_initialized = 1;
+    }
 
     while (SDL3_PollEvent(&event)) {
         ImGuiManager_ProcessEvent(&event);
@@ -194,6 +204,8 @@ static void SDL3_Harness_ProcessWindowMessages(void) {
             break;
 
         case SDL_EVENT_WINDOW_RESIZED:
+            gHarness_window_width = event.window.data1;
+            gHarness_window_height = event.window.data2;
             calculate_viewport(event.window.data1, event.window.data2);
             break;
 
@@ -401,6 +413,7 @@ static void SDL3_Harness_CreateWindow(const char* title, int width, int height, 
 
     ImGuiManager_Init(window, renderer, window_type == eWindow_type_opengl, &imgui_callbacks);
 
+    SDL3_GetWindowSize(window, &gHarness_window_width, &gHarness_window_height);
     viewport.x = 0;
     viewport.y = 0;
     viewport.scale_x = 1;
@@ -427,7 +440,16 @@ static void SDL3_Harness_Swap(br_pixelmap* back_buffer) {
         }
         SDL3_UnlockTexture(screen_texture);
         SDL3_RenderClear(renderer);
-        SDL3_RenderTexture(renderer, screen_texture, NULL, NULL);
+        if (gHarness_sw_widescreen) {
+            int win_w, win_h;
+            SDL3_GetWindowSize(window, &win_w, &win_h);
+            SDL3_SetRenderLogicalPresentation(renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
+            SDL_FRect dst = {0, 0, (float)win_w, (float)win_h};
+            SDL3_RenderTexture(renderer, screen_texture, NULL, &dst);
+            SDL3_SetRenderLogicalPresentation(renderer, render_width, render_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+        } else {
+            SDL3_RenderTexture(renderer, screen_texture, NULL, NULL);
+        }
         ImGuiManager_Render();
         SDL3_RenderPresent(renderer);
         last_screen_src = back_buffer;
@@ -452,10 +474,17 @@ static void SDL3_Harness_PaletteChanged(br_colour entries[256]) {
 }
 
 static void SDL3_Harness_GetViewport(int* x, int* y, float* width_multipler, float* height_multiplier) {
-    *x = viewport.x;
-    *y = viewport.y;
-    *width_multipler = viewport.scale_x;
-    *height_multiplier = viewport.scale_y;
+    if (gHarness_gl_viewport_override > 0 && gBack_screen != NULL) {
+        *x = 0;
+        *y = viewport.y;
+        *width_multipler = (float)gHarness_gl_viewport_override / gBack_screen->width;
+        *height_multiplier = viewport.scale_y;
+    } else {
+        *x = viewport.x;
+        *y = viewport.y;
+        *width_multipler = viewport.scale_x;
+        *height_multiplier = viewport.scale_y;
+    }
 }
 
 static uint32_t SDL3_Harness_GetTicks(void) {

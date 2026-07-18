@@ -286,10 +286,17 @@ static int SDL1_Harness_ShowErrorMessage(char* text, char* caption) {
 }
 
 static void SDL1_Harness_GetViewport(int* x, int* y, float* width_multipler, float* height_multiplier) {
-    *x = viewport.x;
-    *y = viewport.y;
-    *width_multipler = viewport.scale_x;
-    *height_multiplier = viewport.scale_y;
+    if (gHarness_gl_viewport_override > 0 && gBack_screen != NULL) {
+        *x = 0;
+        *y = viewport.y;
+        *width_multipler = (float)gHarness_gl_viewport_override / gBack_screen->width;
+        *height_multiplier = viewport.scale_y;
+    } else {
+        *x = viewport.x;
+        *y = viewport.y;
+        *width_multipler = viewport.scale_x;
+        *height_multiplier = viewport.scale_y;
+    }
 }
 
 static int SDL1_Harness_Platform_Init(tHarness_platform* platform) {
