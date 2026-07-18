@@ -329,6 +329,7 @@ int S3PlaySample(tS3_channel* chan) {
             sound_data->dataptr,
             sound_data->size,
             sound_data->rate,
+            sound_data->resolution,
             chan->repetitions == 0)
         != eAB_success) {
         return 0;

@@ -15,7 +15,7 @@ void AudioBackend_UnInit(void);
 tAudioBackend_error_code AudioBackend_InitCDA(void);
 void AudioBackend_UnInitCDA(void);
 void* AudioBackend_AllocateSampleTypeStruct(void);
-tAudioBackend_error_code AudioBackend_PlaySample(void* type_struct_sample, int channels, void* data, int size, int rate, int loop);
+tAudioBackend_error_code AudioBackend_PlaySample(void* type_struct_sample, int channels, void* data, int size, int rate, int bit_depth, int loop);
 int AudioBackend_SoundIsPlaying(void* type_struct_sample);
 tAudioBackend_error_code AudioBackend_StopSample(void* type_struct_sample);
 tAudioBackend_error_code AudioBackend_SetVolume(void* type_struct_sample, int volume);

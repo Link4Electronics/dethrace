@@ -18,7 +18,8 @@ void AudioBackend_UnInitCDA(void) {
 void* AudioBackend_AllocateSampleTypeStruct(void) {
 }
 
-tAudioBackend_error_code AudioBackend_PlaySample(void* type_struct_sample, int channels, void* data, int size, int rate, int loop) {
+tAudioBackend_error_code AudioBackend_PlaySample(void* type_struct_sample, int channels, void* data, int size, int rate, int bit_depth, int loop) {
+    (void)bit_depth;
     return eAB_error;
 }
 
