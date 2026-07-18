@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL_vulkan.h>
 
 #include "harness.h"
 #include "harness/config.h"
@@ -324,6 +325,46 @@ static ImGuiManager_Callbacks imgui_callbacks = {
     .get_game_type = get_game_type_sdl2,
 };
 
+/*
+ * Vulkan callbacks
+ */
+static void* vkGetInstanceExtensions_fn;
+static void* vkCreateSurface_fn;
+
+static void LoadVulkanSymbols(void) {
+#ifdef DETHRACE_SDL_DYNAMIC
+    vkGetInstanceExtensions_fn = Harness_LoadFunction(sdl2_so, "SDL_Vulkan_GetInstanceExtensions");
+    vkCreateSurface_fn = Harness_LoadFunction(sdl2_so, "SDL_Vulkan_CreateSurface");
+#else
+    vkGetInstanceExtensions_fn = SDL_Vulkan_GetInstanceExtensions;
+    vkCreateSurface_fn = SDL_Vulkan_CreateSurface;
+#endif
+}
+
+static const char** SDL2_Harness_VK_GetInstanceExtensions(uint32_t* count) {
+    if (!vkGetInstanceExtensions_fn)
+        return NULL;
+    static const char* exts[16];
+    memset(exts, 0, sizeof(exts));
+    {   int (*fn)(SDL_Window*, unsigned int*, const char**) = (void*)vkGetInstanceExtensions_fn;
+        if (!fn(window, count, NULL))
+            return NULL;
+        fn(window, count, exts);
+    }
+    return exts;
+}
+
+static void* SDL2_Harness_VK_CreateSurface(void* instance) {
+    if (!vkCreateSurface_fn)
+        return NULL;
+    void* surface = NULL;
+    {   int (*fn)(SDL_Window*, void*, void**) = (void*)vkCreateSurface_fn;
+        if (fn(window, instance, &surface))
+            return surface;
+    }
+    return NULL;
+}
+
 static void SDL2_Harness_CreateWindow(const char* title, int width, int height, tHarness_window_type window_type) {
     int window_width, window_height;
     Uint32 extra_window_flags;
@@ -349,7 +390,19 @@ static void SDL2_Harness_CreateWindow(const char* title, int width, int height, 
         extra_window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     }
 
-    if (window_type == eWindow_type_opengl) {
+    if (window_type == eWindow_type_vulkan) {
+
+        window = SDL2_CreateWindow(title,
+            SDL_WINDOWPOS_CENTERED,
+            SDL_WINDOWPOS_CENTERED,
+            window_width, window_height,
+            extra_window_flags | SDL_WINDOW_VULKAN);
+
+        if (window == NULL) {
+            LOG_PANIC2("Failed to create Vulkan window: %s", SDL2_GetError());
+        }
+
+    } else if (window_type == eWindow_type_opengl) {
 
         window = SDL2_CreateWindow(title,
             SDL_WINDOWPOS_CENTERED,
@@ -408,7 +461,9 @@ static void SDL2_Harness_CreateWindow(const char* title, int width, int height, 
 
     SDL2_ShowCursor(SDL_DISABLE);
 
-    ImGuiManager_Init(window, renderer, window_type == eWindow_type_opengl, &imgui_callbacks);
+    ImGuiManager_Init(window,
+        window_type == eWindow_type_vulkan ? NULL : renderer,
+        window_type == eWindow_type_opengl, &imgui_callbacks);
 
     SDL2_GetWindowSize(window, &gHarness_window_width, &gHarness_window_height);
     viewport.x = 0;
@@ -428,6 +483,8 @@ static void SDL2_Harness_Swap(br_pixelmap* back_buffer) {
     if (gl_context != NULL) {
         ImGuiManager_Render();
         SDL2_GL_SwapWindow(window);
+    } else if (SDL2_GetWindowFlags(window) & SDL_WINDOW_VULKAN) {
+        // VK handles its own presentation and ImGui via external callback
     } else {
         src_pixels = back_buffer->pixels;
 
@@ -507,12 +564,16 @@ static int SDL2_Harness_Platform_Init(tHarness_platform* platform) {
     platform->PaletteChanged = SDL2_Harness_PaletteChanged;
     platform->GL_GetProcAddress = SDL2_GL_GetProcAddress;
     platform->GetViewport = SDL2_Harness_GetViewport;
+
+    LoadVulkanSymbols();
+    platform->VK_CreateSurface = SDL2_Harness_VK_CreateSurface;
+    platform->VK_GetInstanceExtensions = SDL2_Harness_VK_GetInstanceExtensions;
     return 0;
 };
 
 const tPlatform_bootstrap SDL2_bootstrap = {
     "sdl2",
     "SDL2 video backend (libsdl.org)",
-    ePlatform_cap_software | ePlatform_cap_opengl,
+    ePlatform_cap_software | ePlatform_cap_opengl | ePlatform_cap_vulkan,
     SDL2_Harness_Platform_Init,
 };
