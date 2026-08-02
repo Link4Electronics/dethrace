@@ -57,8 +57,6 @@ tHarness_game_info harness_game_info;
 // Configuration options
 tHarness_game_config harness_game_config;
 
-int g_wireframe_mode = 0;
-
 int gHarness_sw_widescreen = 0;
 int gHarness_gl_viewport_override = 0;
 
