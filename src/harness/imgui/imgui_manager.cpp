@@ -2,9 +2,7 @@
 
 #include "imgui.h"
 #include "backends/imgui_impl_opengl3.h"
-#ifdef DETHRACE_VULKAN
 #include "backends/imgui_impl_vulkan.h"
-#endif
 
 #if defined(DETHRACE_PLATFORM_SDL3)
 #include <SDL3/SDL.h>
@@ -23,9 +21,7 @@ static int g_is_vulkan = 0;
 static int g_visible = 1;
 static int g_initialized = 0;
 static int g_renderer_initialized = 0;
-#ifdef DETHRACE_VULKAN
 static VkDescriptorPool g_imgui_vk_pool = VK_NULL_HANDLE;
-#endif
 
 static void DrawMenuBar(void);
 extern int g_wireframe_mode;
@@ -44,23 +40,27 @@ static void InitRendererBackend(void)
 
     if (g_is_opengl)
         ImGui_ImplOpenGL3_Init("#version 140");
-#ifdef DETHRACE_VULKAN
     else if (g_is_vulkan)
-        ; /* Vulkan backend initialized in ImGuiManager_InitVulkan */
-#endif
+        ; /* Vulkan backend initialized in ImGuiManager_InitSDL3 */
 #if defined(DETHRACE_PLATFORM_SDL3)
-    else
+    else if (g_renderer)
         ImGui_ImplSDLRenderer3_Init(g_renderer);
 #else
-    else
+    else if (g_renderer)
         ImGui_ImplSDLRenderer2_Init(g_renderer);
 #endif
 
     g_renderer_initialized = 1;
 }
 
-#ifdef DETHRACE_VULKAN
-void ImGuiManager_InitVulkan(void* instance, void* physical_device, void* device,
+// ImGui has no SDL3-GPU backend; without an OpenGL context or SDL_Renderer there
+// is nothing to draw with, so the overlay is disabled in sdl3rend mode.
+static bool HasRenderBackend(void)
+{
+    return g_is_opengl || g_is_vulkan || g_renderer != NULL;
+}
+
+void ImGuiManager_InitSDL3(void* instance, void* physical_device, void* device,
     void* queue, uint32_t queue_family, void* render_pass,
     uint32_t min_image_count, uint32_t image_count)
 {
@@ -68,7 +68,7 @@ void ImGuiManager_InitVulkan(void* instance, void* physical_device, void* device
         return;
 
     g_is_vulkan = 1;
-    VkDevice vk_device = (VkDevice)device;
+    VkDevice sdl3_device = (VkDevice)device;
 
     VkDescriptorPoolSize pool_sizes[] = {
         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10 },
@@ -78,12 +78,12 @@ void ImGuiManager_InitVulkan(void* instance, void* physical_device, void* device
     pool_info.maxSets = 10;
     pool_info.poolSizeCount = 1;
     pool_info.pPoolSizes = pool_sizes;
-    vkCreateDescriptorPool(vk_device, &pool_info, NULL, &g_imgui_vk_pool);
+    vkCreateDescriptorPool(sdl3_device, &pool_info, NULL, &g_imgui_vk_pool);
 
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = (VkInstance)instance;
     init_info.PhysicalDevice = (VkPhysicalDevice)physical_device;
-    init_info.Device = vk_device;
+    init_info.Device = sdl3_device;
     init_info.QueueFamily = queue_family;
     init_info.Queue = (VkQueue)queue;
     init_info.DescriptorPool = g_imgui_vk_pool;
@@ -97,7 +97,7 @@ void ImGuiManager_InitVulkan(void* instance, void* physical_device, void* device
     ImGui_ImplVulkan_CreateFontsTexture();
 }
 
-void ImGuiManager_RenderVulkan(void* cmd_buffer)
+void ImGuiManager_RenderSDL3(void* cmd_buffer)
 {
     if (!g_initialized)
         return;
@@ -107,11 +107,10 @@ void ImGuiManager_RenderVulkan(void* cmd_buffer)
     VkCommandBuffer cmd = (VkCommandBuffer)cmd_buffer;
     ImGui_ImplVulkan_RenderDrawData(draw_data, cmd);
 }
-#endif
 
 void ImGuiManager_NewFrame(void)
 {
-    if (!g_initialized)
+    if (!g_initialized || !HasRenderBackend())
         return;
 
     InitRendererBackend();
@@ -124,10 +123,8 @@ void ImGuiManager_NewFrame(void)
 
     if (g_is_opengl)
         ImGui_ImplOpenGL3_NewFrame();
-#ifdef DETHRACE_VULKAN
     else if (g_is_vulkan)
         ImGui_ImplVulkan_NewFrame();
-#endif
 #if defined(DETHRACE_PLATFORM_SDL3)
     else
         ImGui_ImplSDLRenderer3_NewFrame();
@@ -379,12 +376,12 @@ void ImGuiManager_Init(void* window, void* renderer, int is_opengl, ImGuiManager
 #if defined(DETHRACE_PLATFORM_SDL3)
     if (g_is_opengl)
         ImGui_ImplSDL3_InitForOpenGL(g_window, NULL);
-    else
+    else if (g_renderer)
         ImGui_ImplSDL3_InitForSDLRenderer(g_window, g_renderer);
 #else
     if (g_is_opengl)
         ImGui_ImplSDL2_InitForOpenGL(g_window, NULL);
-    else
+    else if (g_renderer)
         ImGui_ImplSDL2_InitForSDLRenderer(g_window, g_renderer);
 #endif
 
@@ -394,7 +391,7 @@ void ImGuiManager_Init(void* window, void* renderer, int is_opengl, ImGuiManager
 
 void ImGuiManager_ProcessEvent(const void* event)
 {
-    if (!g_initialized)
+    if (!g_initialized || !HasRenderBackend())
         return;
 
 #if defined(DETHRACE_PLATFORM_SDL3)
@@ -411,10 +408,8 @@ void ImGuiManager_Render(void)
 
     // For Vulkan, NewFrame is called separately (ImGuiManager_NewFrame),
     // and RenderVulkan is called from the VK external render callback.
-#ifdef DETHRACE_VULKAN
     if (g_is_vulkan)
         return;
-#endif
 
     ImGuiManager_NewFrame();
 
@@ -437,10 +432,8 @@ void ImGuiManager_Shutdown(void)
     {
         if (g_is_opengl)
             ImGui_ImplOpenGL3_Shutdown();
-#ifdef DETHRACE_VULKAN
         else if (g_is_vulkan)
             ImGui_ImplVulkan_Shutdown();
-#endif
 #if defined(DETHRACE_PLATFORM_SDL3)
         else
             ImGui_ImplSDLRenderer3_Shutdown();
@@ -456,13 +449,11 @@ void ImGuiManager_Shutdown(void)
     ImGui_ImplSDL2_Shutdown();
 #endif
 
-#ifdef DETHRACE_VULKAN
     if (g_imgui_vk_pool != VK_NULL_HANDLE) {
         // We need the VkDevice to destroy the pool, but we don't store it.
         // The shutdown should happen after device destruction.
         // For simplicity, the pool leaks.
     }
-#endif
 
     ImGui::DestroyContext();
     g_initialized = 0;

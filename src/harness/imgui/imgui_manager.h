@@ -39,8 +39,8 @@ int ImGuiManager_IsVisible(void);
 void ImGuiManager_SetVisible(int visible);
 
 void ImGuiManager_NewFrame(void);
-void ImGuiManager_RenderVulkan(void* cmd_buffer);
-void ImGuiManager_InitVulkan(void* instance, void* physical_device, void* device,
+void ImGuiManager_RenderSDL3(void* cmd_buffer);
+void ImGuiManager_InitSDL3(void* instance, void* physical_device, void* device,
     void* queue, uint32_t queue_family, void* render_pass,
     uint32_t min_image_count, uint32_t image_count);
 
