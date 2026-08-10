@@ -10,15 +10,13 @@
 #include "harness/os.h"
 #include "harness/trace.h"
 
-#ifdef DETHRACE_VULKAN
 #include "imgui_manager.h"
-#include "brvkrend.h"
+#include "brsdl3rend.h"
 
-static void imgui_vk_render_cb(void* cmd, void* ud) {
+static void imgui_sdl3_render_cb(void* cmd, void* ud) {
     (void)ud;
-    ImGuiManager_RenderVulkan(cmd);
+    ImGuiManager_RenderSDL3(cmd);
 }
-#endif
 #include "init.h"
 #include "input.h"
 #include "loadsave.h"
@@ -84,14 +82,14 @@ int gForce_voodoo_rush_mode;
 int gForce_voodoo_mode;
 
 br_device_gl_callback_procs gl_callbacks;
-br_device_vk_callback_procs vk_callbacks;
+br_device_sdl3_callback_procs sdl3_callbacks;
 br_device_virtualfb_callback_procs virtualfb_callbacks;
 
-static int BR_CALLBACK vk_get_map_mode(void) {
+static int BR_CALLBACK sdl3_get_map_mode(void) {
     return gMap_mode;
 }
 
-static void BR_CALLBACK vk_get_window_size(int* width, int* height) {
+static void BR_CALLBACK sdl3_get_window_size(int* width, int* height) {
     *width = gHarness_window_width;
     *height = gHarness_window_height;
 }
@@ -422,47 +420,36 @@ void PDAllocateScreenAndBack(void) {
     if (harness_game_config.opengl_3dfx_mode == 2) {
         if (!gNo_voodoo) {
             BrBegin();
-            vk_callbacks.get_proc_address = NULL;
-            vk_callbacks.swap_buffers = gHarness_platform.Swap;
-            vk_callbacks.get_viewport = gHarness_platform.GetViewport;
-            vk_callbacks.free = NULL;
-            vk_callbacks.create_surface = (void*)gHarness_platform.VK_CreateSurface;
-            vk_callbacks.get_instance_extensions = gHarness_platform.VK_GetInstanceExtensions;
-            vk_callbacks.get_map_mode = vk_get_map_mode;
-            vk_callbacks.get_window_size = vk_get_window_size;
-            fprintf(stderr, "[VK] Creating Vulkan window...\n");
-            gHarness_platform.CreateWindow_("Carmageddon", gGraf_specs[gGraf_spec_index].phys_width, gGraf_specs[gGraf_spec_index].phys_height, eWindow_type_vulkan);
-            fprintf(stderr, "[VK] Window created. Calling BrDevBeginVar(\"vkrend\")...\n");
+            sdl3_callbacks.get_proc_address = NULL;
+            sdl3_callbacks.swap_buffers = gHarness_platform.Swap;
+            sdl3_callbacks.get_viewport = gHarness_platform.GetViewport;
+            sdl3_callbacks.free = NULL;
+            sdl3_callbacks.create_surface = (void*)gHarness_platform.SDL3_CreateSurface;
+            sdl3_callbacks.get_instance_extensions = gHarness_platform.SDL3_GetInstanceExtensions;
+            sdl3_callbacks.get_map_mode = sdl3_get_map_mode;
+            sdl3_callbacks.get_window_size = sdl3_get_window_size;
+            sdl3_callbacks.get_window = gHarness_platform.GetWindow;
+            fprintf(stderr, "[SDL3] Creating SDL3-GPU window...\n");
+            gHarness_platform.CreateWindow_("Carmageddon", gGraf_specs[gGraf_spec_index].phys_width, gGraf_specs[gGraf_spec_index].phys_height, eWindow_type_sdl3);
+            fprintf(stderr, "[SDL3] Window created. Calling BrDevBeginVar(\"sdl3rend\")...\n");
 
-            br_error vk_err = BrDevBeginVar(&gScreen, "vkrend",
+            br_error sdl3_err = BrDevBeginVar(&gScreen, "sdl3rend",
                 BRT_WIDTH_I32, gGraf_specs[gGraf_spec_index].phys_width,
                 BRT_HEIGHT_I32, gGraf_specs[gGraf_spec_index].phys_height,
-                BRT_VULKAN_CALLBACKS_P, &vk_callbacks,
+                BRT_SDL3_CALLBACKS_P, &sdl3_callbacks,
                 BRT_PIXEL_TYPE_U8, BR_PMT_RGB_565,
                 BR_NULL_TOKEN);
-            fprintf(stderr, "[VK] BrDevBeginVar returned %d, gScreen=%p\n", (int)vk_err, (void*)gScreen);
+            fprintf(stderr, "[SDL3] BrDevBeginVar returned %d, gScreen=%p\n", (int)sdl3_err, (void*)gScreen);
 
-#ifdef DETHRACE_VULKAN
-            if (vk_err == BRE_OK && gScreen != NULL) {
-                VKREND_DeviceInfo vk_info;
-                VKREND_GetDeviceInfo(&vk_info);
-                if (vk_info.device) {
-                    ImGuiManager_InitVulkan(
-                        vk_info.instance,
-                        vk_info.physical_device,
-                        vk_info.device,
-                        vk_info.graphics_queue,
-                        vk_info.graphics_queue_family,
-                        vk_info.render_pass,
-                        vk_info.min_image_count,
-                        vk_info.image_count
-                    );
-
-                    VKREND_SetExternalRenderCallback(imgui_vk_render_cb, NULL);
-                    fprintf(stderr, "[VK] ImGui Vulkan backend initialized\n");
-                }
+            if (sdl3_err == BRE_OK && gScreen != NULL) {
+                /*
+                 * ImGui's SDL3 backend here is Vulkan-only (imgui_impl_vulkan)
+                 * and the SDL3-GPU driver cannot expose the underlying
+                 * VkInstance/VkDevice/queues, so the overlay is not wired up in
+                 * sdl3rend mode yet.
+                 */
+                fprintf(stderr, "[SDL3] SDL3-GPU window initialized\n");
             }
-#endif
         }
     } else if (harness_game_config.opengl_3dfx_mode) {
         if (!gNo_voodoo) {
@@ -811,13 +798,11 @@ int PDGetTotalTime(void) {
 // FUNCTION: CARM95 0x004a7b63
 int PDServiceSystem(tU32 pTime_since_last_call) {
     gHarness_platform.ProcessWindowMessages();
-#ifdef DETHRACE_VULKAN
     // For Vulkan, ImGui new frame + menu drawing is done here (once per frame).
     // GL/SDL renderer uses ImGuiManager_Render() in the swap function instead.
     if (harness_game_config.opengl_3dfx_mode == 2) {
         ImGuiManager_NewFrame();
     }
-#endif
     return 0;
 }
 
