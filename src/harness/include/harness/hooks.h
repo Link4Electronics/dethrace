@@ -69,13 +69,10 @@ typedef struct tPlatform_bootstrap {
 
 extern tHarness_platform gHarness_platform;
 
-extern int g_wireframe_mode;
-
-extern int gHarness_sw_widescreen;
-extern int gHarness_gl_viewport_override;
-
-extern int gHarness_window_width;
-extern int gHarness_window_height;
+// Returns the OS handle of the loaded SDL3 library (dlopen/LoadLibrary handle),
+// or NULL when SDL3 is linked directly. Used by the sdl3rend BRender driver to
+// resolve its SDL3 function pointers at runtime.
+extern void* SDL3_GetHandle(void);
 
 extern int Harness_Init(int* argc, char* argv[]);
 
