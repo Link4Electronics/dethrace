@@ -10,6 +10,11 @@
 #include "harness/os.h"
 #include "harness/trace.h"
 
+#ifdef DETHRACE_IMGUI
+#include "brsdl3gpurend.h"
+#include "imgui_manager.h"
+#endif
+
 #include "init.h"
 #include "input.h"
 #include "loadsave.h"
@@ -85,6 +90,18 @@ static void BR_CALLBACK sdl3_get_window_size(int* width, int* height) {
     *width = gHarness_window_width;
     *height = gHarness_window_height;
 }
+
+#ifdef DETHRACE_IMGUI
+static void BR_CALLBACK sdl3_gpu_external_render(void* cmd, void* swapchain_texture, uint32_t w, uint32_t h, void* ud) {
+    (void)w;
+    (void)h;
+    (void)ud;
+    if (!swapchain_texture)
+        return;
+    ImGuiManager_NewFrame();
+    ImGuiManager_RenderSDL3GPU(cmd, swapchain_texture);
+}
+#endif
 
 /* SDL3 GPU renderer debug mode (Vulkan validation layers): enabled by the
  * --sdl3gpu-debug command line option or the SDL3GPU_DEBUG environment variable
@@ -456,6 +473,14 @@ void PDAllocateScreenAndBack(void) {
 
             if (sdl3_err == BRE_OK && gScreen != NULL) {
                 fprintf(stderr, "[SDL3] SDL3-GPU window initialized\n");
+#ifdef DETHRACE_IMGUI
+                {
+                    SDL3GPUREND_DeviceInfo dev_info;
+                    SDL3GPUREND_GetDeviceInfo(&dev_info);
+                    ImGuiManager_InitSDL3GPU(dev_info.gpu_device, dev_info.swapchain_texture_format);
+                    SDL3GPUREND_SetExternalRenderCallback(sdl3_gpu_external_render, NULL);
+                }
+#endif
             }
         }
     } else

@@ -28,12 +28,14 @@ else()
 endif()
 
 set(IMGUI_OPENGL3_BACKEND_SRC ${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp)
+set(IMGUI_SDLGPU3_BACKEND_SRC ${IMGUI_BACKEND_DIR}/imgui_impl_sdlgpu3.cpp)
 
 add_library(imgui_manager STATIC
     ${IMGUI_SRC}
     ${IMGUI_SDL_BACKEND_SRC}
     ${IMGUI_OPENGL3_BACKEND_SRC}
     ${IMGUI_SDLRENDERER_BACKEND_SRC}
+    ${IMGUI_SDLGPU3_BACKEND_SRC}
     imgui_manager.cpp
 )
 
@@ -58,9 +60,3 @@ else()
     target_compile_definitions(imgui_manager PRIVATE DETHRACE_PLATFORM_SDL2)
     target_link_libraries(imgui_manager PRIVATE SDL2::SDL2)
 endif()
-
-find_package(Vulkan REQUIRED)
-target_compile_definitions(imgui_manager PRIVATE DETHRACE_VULKAN)
-target_include_directories(imgui_manager PRIVATE ${Vulkan_INCLUDE_DIRS})
-target_sources(imgui_manager PRIVATE ${IMGUI_BACKEND_DIR}/imgui_impl_vulkan.cpp)
-target_link_libraries(imgui_manager PRIVATE Vulkan::Vulkan)

@@ -409,7 +409,7 @@ static void SDL2_Harness_CreateWindow(const char* title, int width, int height, 
 
     ImGuiManager_Init(window,
         renderer,
-        window_type == eWindow_type_opengl, &imgui_callbacks);
+        window_type == eWindow_type_opengl, 0, &imgui_callbacks);
 
     SDL2_GetWindowSize(window, &gHarness_window_width, &gHarness_window_height);
     viewport.x = 0;

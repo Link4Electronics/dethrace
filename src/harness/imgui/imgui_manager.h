@@ -29,7 +29,7 @@ typedef struct {
     int (*get_game_type)(void);
 } ImGuiManager_Callbacks;
 
-void ImGuiManager_Init(void* window, void* renderer, int is_opengl, ImGuiManager_Callbacks* callbacks);
+void ImGuiManager_Init(void* window, void* renderer, int is_opengl, int is_sdl3gpu, ImGuiManager_Callbacks* callbacks);
 void ImGuiManager_ProcessEvent(const void* event);
 void ImGuiManager_Render(void);
 void ImGuiManager_Shutdown(void);
@@ -39,10 +39,8 @@ int ImGuiManager_IsVisible(void);
 void ImGuiManager_SetVisible(int visible);
 
 void ImGuiManager_NewFrame(void);
-void ImGuiManager_RenderSDL3(void* cmd_buffer);
-void ImGuiManager_InitSDL3(void* instance, void* physical_device, void* device,
-    void* queue, uint32_t queue_family, void* render_pass,
-    uint32_t min_image_count, uint32_t image_count);
+void ImGuiManager_InitSDL3GPU(void* gpu_device, uint32_t swapchain_format);
+void ImGuiManager_RenderSDL3GPU(void* cmd_buffer, void* swapchain_texture);
 
 #ifdef __cplusplus
 }

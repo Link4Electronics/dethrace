@@ -442,7 +442,8 @@ static void SDL3_Harness_CreateWindow(const char* title, int width, int height, 
 
     ImGuiManager_Init(window,
         window_type == eWindow_type_sdl3 ? NULL : renderer,
-        window_type == eWindow_type_opengl, &imgui_callbacks);
+        window_type == eWindow_type_opengl,
+        window_type == eWindow_type_sdl3, &imgui_callbacks);
 
     SDL3_GetWindowSize(window, &gHarness_window_width, &gHarness_window_height);
     viewport.x = 0;

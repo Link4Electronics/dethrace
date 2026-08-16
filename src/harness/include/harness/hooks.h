@@ -72,6 +72,14 @@ typedef struct tPlatform_bootstrap {
 
 extern tHarness_platform gHarness_platform;
 
+extern int g_wireframe_mode;
+
+extern int gHarness_sw_widescreen;
+extern int gHarness_gl_viewport_override;
+
+extern int gHarness_window_width;
+extern int gHarness_window_height;
+
 extern int Harness_Init(int* argc, char* argv[]);
 
 extern void Harness_Quit(void);
