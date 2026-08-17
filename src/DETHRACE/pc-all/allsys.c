@@ -479,6 +479,10 @@ void PDAllocateScreenAndBack(void) {
                     SDL3GPUREND_GetDeviceInfo(&dev_info);
                     ImGuiManager_InitSDL3GPU(dev_info.gpu_device, dev_info.swapchain_texture_format);
                     SDL3GPUREND_SetExternalRenderCallback(sdl3_gpu_external_render, NULL);
+                    {
+                        extern void AuxCockpitRender_Register(void);
+                        AuxCockpitRender_Register();
+                    }
                 }
 #endif
             }

@@ -29,6 +29,7 @@ extern int gWidescreen_mode;
 extern int gDisable_lod;
 extern int gNo_view_distance;
 extern int gAnisotropy_level;
+extern int g3window_cockpit;
 static ImGuiManager_Callbacks g_callbacks;
 
 static bool g_cheat_freeze_time = false;
@@ -189,6 +190,10 @@ static void DrawMenuBar(void)
                     ImGui::EndCombo();
                 }
             }
+            ImGui::Separator();
+            bool wc = g3window_cockpit != 0;
+            if (ImGui::MenuItem("3-Window Cockpit View (SDL3GPU)", NULL, &wc))
+                g3window_cockpit = wc ? 1 : 0;
             ImGui::EndMenu();
         }
 

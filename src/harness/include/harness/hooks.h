@@ -76,6 +76,8 @@ extern int g_wireframe_mode;
 
 extern int gAnisotropy_level;
 
+extern int g3window_cockpit;
+
 extern int gHarness_sw_widescreen;
 extern int gHarness_gl_viewport_override;
 

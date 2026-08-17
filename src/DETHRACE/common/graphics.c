@@ -3635,3 +3635,93 @@ void DRPixelmapDoubledCopy(br_pixelmap* pDestn, br_pixelmap* pSource, int pSourc
         sptr -= src_row_skip;
     }
 }
+
+static void AuxCockpitRender_cb(int viewIndex, void* ud) {
+    br_matrix34 saved_cam_mat;
+    br_matrix34 saved_cam_to_world;
+    tWhich_view saved_view;
+    br_actor* saved_camera;
+    br_camera* camera_ptr;
+    float the_angle;
+    extern br_actor* gCamera_list[2];
+
+    camera_ptr = (br_camera*)gCamera_list[0]->type_data;
+
+    /* Save camera state */
+    BrMatrix34Copy(&saved_cam_mat, &gCamera_list[0]->t.t.mat);
+    BrMatrix34Copy(&saved_cam_to_world, &gCamera_to_world);
+    saved_view = gProgram_state.which_view;
+    saved_camera = gCamera;
+
+    /* Temporarily switch to cockpit camera for the aux render */
+    gCamera = gCamera_list[0];
+
+    /* Set the view for this aux window */
+    gProgram_state.which_view = (viewIndex == 0) ? eView_left : eView_right;
+
+    /* Build a fresh camera matrix with the aux rotation, matching
+     * ReinitialiseForwardCamera logic but without the side effects
+     * (MungeForwardSky, AssertYons, etc.) */
+    BrMatrix34Identity(&gCamera_list[0]->t.t.mat);
+    gCamera_list[0]->t.t.mat.m[3][0] = gProgram_state.current_car.driver_x_offset;
+    gCamera_list[0]->t.t.mat.m[3][1] = gProgram_state.current_car.driver_y_offset;
+    gCamera_list[0]->t.t.mat.m[3][2] = gProgram_state.current_car.driver_z_offset;
+
+    the_angle = atan(
+                    tandeg(gCamera_angle / 2.0f)
+                    * (double)gRender_screen->height
+                    / (double)(gProgram_state.current_car.render_bottom[0] - gProgram_state.current_car.render_top[0]))
+        * 114.59155902616465;
+    {
+        float d = (float)(gRender_screen->base_y
+            + (gRender_screen->height / 2)
+            - (gProgram_state.current_car.render_bottom[0] + gProgram_state.current_car.render_top[0]) / 2);
+        float w = (float)gRender_screen->height;
+        gCamera_list[0]->t.t.mat.m[2][1] = tandeg(the_angle / 2.0f) * d * 2.0f / w;
+    }
+
+    /* Apply the aux rotation */
+    if (viewIndex == 0) {
+        DRMatrix34PostRotateY(&gCamera_list[0]->t.t.mat,
+            BrDegreeToAngle(gProgram_state.current_car.head_left_angle));
+    } else {
+        DRMatrix34PostRotateY(&gCamera_list[0]->t.t.mat,
+            BrDegreeToAngle(gProgram_state.current_car.head_right_angle));
+    }
+
+    /* Re-apply driver offsets (rotation may have disturbed column 3) */
+    gCamera_list[0]->t.t.mat.m[3][0] = gProgram_state.current_car.driver_x_offset;
+    gCamera_list[0]->t.t.mat.m[3][1] = gProgram_state.current_car.driver_y_offset;
+    gCamera_list[0]->t.t.mat.m[3][2] = gProgram_state.current_car.driver_z_offset;
+
+    /* Compute camera_to_world for the aux view */
+    BrMatrix34Inverse(&gCamera_to_world, &gCamera_list[0]->t.t.mat);
+
+    /* Clear depth buffer for the new scene */
+    BrPixelmapFill(gDepth_buffer, 0xFFFFFFFF);
+
+    /* Render the 3D scene */
+    BrZbSceneRenderBegin(gUniverse_actor, gCamera_list[0], gRender_screen, gDepth_buffer);
+    ProcessNonTrackActors(gRender_screen, gDepth_buffer, gCamera_list[0], &gCamera_to_world, &gCamera_list[0]->t.t.mat);
+    ProcessTrack(gUniverse_actor, &gProgram_state.track_spec, gCamera_list[0], &gCamera_to_world, 0);
+    RenderLollipops();
+    DepthEffectSky(gRender_screen, gDepth_buffer, gCamera_list[0], &gCamera_to_world);
+    DepthEffect(gRender_screen, gDepth_buffer, gCamera_list[0], &gCamera_to_world);
+    if (!gAusterity_mode) {
+        ProcessTrack(gUniverse_actor, &gProgram_state.track_spec, gCamera_list[0], &gCamera_to_world, 1);
+    }
+    RenderSplashes();
+    BrZbSceneRenderEnd();
+
+    /* Restore camera state */
+    BrMatrix34Copy(&gCamera_list[0]->t.t.mat, &saved_cam_mat);
+    BrMatrix34Copy(&gCamera_to_world, &saved_cam_to_world);
+    gProgram_state.which_view = saved_view;
+    gCamera = saved_camera;
+}
+
+void AuxCockpitRender_Register(void) {
+    extern void SDL3GPUREND_SetAuxRenderCallback(struct _VIDEO* hVideo,
+        void (*cb)(int viewIndex, void* ud), void* ud);
+    SDL3GPUREND_SetAuxRenderCallback(NULL, AuxCockpitRender_cb, NULL);
+}
