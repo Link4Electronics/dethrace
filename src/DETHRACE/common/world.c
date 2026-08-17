@@ -1419,7 +1419,7 @@ void AddFunkotronics(FILE* pF, int pOwner, int pRef_offset) {
                     -1,
                     &the_funk->texture_animation_data.flic_info.flic_descriptor,
                     the_funk->texture_animation_data.flic_info.flic_data_length,
-                    (tS8*)the_funk->texture_animation_data.flic_info.flic_data,
+                    (tU8*)the_funk->texture_animation_data.flic_info.flic_data,
                     0,
                     0,
                     0,
@@ -2525,8 +2525,9 @@ void LoadExceptionsFile(char* pName) {
 void LoadExceptionsFileForTrack(char* pTrack_file_name) {
     tPath_name exceptions_file_name;
 
-    sprintf(
+    snprintf(
         exceptions_file_name,
+        sizeof(exceptions_file_name),
         "%s%s%s%s",
         pTrack_file_name,
         gDir_separator,
@@ -2596,7 +2597,7 @@ void LoadTrack(char* pFile_name, tTrack_spec* pTrack_spec, tRace_info* pRace_inf
     br_vector3 v1;
     br_vector3 v2;
     br_vector3 temp_v;
-    br_bounds temp_bounds;
+    br_bounds temp_bounds = {{{0}}, {{0}}};
     tPed_subs* ped_subs;
     br_pixelmap* sky;
     br_material* material;
@@ -3414,7 +3415,7 @@ void FunkThoseTronics(void) {
                             -1,
                             &the_funk->texture_animation_data.flic_info.flic_descriptor,
                             the_funk->texture_animation_data.flic_info.flic_data_length,
-                            (tS8*)the_funk->texture_animation_data.flic_info.flic_data,
+                            (tU8*)the_funk->texture_animation_data.flic_info.flic_data,
                             the_material->colour_map, 0, 0, 0);
                     }
                     the_funk->last_frame = f_the_time;

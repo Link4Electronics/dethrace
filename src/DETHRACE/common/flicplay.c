@@ -741,7 +741,7 @@ void AssertFlicPixelmap(tFlic_descriptor_ptr pFlic_info, br_pixelmap* pDest_pixe
 
 // IDA: int __usercall StartFlic@<EAX>(char *pFile_name@<EAX>, int pIndex@<EDX>, tFlic_descriptor_ptr pFlic_info@<EBX>, tU32 pSize@<ECX>, tS8 *pData_ptr, br_pixelmap *pDest_pixelmap, int pX_offset, int pY_offset, int pFrame_rate)
 // FUNCTION: CARM95 0x00495b77
-int StartFlic(char* pFile_name, int pIndex, tFlic_descriptor_ptr pFlic_info, tU32 pSize, tS8* pData_ptr, br_pixelmap* pDest_pixelmap, int pX_offset, int pY_offset, int pFrame_rate) {
+int StartFlic(char* pFile_name, int pIndex, tFlic_descriptor_ptr pFlic_info, tU32 pSize, tU8* pData_ptr, br_pixelmap* pDest_pixelmap, int pX_offset, int pY_offset, int pFrame_rate) {
     tU16 claimed_speed;
     tU16 magic_number;
     tPath_name the_path;
@@ -1370,9 +1370,9 @@ void DoMini(tFlic_descriptor* pFlic_info, tU32 chunk_length) {
 void DrawTranslations(tFlic_descriptor* pFlic_info, int pLast_frame) {
     tTranslation_record* trans;
     int i;
-    int x;
+    int x = 0;
     int width;
-    int right_edge;
+    int right_edge = 0;
 
     for (i = 0, trans = gTranslations; i < gTranslation_count; i++, trans++) {
         if (trans->flic_index == pFlic_info->the_index) {
@@ -1537,7 +1537,7 @@ int PlayFlic(int pIndex, tU32 pSize, tS8* pData_ptr, br_pixelmap* pDest_pixelmap
 
     finished_playing = 0;
     the_flic.data_start = NULL;
-    if (StartFlic(gMain_flic_list[pIndex].file_name, pIndex, &the_flic, pSize, pData_ptr, pDest_pixelmap, pX_offset, pY_offset, pFrame_rate)) {
+    if (StartFlic(gMain_flic_list[pIndex].file_name, pIndex, &the_flic, pSize, (tU8*)pData_ptr, pDest_pixelmap, pX_offset, pY_offset, pFrame_rate)) {
         LOG_WARN("startflic returned error");
         return -1;
     }
@@ -1909,7 +1909,7 @@ void AddToFlicQueue(int pIndex, int pX, int pY, int pMust_finish) {
         pIndex,
         new_flic,
         gMain_flic_list[pIndex].the_size,
-        gMain_flic_list[pIndex].data_ptr,
+        (tU8*)gMain_flic_list[pIndex].data_ptr,
         gBack_screen,
         pX >= 0 ? pX : gMain_flic_list[pIndex].x_offset,
         pY >= 0 ? pY : gMain_flic_list[pIndex].y_offset,
@@ -2027,7 +2027,7 @@ void ChangePanelFlic(int pIndex, tU8* pData, tU32 pData_length) {
         pIndex,
         &gPanel_flic[pIndex],
         gPanel_flic_data_length[pIndex],
-        (tS8*)gPanel_flic_data[pIndex],
+        gPanel_flic_data[pIndex],
         gPanel_buffer[pIndex],
         0,
         0,

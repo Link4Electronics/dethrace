@@ -906,7 +906,7 @@ tS8* ConvertPixTo16BitStripMap(br_pixelmap* pBr_map) {
     tU8* current_strip_pointer;
     tU8* temp_strip_image;
     tU8* new_line;
-    tU8 byte;
+    tU8 byte = 0;
     tU16* palette_entry;
 
     palette_entry = PaletteOf16Bits(gRender_palette)->pixels;
@@ -993,7 +993,7 @@ tS8* ConvertPixToStripMap(br_pixelmap* pThe_br_map) {
     tU8* current_strip_pointer;
     tU8* temp_strip_image;
     tU8 new_line[800];
-    tU8 the_byte;
+    tU8 the_byte = 0;
 
     the_strip_image = BrMemAllocate(pThe_br_map->row_bytes * pThe_br_map->height, kMem_strip_image);
     current_strip_pointer = the_strip_image;
@@ -3558,7 +3558,7 @@ int GetCDPathFromPathsTxtFile(char* pPath_name) {
     tPath_name paths_txt;
 
     if (!got_it_already) {
-        sprintf(paths_txt, "%s%s%s", gApplication_path, gDir_separator, "PATHS.TXT");
+        snprintf(paths_txt, sizeof(paths_txt), "%s%s%s", gApplication_path, gDir_separator, "PATHS.TXT");
         paths_txt_fp = fopen(paths_txt, "rt");
         if (paths_txt_fp == NULL) {
             return 0;

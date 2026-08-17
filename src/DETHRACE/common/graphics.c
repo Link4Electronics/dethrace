@@ -369,7 +369,7 @@ int gColours[9];
 br_pixelmap* gFlic_palette;
 
 // GLOBAL: CARM95 0x0054b330
-tDR_font gFonts[21];
+tDR_font gFonts[256];
 
 // GLOBAL: CARM95 0x00550094
 char* gCurrent_palette_pixels;
@@ -539,7 +539,7 @@ void DrawNumberAt(br_pixelmap* gImage, int pX, int pY, int pX_pitch, int pY_pitc
 void BuildColourTable(br_pixelmap* pPalette) {
     int i;
     int j;
-    int nearest_index;
+    int nearest_index = 0;
     int red;
     int green;
     int blue;
@@ -611,7 +611,7 @@ void Copy8BitStripImageTo16Bit(br_pixelmap* pDest, br_int_16 pDest_x, br_int_16 
     int old_x_byte;
     int x_byte;
     int off_the_left;
-    int destn_width;
+    int destn_width = 0;
     int chunk_length;
     char* destn_ptr;
     char* destn_ptr2;
@@ -1760,7 +1760,7 @@ void RenderShadows(br_actor* pWorld, tTrack_spec* pTrack_spec, br_actor* pCamera
     int car_count;
     tCar_spec* the_car;
     br_vector3 camera_to_car;
-    br_scalar distance_factor;
+    br_scalar distance_factor = 0;
 
     if (gShadow_level != eShadow_none) {
         for (cat = eVehicle_self; cat <= (gShadow_level == eShadow_everyone ? 4 : gShadow_level == eShadow_us_and_opponents ? 3 : 0); ++cat) {
@@ -3247,7 +3247,7 @@ void DisposeFont(int pFont_ID) {
 void InitDRFonts(void) {
     int i;
 
-    for (i = 0; i < 21; i++) {
+    for (i = 0; i < 256; i++) {
         gFonts[i].images = NULL;
         gFonts[i].file_read_once = 0;
     }

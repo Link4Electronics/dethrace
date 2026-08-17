@@ -645,6 +645,8 @@ tMM_result DoMainMenu(tU32 pTime_out, int pSave_allowed, int pContinue_allowed) 
     case eMM_recover:
         SetRecovery();
         break;
+    default:
+        break;
     }
     return the_result;
 }
@@ -680,6 +682,8 @@ void DoMainMenuScreen(tU32 pTime_out, int pSave_allowed, int pContinue_allowed) 
         if (gGame_to_load < 0) {
             gProgram_state.prog_status = eProg_game_starting;
         }
+        break;
+    default:
         break;
     }
     UnlockBunchOfFlics(0);

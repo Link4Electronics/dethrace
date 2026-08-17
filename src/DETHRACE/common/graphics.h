@@ -70,7 +70,7 @@ extern br_pixelmap* gRender_palette;
 extern float gCamera_to_horiz_angle;
 extern int gColours[9];
 extern br_pixelmap* gFlic_palette;
-extern tDR_font gFonts[21];
+extern tDR_font gFonts[256];
 extern char* gCurrent_palette_pixels;
 extern int gWidth;
 extern int gMap_render_height_i;

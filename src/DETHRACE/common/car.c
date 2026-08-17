@@ -762,8 +762,6 @@ void GetFacesInBox(tCollision_info* c) {
         }
     }
 
-condition_met:
-
     BrMatrix34Mul(&mat5, &mat4, &mat4);
     BrMatrix34Mul(&mat6, &mat5, &mat4);
     BrMatrix34LPInverse(&mat5, &mat6);
@@ -7024,7 +7022,7 @@ int DoCollide(tCollision_info* car1, tCollision_info* car2, br_vector3* r, br_ve
     br_vector3 torque2;
     br_scalar f[4];
     br_scalar d[4];
-    br_scalar ts;
+    br_scalar ts = 0;
     br_scalar tforce;
     int i;
     int j;

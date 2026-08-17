@@ -245,7 +245,7 @@ void NextPratcamChunk(void) {
                 gCurrent_pratcam_alternative = i;
                 gPrat_flic.data_start = NULL;
                 StartFlic(NULL, -1, &gPrat_flic, gPratcam_flics[current_alternative->ref].data_length,
-                    (tS8*)gPratcam_flics[current_alternative->ref].data, gPrat_buffer, 0, 0, 0);
+                    (tU8*)gPratcam_flics[current_alternative->ref].data, gPrat_buffer, 0, 0, 0);
                 if (current_alternative->sound_chance == 0) {
                     return;
                 }

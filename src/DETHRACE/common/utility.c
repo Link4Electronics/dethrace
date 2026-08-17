@@ -1852,7 +1852,7 @@ int AlreadyBlended(br_material* pMaterial) {
 // IDA: void __usercall BlendifyMaterialTablishly(br_material *pMaterial@<EAX>, int pPercent@<EDX>)
 // FUNCTION: CARM95 0x004c3f0d
 void BlendifyMaterialTablishly(br_material* pMaterial, int pPercent) {
-    char* s;
+    char* s = NULL;
 
     switch (pPercent) {
     case 25:

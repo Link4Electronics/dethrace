@@ -574,7 +574,7 @@ void NetPlayersChanged(int pNew_count, tNet_game_player_info* pNew_players) {
     int switched_res;
     int new_player;
     int player_still_there;
-    tPlayer_ID old_fox_it;
+    tPlayer_ID old_fox_it = -1;
 
     if (gCurrent_net_game->type == eNet_game_type_tag || gCurrent_net_game->type == eNet_game_type_foxy) {
 #ifdef DETHRACE_FIX_BUGS
@@ -882,7 +882,7 @@ int NetSendMessageToAllPlayers(tNet_game_details* pDetails, tNet_message* pMessa
 // FUNCTION: CARM95 0x00447adb
 tU32 NetGetContentsSize(tNet_message_type pType, tS32 pSize_decider) {
 
-    tU32 the_size;
+    tU32 the_size = 0;
 
     switch (pType) {
     case NETMSGID_SENDMEDETAILS:

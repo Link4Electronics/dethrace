@@ -1021,7 +1021,7 @@ void DetachPedActorFromCar(br_actor* pActor) {
 void MungePedestrianFrames(tPedestrian_data* pPedestrian) {
     tPedestrian_sequence* the_sequence;
     float f_the_time;
-    float frame_period;
+    float frame_period = 0.f;
     int frame_offset;
     int number_of_frames;
     int new_frame;

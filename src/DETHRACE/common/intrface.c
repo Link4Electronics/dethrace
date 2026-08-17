@@ -177,7 +177,7 @@ int DoInterfaceScreen(tInterface_spec* pSpec, int pOptions, int pCurrent_choice)
     tProg_status entry_status; //
     int x_coord;               //
     int y_coord;               //
-    int mouse_in_somewhere;
+    int mouse_in_somewhere = 0;
     int i; //
     int key2;
     int mouse_was_started;
@@ -191,7 +191,7 @@ int DoInterfaceScreen(tInterface_spec* pSpec, int pOptions, int pCurrent_choice)
     int the_max;
     int mouse_down;     //
     int new_mouse_down; //
-    int last_mouse_down;
+    int last_mouse_down = 0;
     int defeat_mode_change; //
     int selection_changed;  //
     char the_str[256];
@@ -200,7 +200,7 @@ int DoInterfaceScreen(tInterface_spec* pSpec, int pOptions, int pCurrent_choice)
     tU32 last_right_press;
     tU32 last_up_press;
     tU32 last_down_press;
-    br_pixelmap** copy_areas;        //
+    br_pixelmap** copy_areas = NULL;        //
     br_pixelmap* old_current_splash; //
     void* pixels_copy;
     void* palette_copy;

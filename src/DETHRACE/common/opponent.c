@@ -3880,8 +3880,8 @@ int ConsistencyCheck(void) {
     tS16 section_no_index1;
     int found_how_many;
     int failed;
-    tU8* nodes_referenced_by_sections_array;
-    tU8* sections_referenced_by_nodes_array;
+    tU8* nodes_referenced_by_sections_array = NULL;
+    tU8* sections_referenced_by_nodes_array = NULL;
 
     failed = 0;
     if (gProgram_state.AI_vehicles.number_of_path_nodes != 0) {
@@ -4040,19 +4040,19 @@ void ShowOppoPaths(void) {
 // FUNCTION: CARM95 0x0040e9d4
 void WriteOutOppoPaths(void) {
     char the_path[256];
-    char str[13];
+    char str[20];
     FILE* f;
     int i;
 
     if (!gMade_path_filename) {
         for (i = 0; 1; i++) {
 #ifdef DETHRACE_FIX_BUGS
-            sprintf(str, "OPATH%03d.TXT", i);
+            snprintf(str, sizeof(str), "OPATH%03d.TXT", i);
             PathCat(the_path, gApplication_path, str);
             // OldDRfopen refuses to open unknown .TXT files
             f = fopen(the_path, "r");
 #else
-            sprintf(str, "OPATH%0.3d.TXT", i);
+            snprintf(str, sizeof(str), "OPATH%0.3d.TXT", i);
             PathCat(the_path, gApplication_path, str);
             f = DRfopen(the_path, "r+");
 #endif

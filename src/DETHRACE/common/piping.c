@@ -759,7 +759,7 @@ void AddDamageToPipingSession(int pCar_ID, tS8* pDifferences) {
 // IDA: void __usercall AddSpecialToPipingSession(tSpecial_type pType@<EAX>)
 // FUNCTION: CARM95 0x00429003
 void AddSpecialToPipingSession(tSpecial_type pType) {
-    tPipe_special_data data;
+    tPipe_special_data data = {0};
 
     AddDataToSession(pType, &data, sizeof(tPipe_special_data));
 }
@@ -2106,7 +2106,7 @@ void UndoSkidAdjustment(tPipe_chunk** pChunk, tPipe_chunk* pPrev_chunk) {
 // FUNCTION: CARM95 0x0042b0a6
 int UndoPipedSession(tU8** pPtr) {
     tPipe_chunk* chunk_ptr;
-    tPipe_chunk* prev_chunk;
+    tPipe_chunk* prev_chunk = NULL;
     tU8* temp_ptr;
     tU8* pushed_end_of_session;
     int i;

@@ -446,7 +446,7 @@ void DrawPowerups(tU32 pTime) {
     int y;
     int timer;
     tPowerup* the_powerup;
-    char s[8];
+    char s[12];
     tHeadup_icon* the_icon;
     br_pixelmap* fizzle_pix;
 
@@ -491,7 +491,7 @@ void DrawPowerups(tU32 pTime) {
                     y + gCurrent_graf_data->power_up_icon_countdown_y_offset,
                     &gFonts[kFont_ORANGHED], s, gCurrent_graf_data->power_up_icon_countdown_x + 30);
             } else if (the_powerup->current_value > 0) {
-                sprintf(s, "%d", the_powerup->current_value);
+                snprintf(s, sizeof(s), "%d", the_powerup->current_value);
                 TransDRPixelmapText(gBack_screen,
                     gCurrent_graf_data->power_up_icon_countdown_x,
                     y + gCurrent_graf_data->power_up_icon_countdown_y_offset,
@@ -1157,7 +1157,7 @@ void DoBouncey(tPowerup* pPowerup, tU32 pPeriod) {
 // FUNCTION: CARM95 0x0042e986
 int HitMine(tPowerup* pPowerup, tCar_spec* pCar) {
     int i;
-    float fudge_multiplier;
+    float fudge_multiplier = 0.f;
 
     pCar->v.v[1] = FRandomBetween(pPowerup->float_params[0], pPowerup->float_params[1]) / pCar->M + pCar->v.v[1];
     pCar->omega.v[2] += FRandomPosNeg(pPowerup->float_params[2]) * TAU / pCar->M;

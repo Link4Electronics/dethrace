@@ -2909,7 +2909,7 @@ tSO_result NetSynchRaceStart2(tNet_synch_mode pMode) {
         COUNT_OF(flicker_on_c), flicker_on_c, flicker_off_c, push_c,
         COUNT_OF(mouse_areas_c), mouse_areas_c, 0, NULL
     };
-    int result;
+    int result = 0;
 
     if (pMode != eNet_synch_client) {
         if (gCurrent_net_game->status.stage == eNet_game_starting) {
