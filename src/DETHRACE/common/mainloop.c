@@ -655,6 +655,8 @@ tRace_result MainGameLoop(void) {
         gCamera_to_horiz_angle = FastScalarArcTan2(gCamera_to_world.m[2][1], gCamera_to_world.m[1][1]);
         if (gNo_view_distance) {
             ((br_camera*)gCamera->type_data)->yon_z = 100000.f;
+        } else {
+            ((br_camera*)gCamera->type_data)->yon_z = gYon_multiplier * gCamera_yon;
         }
         gYon_squared = ((br_camera*)gCamera->type_data)->yon_z * ((br_camera*)gCamera->type_data)->yon_z
             * gYon_multiplier
