@@ -441,7 +441,14 @@ void RenderTrack(br_actor* pWorld, tTrack_spec* pTrack_spec, br_actor* pCamera, 
         if (pRender_blends) {
             DrawColumns(1, pTrack_spec, min_x, max_x, min_z, max_z, pCamera_to_world);
         } else {
-            camera = (br_camera*)pCamera->type_data;
+            if (gNo_view_distance) {
+                min_x = 0;
+                max_x = pTrack_spec->ncolumns_x - 1;
+                min_z = 0;
+                max_z = pTrack_spec->ncolumns_z - 1;
+                DrawColumns(0, pTrack_spec, min_x, max_x, min_z, max_z, pCamera_to_world);
+            } else {
+                camera = (br_camera*)pCamera->type_data;
             XZToColumnXZ(&column_x, &column_z, pCamera_to_world->m[3][0], pCamera_to_world->m[3][2], pTrack_spec);
             min_x = column_x;
             max_x = column_x;
@@ -518,6 +525,7 @@ void RenderTrack(br_actor* pWorld, tTrack_spec* pTrack_spec, br_actor* pCamera, 
                 max_z++;
             }
             DrawColumns(0, pTrack_spec, min_x, max_x, min_z, max_z, pCamera_to_world);
+            }
         }
     }
 }

@@ -28,6 +28,7 @@
 #include "pratcam.h"
 #include "replay.h"
 #include "s3/s3.h"
+#include "world.h"
 #include "skidmark.h"
 #include "sound.h"
 #include "spark.h"
@@ -652,6 +653,9 @@ tRace_result MainGameLoop(void) {
         BrActorToActorMatrix34(&gCamera_to_world, gCamera, gUniverse_actor);
         BrActorToActorMatrix34(&gRearview_camera_to_world, gRearview_camera, gUniverse_actor);
         gCamera_to_horiz_angle = FastScalarArcTan2(gCamera_to_world.m[2][1], gCamera_to_world.m[1][1]);
+        if (gNo_view_distance) {
+            ((br_camera*)gCamera->type_data)->yon_z = 100000.f;
+        }
         gYon_squared = ((br_camera*)gCamera->type_data)->yon_z * ((br_camera*)gCamera->type_data)->yon_z
             * gYon_multiplier
             * gYon_multiplier;

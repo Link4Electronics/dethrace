@@ -35,6 +35,7 @@ extern br_actor* gDelete_list[500];
 extern br_actor* gLight_array[50];
 extern br_model* gAdditional_models[1000];
 extern br_scalar gSight_distance_squared;
+extern int gNo_view_distance;
 extern br_actor* gSpec_vol_actors[100];
 extern tPath_name gAdditional_actor_path;
 extern tPath_name gAdditional_model_path;

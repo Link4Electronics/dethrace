@@ -732,7 +732,7 @@ void KillPedestrian(tPedestrian_data* pPedestrian) {
             gProgram_state.peds_killed++;
         }
         pPedestrian->hit_points = -100;
-        if (IsActionReplayAvailable()) {
+        if (IsActionReplayAvailable() && !gNo_view_distance) {
             AddPedestrianToPipingSession(
                 GET_PEDESTRIAN_INDEX(pPedestrian),
                 &pPedestrian->actor->t.t.mat,
@@ -2274,18 +2274,18 @@ void DoPedestrian(tPedestrian_data* pPedestrian, int pIndex) {
             CheckPedestrianDeathScenario(pPedestrian);
         }
         SetPedPos(pPedestrian);
-        if (IsActionReplayAvailable()) {
-            AddPedestrianToPipingSession(pIndex,
-                &pPedestrian->actor->t.t.mat,
-                pPedestrian->current_action,
-                pPedestrian->current_frame,
-                pPedestrian->hit_points,
-                pPedestrian->done_initial,
-                pPedestrian->actor->parent == gDont_render_actor ? (tU16)-1 : pPedestrian->killers_ID,
-                pPedestrian->spin_period,
-                pPedestrian->jump_magnitude,
-                &pPedestrian->offset);
-        }
+    if (IsActionReplayAvailable() && !gNo_view_distance) {
+        AddPedestrianToPipingSession(pIndex,
+            &pPedestrian->actor->t.t.mat,
+            pPedestrian->current_action,
+            pPedestrian->current_frame,
+            pPedestrian->hit_points,
+            pPedestrian->done_initial,
+            pPedestrian->actor->parent == gDont_render_actor ? (tU16)-1 : pPedestrian->killers_ID,
+            pPedestrian->spin_period,
+            pPedestrian->jump_magnitude,
+            &pPedestrian->offset);
+    }
         if (gNet_mode != eNet_mode_none && !pPedestrian->reverse_frames) {
             if (old_pos.v[X] != pPedestrian->pos.v[X]
                 || old_pos.v[Y] != pPedestrian->pos.v[Y]
@@ -2410,7 +2410,7 @@ void GroundPedestrian(tPedestrian_data* pPedestrian) {
         pPedestrian->done_initial = 1;
     }
     BrVector3Set(&pPedestrian->offset, 0.f, 0.f, 0.f);
-    if (IsActionReplayAvailable()) {
+    if (IsActionReplayAvailable() && !gNo_view_distance) {
         AddPedestrianToPipingSession(GET_PEDESTRIAN_INDEX(pPedestrian),
             &pPedestrian->actor->t.t.mat,
             pPedestrian->current_action,
@@ -2492,8 +2492,8 @@ void MungePedestrians(tU32 pFrame_period) {
     gVesuvians_this_time = 0;
     gNumber_of_ped_gibs = 32;
     camera_ptr = gCamera->type_data;
-    max_distance = ACTIVE_PED_DXDZ;
-    gMax_distance_squared = 121.f;
+    max_distance = gNo_view_distance ? 1000.f : ACTIVE_PED_DXDZ;
+    gMax_distance_squared = gNo_view_distance ? 1000000.f : 121.f;
     if (!gAction_replay_mode) {
         MungePedGibs(pFrame_period);
     }

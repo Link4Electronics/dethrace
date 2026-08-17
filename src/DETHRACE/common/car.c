@@ -4535,7 +4535,7 @@ void MungeCarGraphics(tU32 pFrame_period) {
             } else {
                 the_car = GetCarSpec(cat, i);
             }
-            if (the_car->driver == eDriver_local_human || !PointOutOfSight(&the_car->pos, gYon_squared)) {
+            if (the_car->driver == eDriver_local_human || gNo_view_distance || !PointOutOfSight(&the_car->pos, gYon_squared)) {
                 the_car->car_master_actor->render_style = BR_RSTYLE_DEFAULT;
             } else {
                 the_car->car_master_actor->render_style = BR_RSTYLE_NONE;

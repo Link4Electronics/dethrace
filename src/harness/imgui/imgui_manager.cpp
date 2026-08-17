@@ -27,6 +27,7 @@ static void DrawMenuBar(void);
 extern int g_wireframe_mode;
 extern int gWidescreen_mode;
 extern int gDisable_lod;
+extern int gNo_view_distance;
 static ImGuiManager_Callbacks g_callbacks;
 
 static bool g_cheat_freeze_time = false;
@@ -162,6 +163,9 @@ static void DrawMenuBar(void)
             bool lod = gDisable_lod != 0;
             if (ImGui::MenuItem("Disable LOD", NULL, &lod))
                 gDisable_lod = lod ? 1 : 0;
+            bool nvd = gNo_view_distance != 0;
+            if (ImGui::MenuItem("No View Distance", NULL, &nvd))
+                gNo_view_distance = nvd ? 1 : 0;
             ImGui::EndMenu();
         }
 

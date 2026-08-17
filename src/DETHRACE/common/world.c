@@ -152,6 +152,9 @@ br_actor* gAdditional_actors;
 // GLOBAL: CARM95 0x00534abc
 br_scalar gSight_distance_squared;
 
+// GLOBAL:
+int gNo_view_distance = 0;
+
 // GLOBAL: CARM95 0x00534ac0
 br_actor* gSpec_vol_actors[100];
 
@@ -4276,7 +4279,7 @@ void GrooveThisDelic(tGroovidelic_spec* pGroove, tU32 pTime, int pInterrupt_it) 
     the_actor = pGroove->actor;
     pGroove->done_this_frame = 1;
     CalcActorGlobalPos(&actor_pos, the_actor);
-    if (PointOutOfSight(&actor_pos, pGroove->mode == eGroove_mode_distance ? gYon_squared : 36.f)) {
+    if (!gNo_view_distance && PointOutOfSight(&actor_pos, pGroove->mode == eGroove_mode_distance ? gYon_squared : 36.f)) {
         return;
     }
 
