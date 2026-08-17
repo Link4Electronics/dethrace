@@ -74,6 +74,8 @@ extern tHarness_platform gHarness_platform;
 
 extern int g_wireframe_mode;
 
+extern int gAnisotropy_level;
+
 extern int gHarness_sw_widescreen;
 extern int gHarness_gl_viewport_override;
 

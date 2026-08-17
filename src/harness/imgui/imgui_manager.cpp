@@ -28,6 +28,7 @@ extern int g_wireframe_mode;
 extern int gWidescreen_mode;
 extern int gDisable_lod;
 extern int gNo_view_distance;
+extern int gAnisotropy_level;
 static ImGuiManager_Callbacks g_callbacks;
 
 static bool g_cheat_freeze_time = false;
@@ -166,6 +167,28 @@ static void DrawMenuBar(void)
             bool nvd = gNo_view_distance != 0;
             if (ImGui::MenuItem("No View Distance", NULL, &nvd))
                 gNo_view_distance = nvd ? 1 : 0;
+            ImGui::Separator();
+            ImGui::Text("Anisotropic Filtering");
+            ImGui::SameLine();
+            {
+                const char* preview = "Off";
+                if (gAnisotropy_level == 2)  preview = "2x";
+                else if (gAnisotropy_level == 4)  preview = "4x";
+                else if (gAnisotropy_level == 8)  preview = "8x";
+                else if (gAnisotropy_level == 16) preview = "16x";
+                if (ImGui::BeginCombo("##Aniso", preview, ImGuiComboFlags_WidthFitPreview)) {
+                    struct { const char* label; int level; } levels[] = {
+                        {"Off", 0}, {"2x", 2}, {"4x", 4}, {"8x", 8}, {"16x", 16}
+                    };
+                    for (int i = 0; i < 5; i++) {
+                        bool selected = (gAnisotropy_level == levels[i].level);
+                        if (ImGui::Selectable(levels[i].label, selected))
+                            gAnisotropy_level = levels[i].level;
+                        if (selected) ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+            }
             ImGui::EndMenu();
         }
 
