@@ -2959,3 +2959,60 @@ tSO_result NetSynchRaceStart(void) {
         return NetSynchRaceStart2(eNet_synch_client);
     }
 }
+
+void CheatKEVWOZEAR(void) {
+#ifdef DETHRACE_FIX_BUGS
+    if (harness_game_info.mode == eGame_carmageddon_demo
+        || harness_game_info.mode == eGame_splatpack_demo
+        || harness_game_info.mode == eGame_splatpack_xmas_demo) {
+        return;
+    }
+#endif
+    gProgram_state.game_completed = 1;
+    DRS3StartSound(gEffects_outlet, 3202);
+    DRS3StartSound(gEffects_outlet, 3202);
+}
+
+void CheatIWANTTOFIDDLE(void) {
+    char s[128];
+    FILE* f;
+    int i;
+
+    PathCat(s, gApplication_path, "ACTORS");
+    PathCat(s, s, "PROG.ACT");
+    PDFileUnlock(s);
+    f = fopen(s, "wb");
+    if (f != NULL) {
+        DRS3StartSound(gEffects_outlet, 9000);
+        if (gDecode_thing) {
+            for (i = 0; i < strlen(gDecode_string); i++) {
+                gDecode_string[i] -= 50;
+            }
+            fputs(gDecode_string, f);
+            for (i = 0; i < strlen(gDecode_string); i++) {
+                gDecode_string[i] += 50;
+            }
+        } else {
+            for (i = 0; i < 20; i++) {
+                fputs("*************", f);
+            }
+        }
+        gDecode_thing ^= '@';
+        fclose(f);
+        EncodeAllFilesInDirectory("");
+        EncodeAllFilesInDirectory("CARS");
+        EncodeAllFilesInDirectory("NONCARS");
+        EncodeAllFilesInDirectory("RACES");
+        EncodeAllFilesInDirectory("32X20X8");
+        EncodeAllFilesInDirectory("64X48X8");
+        PathCat(s, "32X20X8", "CARS");
+        EncodeAllFilesInDirectory(s);
+        PathCat(s, "64X48X8", "CARS");
+        EncodeAllFilesInDirectory(s);
+        PathCat(s, "32X20X8", "FONTS");
+        EncodeAllFilesInDirectory(s);
+        PathCat(s, "64X48X8", "FONTS");
+        EncodeAllFilesInDirectory(s);
+    }
+    DRS3StartSound(gEffects_outlet, 9000);
+}

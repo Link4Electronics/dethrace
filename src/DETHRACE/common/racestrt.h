@@ -217,4 +217,8 @@ tSO_result NetSynchRaceStart2(tNet_synch_mode pMode);
 
 tSO_result NetSynchRaceStart(void);
 
+void CheatKEVWOZEAR(void);
+
+void CheatIWANTTOFIDDLE(void);
+
 #endif

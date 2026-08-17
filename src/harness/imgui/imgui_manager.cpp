@@ -163,6 +163,16 @@ static void DrawMenuBar(void)
 
         if (ImGui::BeginMenu("Cheats"))
         {
+            if (ImGui::MenuItem("Unlock everything (KEVWOZEAR)"))
+            {
+                if (g_callbacks.cheat_kevwozear)
+                    g_callbacks.cheat_kevwozear();
+            }
+            if (ImGui::MenuItem("Toggle File Encoding (IWANTTOFIDDLE)"))
+            {
+                if (g_callbacks.cheat_iwanttofiddle)
+                    g_callbacks.cheat_iwanttofiddle();
+            }
             if (ImGui::MenuItem("Freeze Timer"))
             {
                 g_cheat_freeze_time = !g_cheat_freeze_time;

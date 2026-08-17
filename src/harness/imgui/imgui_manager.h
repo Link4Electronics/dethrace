@@ -27,6 +27,8 @@ typedef struct {
     void (*lose_dosh)(void);
     void (*give_powerup)(int n);
     int (*get_game_type)(void);
+    void (*cheat_kevwozear)(void);
+    void (*cheat_iwanttofiddle)(void);
 } ImGuiManager_Callbacks;
 
 void ImGuiManager_Init(void* window, void* renderer, int is_opengl, int is_sdl3gpu, ImGuiManager_Callbacks* callbacks);

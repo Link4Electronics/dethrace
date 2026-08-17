@@ -48,6 +48,8 @@ extern void MoreTime(void);
 extern void EarnDosh(void);
 extern void LoseDosh(void);
 extern void GetPowerup(int pNum);
+extern void CheatKEVWOZEAR(void);
+extern void CheatIWANTTOFIDDLE(void);
 
 #ifdef DETHRACE_SDL_DYNAMIC
 #ifdef _WIN32
@@ -301,6 +303,8 @@ static void earn_dosh_sdl2(void) { EarnDosh(); }
 static void lose_dosh_sdl2(void) { LoseDosh(); }
 static void give_powerup_sdl2(int n) { GetPowerup(n); }
 static int get_game_type_sdl2(void) { return harness_game_info.mode; }
+static void cheat_kevwozear_sdl2(void) { CheatKEVWOZEAR(); }
+static void cheat_iwanttofiddle_sdl2(void) { CheatIWANTTOFIDDLE(); }
 static ImGuiManager_Callbacks imgui_callbacks = {
     .toggle_fullscreen = toggle_fullscreen_sdl2,
     .quit_game = QuitGame,
@@ -321,6 +325,8 @@ static ImGuiManager_Callbacks imgui_callbacks = {
     .lose_dosh = lose_dosh_sdl2,
     .give_powerup = give_powerup_sdl2,
     .get_game_type = get_game_type_sdl2,
+    .cheat_kevwozear = cheat_kevwozear_sdl2,
+    .cheat_iwanttofiddle = cheat_iwanttofiddle_sdl2,
 };
 
 static void SDL2_Harness_CreateWindow(const char* title, int width, int height, tHarness_window_type window_type) {
