@@ -26,6 +26,7 @@ static int g_renderer_initialized = 0;
 static void DrawMenuBar(void);
 extern int g_wireframe_mode;
 extern int gWidescreen_mode;
+extern int gDisable_lod;
 static ImGuiManager_Callbacks g_callbacks;
 
 static bool g_cheat_freeze_time = false;
@@ -158,6 +159,9 @@ static void DrawMenuBar(void)
             bool ws = gWidescreen_mode != 0;
             if (ImGui::MenuItem("Widescreen (in-race only)", NULL, &ws))
                 gWidescreen_mode = ws ? 1 : 0;
+            bool lod = gDisable_lod != 0;
+            if (ImGui::MenuItem("Disable LOD", NULL, &lod))
+                gDisable_lod = lod ? 1 : 0;
             ImGui::EndMenu();
         }
 

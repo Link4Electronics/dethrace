@@ -46,6 +46,7 @@ extern br_scalar gPanning_camera_height;
 extern int gFace_count;
 extern float gCar_simplification_factor[2][5];
 extern int gCar_simplification_level;
+extern int gDisable_lod;
 extern int gNum_active_non_cars;
 extern int gCamera_has_collided;
 extern tFace_ref gFace_list__car[150]; // suffix added to avoid duplicate symbol

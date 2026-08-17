@@ -179,6 +179,9 @@ float gCar_simplification_factor[2][5] = {
 int gCar_simplification_level = 0;
 
 // GLOBAL: CARM95 0x00514e2c
+int gDisable_lod = 0;
+
+// GLOBAL: CARM95 0x00514e2c
 int gNum_active_non_cars = 0;
 
 // GLOBAL: CARM95 0x00514e30
@@ -4691,7 +4694,7 @@ void MungeCarGraphics(tU32 pFrame_period) {
             MungeSpecialVolume((tCollision_info*)the_car);
         }
 
-        if (the_car->driver != eDriver_local_human && the_car->car_model_variable) {
+        if (the_car->driver != eDriver_local_human && the_car->car_model_variable && !gDisable_lod) {
             distance_from_camera = Vector3DistanceSquared(&the_car->car_master_actor->t.t.translate.t, (br_vector3*)gCamera_to_world.m[3]);
             distance_from_camera /= gCar_simplification_factor[gGraf_spec_index][gCar_simplification_level * 1];
 #ifdef DETHRACE_FIX_BUGS
@@ -4712,6 +4715,8 @@ void MungeCarGraphics(tU32 pFrame_period) {
                     break;
                 }
             }
+        } else if (the_car->driver != eDriver_local_human && gDisable_lod) {
+            SwitchCarActor(the_car, the_car->principal_car_actor);
         }
         if (the_car->screen_material != NULL) {
             car_x = the_car->car_master_actor->t.t.translate.t.v[0];
