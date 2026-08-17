@@ -153,53 +153,19 @@ static void DrawMenuBar(void)
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Settings"))
-        {
-            if (ImGui::BeginMenu("Audio"))
-            {
-                ImGui::Text("Audio API (Needs reload)");
-                if (ImGui::BeginCombo("##AApi", "SDL Audio", 0))
-                {
-                    ImGui::EndCombo();
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Controller"))
-            {
-                if (ImGui::Button("Controller Mapping")) { }
-                if (ImGui::Button("Input Viewer")) { }
-                if (ImGui::Button("Input Viewer Settings")) { }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Graphics"))
-            {
-                if (ImGui::Button("Advanced Resolution")) { }
-                ImGui::BeginGroup();
-                ImGui::Text("Internal Resolution: 100%%");
-                ImGui::EndGroup();
-                ImGui::Text("FPS: Original (20)");
-                if (ImGui::Button(" - ##WiiUFPS")) { }
-                ImGui::SameLine();
-                if (ImGui::Button(" + ##WiiUFPS")) { }
-                {
-                    bool ws = gWidescreen_mode != 0;
-                    if (ImGui::MenuItem("Widescreen (in-race only)", NULL, &ws))
-                        gWidescreen_mode = ws ? 1 : 0;
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenu();
-        }
-
         if (ImGui::BeginMenu("Enhancements"))
         {
+            bool ws = gWidescreen_mode != 0;
+            if (ImGui::MenuItem("Widescreen (in-race only)", NULL, &ws))
+                gWidescreen_mode = ws ? 1 : 0;
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Cheats"))
         {
-            if (ImGui::MenuItem("Freeze Timer", NULL, &g_cheat_freeze_time))
+            if (ImGui::MenuItem("Freeze Timer"))
             {
+                g_cheat_freeze_time = !g_cheat_freeze_time;
                 if (g_callbacks.toggle_timer_freeze)
                     g_callbacks.toggle_timer_freeze();
             }
