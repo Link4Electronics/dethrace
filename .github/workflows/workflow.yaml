@@ -8,9 +8,19 @@ on:
     tags:
       - "v*"
   pull_request:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: >-
+          Tag to attach the AppImage release to. Leave empty to create the
+          release against the current ref using a v<commit> tag.
+        required: false
+        default: ''
 
 jobs:
   ci:
+    # A manual dispatch is "build the AppImage now", not "run the whole CI".
+    if: github.event_name != 'workflow_dispatch'
     strategy:
       matrix:
         platform:
@@ -187,10 +197,60 @@ jobs:
           path: "build/dist/${{ steps.configure.outputs.filename }}"
           if-no-files-found: error
 
+  appimage:
+    name: "AppImage ${{ matrix.arch }}"
+    # Only build the AppImage on version tags and on manual dispatch, not on
+    # every commit push / PR.
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    needs: []
+    runs-on: "${{ matrix.runs-on }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runs-on: ubuntu-latest, arch: x86_64 }
+          - { runs-on: ubuntu-24.04-arm, arch: aarch64 }
+    container: ghcr.io/pkgforge-dev/archlinux:latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: sh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: pkgforge-dev/anylinux-setup-action@v2
+      # The script pulls from Arch mirrors and downloads appimagetool from a
+      # GitHub release; both have failed a leg outright when upstream returned
+      # 5xx. Retry the whole script rather than any one fetch: pacman and the
+      # CMake build are both incremental, so a second attempt costs seconds.
+      - name: Make AppImage
+        run: |
+          for attempt in 1 2 3; do
+            # Start each attempt from a clean AppDir: a run that died inside
+            # quick-sharun leaves a half-populated tree behind, and the next
+            # attempt would then fail on that rather than on the real cause.
+            rm -rf ./AppDir ./dist
+            if /bin/sh ./packaging/make-appimage.sh; then
+              exit 0
+            fi
+            echo "AppImage build attempt ${attempt} failed; retrying in 15s"
+            sleep 15
+          done
+          echo "AppImage build failed after 3 attempts" >&2
+          exit 1
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "AppImage-${{ matrix.arch }}"
+          path: dist
+
   create-release:
     name: Create Release
-    needs: [ci]
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: [ci, appimage]
+    # AppImage artifacts are only produced on version tags and manual
+    # dispatches, so a release (and its tag) only ever forms there.
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Build Artifacts
@@ -200,20 +260,36 @@ jobs:
       - name: Calculate Variables
         id: vars
         run: |
-          echo "ref_name_without_v=$(echo ${GITHUB_REF_NAME} | cut -c2-)" >>$GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+              VERSION="${{ github.event.inputs.tag_name }}"
+            else
+              # VERSION.txt was written into each AppImage-* artifact by
+              # make-appimage.sh; both copies are identical.
+              VERSION="$(cat artifacts/AppImage-*/VERSION.txt | head -1)"
+            fi
+            echo "release_tag=${VERSION}" >>$GITHUB_OUTPUT
+            echo "release_name=Dethrace ${VERSION#v}" >>$GITHUB_OUTPUT
+          else
+            echo "release_tag=${GITHUB_REF_NAME}" >>$GITHUB_OUTPUT
+            echo "release_name=Dethrace ${GITHUB_REF_NAME#v}" >>$GITHUB_OUTPUT
+          fi
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
           draft: false
           prerelease: false
-          name: Dethrace ${{ steps.vars.outputs.ref_name_without_v }}
+          name: ${{ steps.vars.outputs.release_name }}
           generate_release_notes: true
+          tag_name: ${{ steps.vars.outputs.release_tag }}
           files: |
             artifacts/**
 
   reccmp:
     name: Verify decomp
+    # Skip on manual dispatch: only the AppImage build runs there.
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       actions: read
