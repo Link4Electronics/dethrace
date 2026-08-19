@@ -24,6 +24,9 @@ static int g_initialized = 0;
 static int g_renderer_initialized = 0;
 
 static void DrawMenuBar(void);
+// These are defined in C translation units; give them C linkage so MSVC does
+// not mangle the references (GCC/Clang leave plain variable names unmangled).
+extern "C" {
 extern int g_wireframe_mode;
 extern int gWidescreen_mode;
 extern int gDisable_lod;
@@ -31,6 +34,7 @@ extern int gNo_view_distance;
 extern int gAnisotropy_level;
 extern int g3window_cockpit;
 extern int gMap_screen_detach;
+}
 static ImGuiManager_Callbacks g_callbacks;
 
 static bool g_cheat_freeze_time = false;

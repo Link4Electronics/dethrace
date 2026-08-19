@@ -128,7 +128,12 @@ endif()
 if(DETHRACE_PLATFORM_SDL_DYNAMIC)
     target_compile_definitions(harness PRIVATE DETHRACE_SDL_DYNAMIC)
     target_link_libraries(harness PRIVATE ${CMAKE_DL_LIBS})
-elseif(DETHRACE_PLATFORM_SDL2 OR DETHRACE_PLATFORM_SDL3)
+endif()
+
+# ImGui needs a direct SDL link, so it is available whenever an SDL2/SDL3
+# platform is enabled, dynamic loading or not. On Windows this puts SDL3.dll
+# in the executable's import table, which is fine since the packages bundle it.
+if(DETHRACE_PLATFORM_SDL2 OR DETHRACE_PLATFORM_SDL3)
     add_subdirectory(imgui)
     target_compile_definitions(harness PUBLIC DETHRACE_IMGUI)
     target_link_libraries(harness PUBLIC imgui_manager)

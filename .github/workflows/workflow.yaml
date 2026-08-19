@@ -286,8 +286,16 @@ jobs:
           name: ${{ steps.vars.outputs.release_name }}
           generate_release_notes: true
           tag_name: ${{ steps.vars.outputs.release_tag }}
+          # Only attach the actual packages. The AppImage artifacts also carry
+          # a per-artifact appinfo + VERSION.txt; uploading those (twice, once
+          # per arch) makes softprops try to update the same-named assets and
+          # fail with "Not Found" on re-runs against an existing release.
           files: |
-            artifacts/**
+            artifacts/**/*.zip
+            artifacts/**/*.dmg
+            artifacts/**/*.tar.gz
+            artifacts/**/*.AppImage
+            artifacts/**/*.zsync
 
   reccmp:
     name: Verify decomp
