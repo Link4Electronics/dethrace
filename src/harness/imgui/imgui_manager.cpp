@@ -166,7 +166,7 @@ static void DrawMenuBar(void)
             if (ImGui::MenuItem("Disable LOD", NULL, &lod))
                 gDisable_lod = lod ? 1 : 0;
             bool nvd = gNo_view_distance != 0;
-            if (ImGui::MenuItem("No View Distance", NULL, &nvd))
+            if (ImGui::MenuItem("No View Distance (WIP: z-fighting sky)", NULL, &nvd))
                 gNo_view_distance = nvd ? 1 : 0;
             ImGui::Separator();
             ImGui::Text("Anisotropic Filtering");
@@ -192,7 +192,7 @@ static void DrawMenuBar(void)
             }
             ImGui::Separator();
             bool wc = g3window_cockpit != 0;
-            if (ImGui::MenuItem("3-Window Cockpit View (SDL3GPU)", NULL, &wc))
+            if (ImGui::MenuItem("WIP 3-Window Cockpit View (SDL3GPU)", NULL, &wc))
                 g3window_cockpit = wc ? 1 : 0;
             ImGui::EndMenu();
         }
@@ -344,11 +344,25 @@ static void DrawMenuBar(void)
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Multiplayer (not impl yet)"))
+        {
+            ImGui::MenuItem("Browse Public Game Lobby", NULL, nullptr, false);
+            ImGui::MenuItem("Create Room", NULL, nullptr, false);
+            ImGui::MenuItem("Direct Connect to Room", NULL, nullptr, false);
+            ImGui::EndMenu();
+        }
+
         if (ImGui::BeginMenu("Developer Tools"))
         {
             bool wf = g_wireframe_mode != 0;
             if (ImGui::MenuItem("Wireframe", NULL, &wf))
                 g_wireframe_mode = wf ? 1 : 0;
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Mod manager (not impl yet)"))
+        {
+            ImGui::TextDisabled("Not implemented yet");
             ImGui::EndMenu();
         }
 
