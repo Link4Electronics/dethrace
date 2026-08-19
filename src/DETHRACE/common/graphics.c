@@ -3654,6 +3654,7 @@ void DRPixelmapDoubledCopy(br_pixelmap* pDestn, br_pixelmap* pSource, int pSourc
     }
 }
 
+#ifdef DETHRACE_SDL3GPU
 static void AuxCockpitRender_cb(int viewIndex, void* ud) {
     br_matrix34 saved_cam_mat;
     br_matrix34 saved_cam_to_world;
@@ -3754,9 +3755,22 @@ static br_uint_16 mapScratch565[640 * 480];
 static br_uint_32 mapScratchBGRA[640 * 480];
 
 static void MapScreenRender_cb(void* ud) {
-    (void)ud;
+    int y;
+    int x;
+    br_uint_16 p;
+    int r5;
+    int g;
+    int b5;
+    void* real_pixels;
+    br_int_16 real_row_bytes;
+    int real_origin_x;
+    int real_origin_y;
+    int real_base_x;
+    int real_base_y;
     extern int SDL3GPUREND_MapScreenUpload(struct _VIDEO* hVideo, const void* bgra,
         int width, int height);
+
+    (void)ud;
 
     if (!gBack_screen || gCurrent_race.map_image == NULL) {
         /* No race map up: show an empty map window. */
@@ -3768,12 +3782,12 @@ static void MapScreenRender_cb(void* ud) {
     /* Point the back buffer's pixels at the scratch buffer for the duration of
      * the draw. The scratch is always resident, so the pixel writes are safe
      * even though the real back buffer is unlocked during Present. */
-    void* real_pixels = gBack_screen->pixels;
-    br_int_16 real_row_bytes = gBack_screen->row_bytes;
-    int real_origin_x = gBack_screen->origin_x;
-    int real_origin_y = gBack_screen->origin_y;
-    int real_base_x = gBack_screen->base_x;
-    int real_base_y = gBack_screen->base_y;
+    real_pixels = gBack_screen->pixels;
+    real_row_bytes = gBack_screen->row_bytes;
+    real_origin_x = gBack_screen->origin_x;
+    real_origin_y = gBack_screen->origin_y;
+    real_base_x = gBack_screen->base_x;
+    real_base_y = gBack_screen->base_y;
 
     gBack_screen->pixels = mapScratch565;
     gBack_screen->row_bytes = 640 * 2;
@@ -3792,15 +3806,15 @@ static void MapScreenRender_cb(void* ud) {
     /* 565 -> BGRA8888, matching the flush conversion: magenta becomes fully
      * transparent so the blended composite (and the overlay.frag discard)
      * hides it. */
-    for (int y = 0; y < 480; y++) {
-        for (int x = 0; x < 640; x++) {
-            br_uint_16 p = mapScratch565[y * 640 + x];
+    for (y = 0; y < 480; y++) {
+        for (x = 0; x < 640; x++) {
+            p = mapScratch565[y * 640 + x];
             if (p == BR_COLOUR_565(31, 0, 31)) {
                 mapScratchBGRA[y * 640 + x] = 0;
             } else {
-                int r5 = (p >> 11) & 0x1F;
-                int g = (p >> 5) & 0x3F;
-                int b5 = p & 0x1F;
+                r5 = (p >> 11) & 0x1F;
+                g = (p >> 5) & 0x3F;
+                b5 = p & 0x1F;
                 mapScratchBGRA[y * 640 + x] = (br_uint_32)((b5 * 255) / 31)
                     | ((br_uint_32)((g * 255) / 63) << 8)
                     | ((br_uint_32)((r5 * 255) / 31) << 16)
@@ -3824,3 +3838,4 @@ void MapScreenRender_Register(void) {
         void (*cb)(void* ud), void* ud);
     SDL3GPUREND_SetMapRenderCallback(NULL, MapScreenRender_cb, NULL);
 }
+#endif /* DETHRACE_SDL3GPU */

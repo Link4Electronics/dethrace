@@ -206,6 +206,10 @@ else()
     get_property(build_rpaths GLOBAL PROPERTY DETHRACE_BUILD_RPATHS)
     set_property(TARGET dethrace APPEND PROPERTY BUILD_RPATH "${build_rpaths}")
 
+    if(APPLE)
+        set_property(TARGET dethrace PROPERTY INSTALL_RPATH "@executable_path")
+    endif()
+
     if(MSVC)
         target_link_libraries(dethrace PRIVATE dbghelp)
         target_link_options(dethrace PRIVATE /subsystem:windows /ENTRY:mainCRTStartup)
@@ -256,57 +260,84 @@ if(DETHRACE_INSTALL)
     )
 
     if(APPLE)
-        if(DETHRACE_PLATFORM_SDL_DYNAMIC)
-            if(DETHRACE_PLATFORM_SDL2)
-                install(CODE "
-                    set(app_root \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
-                    set(app \"\${app_root}/Deth Race.app\")
-                    if(NOT EXISTS \"\${app}\")
-                        set(app \"\${app_root}/${CMAKE_INSTALL_BINDIR}/Deth Race.app\")
-                    endif()
-                    file(INSTALL
-                        DESTINATION \"\${app}/Contents/MacOS\"
-                        TYPE FILE
-                        FOLLOW_SYMLINK_CHAIN
-                        FILES \"$<TARGET_FILE:SDL2::SDL2>\"
-                    )
-                    "
-                    COMPONENT Runtime
+        if(DETHRACE_PLATFORM_SDL1 AND SDL_LIBRARY MATCHES "\\.dylib$")
+            get_filename_component(sdl1_library_name "${SDL_LIBRARY}" NAME)
+            install(CODE "
+                set(app_root \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+                set(app \"\${app_root}/Deth Race.app\")
+                if(NOT EXISTS \"\${app}\")
+                    set(app \"\${app_root}/${CMAKE_INSTALL_BINDIR}/Deth Race.app\")
+                endif()
+                file(INSTALL
+                    DESTINATION \"\${app}/Contents/MacOS\"
+                    TYPE FILE
+                    FOLLOW_SYMLINK_CHAIN
+                    FILES \"${SDL_LIBRARY}\"
                 )
-            endif()
+                file(CREATE_LINK
+                    \"${sdl1_library_name}\"
+                    \"\${app}/Contents/MacOS/libSDL.dylib\"
+                    SYMBOLIC
+                )
+                "
+                COMPONENT Runtime
+            )
+        endif()
 
-            if(DETHRACE_PLATFORM_SDL3)
-                install(CODE "
-                    set(app_root \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
-                    set(app \"\${app_root}/Deth Race.app\")
-                    if(NOT EXISTS \"\${app}\")
-                        set(app \"\${app_root}/${CMAKE_INSTALL_BINDIR}/Deth Race.app\")
-                    endif()
-                    file(INSTALL
-                        DESTINATION \"\${app}/Contents/MacOS\"
-                        TYPE FILE
-                        FOLLOW_SYMLINK_CHAIN
-                        FILES \"$<TARGET_FILE:SDL3::SDL3>\"
-                    )
-                    file(CREATE_LINK
-                        \"libSDL3.0.dylib\"
-                        \"\${app}/Contents/MacOS/libSDL3.dylib\"
-                        SYMBOLIC
-                    )
-                    "
-                    COMPONENT Runtime
+        if(DETHRACE_PLATFORM_SDL2)
+            install(CODE "
+                set(app_root \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+                set(app \"\${app_root}/Deth Race.app\")
+                if(NOT EXISTS \"\${app}\")
+                    set(app \"\${app_root}/${CMAKE_INSTALL_BINDIR}/Deth Race.app\")
+                endif()
+                file(INSTALL
+                    DESTINATION \"\${app}/Contents/MacOS\"
+                    TYPE FILE
+                    FOLLOW_SYMLINK_CHAIN
+                    FILES \"$<TARGET_FILE:SDL2::SDL2>\"
                 )
-            endif()
+                get_filename_component(_sdl2_name \"$<TARGET_FILE:SDL2::SDL2>\" NAME)
+                file(CREATE_LINK
+                    \"\${_sdl2_name}\"
+                    \"\${app}/Contents/MacOS/libSDL2.dylib\"
+                    SYMBOLIC
+                )
+                "
+                COMPONENT Runtime
+            )
+        endif()
+
+        if(DETHRACE_PLATFORM_SDL3)
+            install(CODE "
+                set(app_root \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+                set(app \"\${app_root}/Deth Race.app\")
+                if(NOT EXISTS \"\${app}\")
+                    set(app \"\${app_root}/${CMAKE_INSTALL_BINDIR}/Deth Race.app\")
+                endif()
+                file(INSTALL
+                    DESTINATION \"\${app}/Contents/MacOS\"
+                    TYPE FILE
+                    FOLLOW_SYMLINK_CHAIN
+                    FILES \"$<TARGET_FILE:SDL3::SDL3>\"
+                )
+                get_filename_component(_sdl3_name \"$<TARGET_FILE:SDL3::SDL3>\" NAME)
+                file(CREATE_LINK
+                    \"\${_sdl3_name}\"
+                    \"\${app}/Contents/MacOS/libSDL3.dylib\"
+                    SYMBOLIC
+                )
+                "
+                COMPONENT Runtime
+            )
         endif()
 
         install(CODE "
-            include(BundleUtilities)
             set(app_root \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
             set(app \"\${app_root}/Deth Race.app\")
             if(NOT EXISTS \"\${app}\")
                 set(app \"\${app_root}/${CMAKE_INSTALL_BINDIR}/Deth Race.app\")
             endif()
-            fixup_bundle(\"\${app}\" \"\" \"/Library/Frameworks\")
             execute_process(COMMAND
                 codesign -s - -f --deep \"\${app}\"
             )

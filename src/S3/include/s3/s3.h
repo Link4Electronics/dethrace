@@ -1,7 +1,11 @@
 #ifndef S3_SOUND_H
 #define S3_SOUND_H
 
+#if defined(_MSC_VER) && _MSC_VER < 1600
+typedef int int32_t;
+#else
 #include <stdint.h>
+#endif
 
 // External typedefs
 

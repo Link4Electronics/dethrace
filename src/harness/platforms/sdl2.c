@@ -6,7 +6,9 @@
 #include "harness/trace.h"
 #include "sdl2_scancode_map.h"
 #include "sdl2_syms.h"
+#ifdef DETHRACE_IMGUI
 #include "imgui/imgui_manager.h"
+#endif
 
 SDL_COMPILE_TIME_ASSERT(sdl2_platform_requires_SDL2, SDL_MAJOR_VERSION == 2);
 
@@ -129,7 +131,9 @@ static int SDL2_Harness_SetWindowPos(void* hWnd, int x, int y, int nWidth, int n
 
 static void SDL2_Harness_DestroyWindow(void) {
     // SDL2_GL_DeleteContext(context);
+#ifdef DETHRACE_IMGUI
     ImGuiManager_Shutdown();
+#endif
     if (window != NULL) {
         SDL2_DestroyWindow(window);
     }
@@ -156,6 +160,7 @@ static void SDL2_Harness_ProcessWindowMessages(void) {
     }
 
     while (SDL2_PollEvent(&event)) {
+#ifdef DETHRACE_IMGUI
         ImGuiManager_ProcessEvent(&event);
 
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_F1 && event.key.windowID == SDL2_GetWindowID(window)) {
@@ -168,6 +173,7 @@ static void SDL2_Harness_ProcessWindowMessages(void) {
                 continue;
             }
         }
+#endif
 
         switch (event.type) {
         case SDL_KEYDOWN:
@@ -282,6 +288,7 @@ static int SDL2_Harness_ShowErrorMessage(char* title, char* message) {
     return 0;
 }
 
+#ifdef DETHRACE_IMGUI
 static void toggle_fullscreen_sdl2(void) {
     SDL2_SetWindowFullscreen(window, (SDL2_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
@@ -328,6 +335,7 @@ static ImGuiManager_Callbacks imgui_callbacks = {
     .cheat_kevwozear = cheat_kevwozear_sdl2,
     .cheat_iwanttofiddle = cheat_iwanttofiddle_sdl2,
 };
+#endif
 
 static void SDL2_Harness_CreateWindow(const char* title, int width, int height, tHarness_window_type window_type) {
     int window_width, window_height;
@@ -413,9 +421,11 @@ static void SDL2_Harness_CreateWindow(const char* title, int width, int height, 
 
     SDL2_ShowCursor(SDL_DISABLE);
 
+#ifdef DETHRACE_IMGUI
     ImGuiManager_Init(window,
         renderer,
         window_type == eWindow_type_opengl, 0, &imgui_callbacks);
+#endif
 
     SDL2_GetWindowSize(window, &gHarness_window_width, &gHarness_window_height);
     viewport.x = 0;
@@ -433,7 +443,9 @@ static void SDL2_Harness_Swap(br_pixelmap* back_buffer) {
     SDL2_Harness_ProcessWindowMessages();
 
     if (gl_context != NULL) {
+#ifdef DETHRACE_IMGUI
         ImGuiManager_Render();
+#endif
         SDL2_GL_SwapWindow(window);
     } else {
         src_pixels = back_buffer->pixels;
@@ -455,14 +467,18 @@ static void SDL2_Harness_Swap(br_pixelmap* back_buffer) {
         } else {
             SDL2_RenderCopy(renderer, screen_texture, NULL, NULL);
         }
+#ifdef DETHRACE_IMGUI
         ImGuiManager_Render();
+#endif
         SDL2_RenderPresent(renderer);
         last_screen_src = back_buffer;
     }
 
+#ifdef DETHRACE_IMGUI
     if (!ImGuiManager_IsVisible()) {
         SDL2_ShowCursor(SDL_DISABLE);
     }
+#endif
 
     if (harness_game_config.fps != 0) {
         limit_fps();

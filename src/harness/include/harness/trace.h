@@ -3,6 +3,15 @@
 
 #include "brender.h"
 #include <stdlib.h>
+#include <stdio.h>
+
+#if defined(_MSC_VER) && _MSC_VER < 1400
+#define snprintf sprintf
+#define vsnprintf vsprintf
+#elif defined(_MSC_VER) && _MSC_VER < 1900
+#define snprintf _snprintf
+#define vsnprintf _vsnprintf
+#endif
 
 extern int harness_debug_level;
 

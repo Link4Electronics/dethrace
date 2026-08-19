@@ -13,7 +13,10 @@
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 
-#if _MSC_VER < 1900
+#if _MSC_VER < 1400
+#define snprintf sprintf
+#define vsnprintf vsprintf
+#elif _MSC_VER < 1900
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
 #endif

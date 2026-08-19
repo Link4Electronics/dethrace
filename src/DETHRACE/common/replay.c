@@ -27,6 +27,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(_MSC_VER) && _MSC_VER < 1600
+#define INT32_MAX 2147483647
+#endif
+
 // GLOBAL: CARM95 0x0050a1b0
 char* gReplay_pixie_names[10] = {
     "REPLAY.PIX",

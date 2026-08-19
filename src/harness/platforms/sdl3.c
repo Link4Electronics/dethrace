@@ -10,7 +10,9 @@
 #include "harness/trace.h"
 #include "sdl3_scancode_map.h"
 #include "sdl3_syms.h"
+#ifdef DETHRACE_IMGUI
 #include "imgui/imgui_manager.h"
+#endif
 
 SDL_COMPILE_TIME_ASSERT(sdl3_platform_requires_SDL3, SDL_MAJOR_VERSION == 3);
 
@@ -146,7 +148,9 @@ static int SDL3_Harness_SetWindowPos(void* hWnd, int x, int y, int nWidth, int n
 
 static void SDL3_Harness_DestroyWindow(void) {
     // SDL3_GL_DeleteContext(context);
+#ifdef DETHRACE_IMGUI
     ImGuiManager_Shutdown();
+#endif
     if (window != NULL) {
         SDL3_DestroyWindow(window);
     }
@@ -173,6 +177,7 @@ static void SDL3_Harness_ProcessWindowMessages(void) {
     }
 
     while (SDL3_PollEvent(&event)) {
+#ifdef DETHRACE_IMGUI
         ImGuiManager_ProcessEvent(&event);
 
         if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_F1 && event.key.windowID == SDL3_GetWindowID(window)) {
@@ -185,6 +190,7 @@ static void SDL3_Harness_ProcessWindowMessages(void) {
                 continue;
             }
         }
+#endif
 
         switch (event.type) {
         case SDL_EVENT_KEY_DOWN:
@@ -298,6 +304,7 @@ static int SDL3_Harness_ShowErrorMessage(char* text, char* caption) {
     return 0;
 }
 
+#ifdef DETHRACE_IMGUI
 static void toggle_fullscreen_sdl3(void) {
     SDL3_SetWindowFullscreen(window, (SDL3_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) ? 0 : SDL_WINDOW_FULLSCREEN);
 }
@@ -344,6 +351,7 @@ static ImGuiManager_Callbacks imgui_callbacks = {
     .cheat_kevwozear = cheat_kevwozear_sdl3,
     .cheat_iwanttofiddle = cheat_iwanttofiddle_sdl3,
 };
+#endif
 
 static void SDL3_Harness_CreateWindow(const char* title, int width, int height, tHarness_window_type window_type) {
     int window_width, window_height;
@@ -446,10 +454,12 @@ static void SDL3_Harness_CreateWindow(const char* title, int width, int height, 
 
     SDL3_HideCursor();
 
+#ifdef DETHRACE_IMGUI
     ImGuiManager_Init(window,
         window_type == eWindow_type_sdl3 ? NULL : renderer,
         window_type == eWindow_type_opengl,
         window_type == eWindow_type_sdl3, &imgui_callbacks);
+#endif
 
     SDL3_GetWindowSize(window, &gHarness_window_width, &gHarness_window_height);
     viewport.x = 0;
@@ -463,7 +473,9 @@ static void SDL3_Harness_Swap(br_pixelmap* back_buffer) {
     SDL3_Harness_ProcessWindowMessages();
 
     if (gl_context != NULL) {
+#ifdef DETHRACE_IMGUI
         ImGuiManager_Render();
+#endif
         SDL3_GL_SwapWindow(window);
     } else if (SDL3_GetWindowFlags(window) & SDL_WINDOW_VULKAN) {
         // VK handles its own presentation and ImGui via external callback
@@ -490,14 +502,18 @@ static void SDL3_Harness_Swap(br_pixelmap* back_buffer) {
         } else {
             SDL3_RenderTexture(renderer, screen_texture, NULL, NULL);
         }
+#ifdef DETHRACE_IMGUI
         ImGuiManager_Render();
+#endif
         SDL3_RenderPresent(renderer);
         last_screen_src = back_buffer;
     }
 
+#ifdef DETHRACE_IMGUI
     if (!ImGuiManager_IsVisible()) {
         SDL3_HideCursor();
     }
+#endif
 
     if (harness_game_config.fps != 0) {
         limit_fps();
