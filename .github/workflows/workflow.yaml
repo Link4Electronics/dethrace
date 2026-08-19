@@ -2,12 +2,8 @@ name: Workflow
 
 on:
   push:
-    branches:
-      - "main"
-      - "ci-*"
     tags:
       - "v*"
-  pull_request:
   workflow_dispatch:
     inputs:
       tag_name:
@@ -19,8 +15,6 @@ on:
 
 jobs:
   ci:
-    # A manual dispatch is "build the AppImage now", not "run the whole CI".
-    if: github.event_name != 'workflow_dispatch'
     strategy:
       matrix:
         platform:
@@ -216,10 +210,19 @@ jobs:
       run:
         shell: sh
     steps:
-      - uses: actions/checkout@v4
+      # anylinux-setup-action installs git (and the other packaging tools) into
+      # the container. It must run before checkout: actions/checkout needs git
+      # in PATH for submodule support, otherwise it falls back to the REST API
+      # download, which does not support `submodules`.
+      - uses: pkgforge-dev/anylinux-setup-action@v2
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
-      - uses: pkgforge-dev/anylinux-setup-action@v2
+      # The checkout was done by the host runner, so inside the container its
+      # files are owned by a different uid, which git reports as dubious
+      # ownership. make-appimage.sh runs `git rev-parse` for the version.
+      - name: Mark workspace as safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       # The script pulls from Arch mirrors and downloads appimagetool from a
       # GitHub release; both have failed a leg outright when upstream returned
       # 5xx. Retry the whole script rather than any one fetch: pacman and the
@@ -288,8 +291,6 @@ jobs:
 
   reccmp:
     name: Verify decomp
-    # Skip on manual dispatch: only the AppImage build runs there.
-    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -318,28 +319,3 @@ jobs:
           reccmp_output_filename: ${{ github.workspace}}/reccmp-output.txt
           status_png_icon_filename: ${{ github.workspace}}/reccmp/carma_32x32_4.png
           status_svg_filename: ${{ github.workspace}}/new-reccmp-progress.svg
-      - name: Upload reccmp output artifact
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
-        with:
-          name: reccmp-output-pr-${{ github.event.number }}
-          path: ${{ github.workspace }}/reccmp-output.txt
-          if-no-files-found: error
-          retention-days: 2
-      - name: Checkout reccmp-report repo
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !github.event.repository.fork
-        uses: actions/checkout@v4
-        with:
-          repository: dethrace-labs/reccmp-report
-          token: ${{ secrets.RECCMP_REPORT_TOKEN }}
-          path: reccmp-report
-      - name: Update report in reccmp-report repo
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !github.event.repository.fork
-        run: |
-          cp new-reccmp-report.json reccmp-report/report.json
-          cp new-reccmp-progress.svg reccmp-report/progress.svg
-          cd reccmp-report
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -am "Update report from ${GITHUB_SHA::7}" || echo "No changes to commit"
-          git push
