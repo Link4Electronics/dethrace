@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+      - "[0-9]*"
   workflow_dispatch:
     inputs:
       tag_name:
@@ -18,8 +19,7 @@ jobs:
     strategy:
       matrix:
         platform:
-          - { name: "Linux", arch: "x64", os: ubuntu-latest, werror: true }
-          - { name: "Linux", arch: "arm64", os: ubuntu-24.04-arm, werror: true }
+          # Linux is built and packaged as an AppImage by the appimage job.
           - {
               name: "MacOS",
               arch: "arm64-x64",
