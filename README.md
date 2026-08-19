@@ -1,8 +1,6 @@
 # Dethrace
 
 [![Workflow](https://github.com/dethrace-labs/dethrace/actions/workflows/workflow.yaml/badge.svg)](https://github.com/dethrace-labs/dethrace/actions/workflows/workflow.yml)
-[![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/dethrace_labs)
-[![Discord Carmageddon server](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/f5StsuP)
 
 Dethrace is an attempt to learn how the 1997 driving/mayhem game [Carmageddon](https://en.wikipedia.org/wiki/Carmageddon) works behind the scenes and rebuild it to run natively on modern systems.
 
@@ -47,26 +45,19 @@ MSYS2 and vcpkg do not ship `shadercross`; build it from [SDL_shadercross](https
 Dethrace uses [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules), so we must pull them after the inital clone:
 
 ```sh
-git clone https://github.com/dethrace-labs/dethrace
-cd dethrace
-git submodule update --init --recursive
+git clone --recursive https://github.com/Link4Electronics/dethrace
 ```
 
 ### Build
 
 Dethrace uses [cmake](https://cmake.org/)
 
-To generate the build files:
+To generate the build files and compbile:
 
 ```sh
 mkdir build
 cd build
 cmake ..
-```
-
-Once cmake has generated the build files for your platform, run the build. For example:
-
-```sh
 make
 ```
 
@@ -76,11 +67,10 @@ Dethrace does not ship with any content. You'll need access to the data from the
 
 `dethrace` also supports the various freeware demos:
 
-- [Original Carmageddon demo](https://rr2000.cwaboard.co.uk/R4/PC/carmdemo.zip)
-- [Splat Pack demo](https://rr2000.cwaboard.co.uk/R4/PC/splatdem.zip)
-- [Splat Pack Xmas demo](https://rr2000.cwaboard.co.uk/R4/PC/Splatpack_christmas_demo.zip)
+- [Original Carmageddon demo](https://archive.org/details/Carmageddon_1020)
+- [Splat Pack demo](https://archive.org/details/CARMASPL)
 
-Dethrace generally expects to be placed into the top level Carmageddon folder. You know you have the right folder when you see the original `CARMA.EXE` there. If you are on Windows, you must also place `SDL2.dll` in the same folder.
+Dethrace generally expects to be placed into the top level Carmageddon folder. You know you have the right folder when you see the original `CARMA.EXE` there. If you are on Windows, you must also place `SDL3.dll` in the same folder.
 
 ### Configuration INI file
 
@@ -89,8 +79,6 @@ Alternatively, you may configure a different Carmageddon directory and settings 
 ### CD audio
 
 Dethrace supports the GOG cd audio convention. If there is a `MUSIC` folder in the Carmageddon folder containing files `Track02.ogg`, `Track03.ogg` etc, then Dethrace will use those files in place of the original CD audio functions.
-
-<img width="571" alt="Screenshot 2024-09-30 at 8 31 59 AM" src="https://github.com/user-attachments/assets/cec72203-9156-4c2a-a15a-328609e65c68">
 
 ## Background
 
