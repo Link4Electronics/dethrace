@@ -78,6 +78,8 @@ extern int gAnisotropy_level;
 
 extern int g3window_cockpit;
 
+extern int gMap_screen_detach;
+
 extern int gHarness_sw_widescreen;
 extern int gHarness_gl_viewport_override;
 

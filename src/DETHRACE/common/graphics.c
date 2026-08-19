@@ -1865,13 +1865,139 @@ int ConditionallyFillWithSky(br_pixelmap* pPixelmap) {
     return 1;
 }
 
+/* Copies the race map image into the (origin-0) back buffer, doubling it on
+ * hires graphics. Shared by the in-race map render and the detached map
+ * screen window. */
+static void CopyMapImage(void) {
+    if (gCurrent_race.map_image == NULL) {
+        return;
+    }
+    if (gReal_graf_data_index) {
+        BrPixelmapRectangleFill(gBack_screen, 0, 0, 640, 40, 0);
+        BrPixelmapRectangleFill(gBack_screen, 0, 440, 640, 40, 0);
+
+        DRPixelmapDoubledCopy(
+            gBack_screen,
+            gCurrent_race.map_image,
+            gCurrent_race.map_image->width,
+            gCurrent_race.map_image->height,
+            0,
+            40);
+    } else {
+        DRPixelmapCopy(gBack_screen, gCurrent_race.map_image);
+    }
+}
+
+/* Draws the map overlay 2D content (timer, checkpoint flashes, ped and car
+ * blips) into the (origin-0) back buffer, after CopyMapImage(). Shared by the
+ * in-race map render and the detached map screen window. */
+static void DrawMapOverlay(void) {
+    int i;
+    int flags;
+    int map_timer_x;
+    int map_timer_width;
+    int ped_type;
+    int cat;
+    int car_count;
+    tU32 the_time;
+    br_vector3* car_pos;
+    br_vector3 pos;
+    char the_text[256];
+    tCar_spec* car;
+
+    if (gNet_mode == eNet_mode_none) {
+        GetTimerString(the_text, 0);
+        map_timer_width = DRTextWidth(&gFonts[kFont_BLUEHEAD], the_text);
+        map_timer_x = gCurrent_graf_data->map_timer_text_x - map_timer_width;
+        BrPixelmapRectangleFill(
+            gBack_screen,
+            map_timer_x - gCurrent_graf_data->map_timer_border_x,
+            gCurrent_graf_data->map_timer_text_y - gCurrent_graf_data->map_timer_border_y,
+            map_timer_width + 2 * gCurrent_graf_data->map_timer_border_x,
+            gFonts[kFont_BLUEHEAD].height + 2 * gCurrent_graf_data->map_timer_border_y,
+            0);
+        TransDRPixelmapText(
+            gBack_screen,
+            map_timer_x,
+            gCurrent_graf_data->map_timer_text_y,
+            &gFonts[kFont_BLUEHEAD],
+            the_text,
+            gBack_screen->width);
+    }
+    the_time = PDGetTotalTime();
+    if (gNet_mode != eNet_mode_none) {
+        if (gCurrent_net_game->type == eNet_game_type_checkpoint) {
+            flags = gNet_players[gThis_net_player_index].score;
+            for (i = 0; gCurrent_race.check_point_count > i; ++i) {
+                if ((flags & 1) != 0) {
+                    FlashyMapCheckpoint(i, the_time);
+                }
+                flags >>= 1;
+            }
+        } else if (gCurrent_net_game->type == eNet_game_type_sudden_death
+            && gNet_players[gThis_net_player_index].score >= 0) {
+            FlashyMapCheckpoint(
+                gNet_players[gThis_net_player_index].score % gCurrent_race.check_point_count,
+                the_time);
+        }
+    } else {
+        FlashyMapCheckpoint(gCheckpoint - 1, the_time);
+    }
+    if (gShow_peds_on_map || (gNet_mode != eNet_mode_none && gCurrent_net_game->options.show_powerups_on_map)) {
+        for (i = 0; i < GetPedCount(); i++) {
+            ped_type = GetPedPosition(i, &pos);
+            if (ped_type > 0 && gShow_peds_on_map) {
+                DrawMapSmallBlip(the_time, &pos, 52);
+            } else if (ped_type < 0 && (gNet_mode != eNet_mode_none && gCurrent_net_game->options.show_powerups_on_map)) {
+                DrawMapSmallBlip(the_time, &pos, 4);
+            }
+        }
+    }
+    if (gShow_opponents) {
+        cat = eVehicle_opponent;
+    } else {
+        cat = eVehicle_self;
+    }
+    while (cat >= eVehicle_self) {
+        if (cat) {
+            car_count = GetCarCount(cat);
+        } else {
+            car_count = 1;
+        }
+        for (i = 0; i < car_count; i++) {
+            if (cat) {
+                car = GetCarSpec(cat, i);
+            } else {
+                car = &gProgram_state.current_car;
+            }
+            if (gNet_mode == eNet_mode_none || (!car->knackered && !NetPlayerFromCar(car)->wasted)) {
+                if (cat) {
+                    car_pos = &GetCarSpec(cat, i)->car_master_actor->t.t.euler.t;
+                } else {
+                    car_pos = &gSelf->t.t.euler.t;
+                }
+                if (gNet_mode) {
+                    DrawMapBlip(
+                        car,
+                        the_time,
+                        &car->car_master_actor->t.t.mat,
+                        car_pos,
+                        car->shrapnel_material[0]->index_range + car->shrapnel_material[0]->index_base - 1);
+                } else if (car->knackered) {
+                    DrawMapBlip(car, the_time, &car->car_master_actor->t.t.mat, car_pos, 0);
+                } else {
+                    DrawMapBlip(car, the_time, &car->car_master_actor->t.t.mat, car_pos, gMap_colours[cat]);
+                }
+            }
+        }
+        cat--;
+    }
+}
+
 // IDA: void __usercall RenderAFrame(int pDepth_mask_on@<EAX>)
 // FUNCTION: CARM95 0x004b59ce
 void RenderAFrame(int pDepth_mask_on) {
-    int cat;
     int i;
-    int car_count;
-    int flags;
     int x_shift;
     int y_shift;
     int cockpit_on;
@@ -1879,17 +2005,10 @@ void RenderAFrame(int pDepth_mask_on) {
     int real_origin_y = 0;
     int real_base_x = 0;
     int real_base_y = 0;
-    int map_timer_x;
-    int map_timer_width;
-    int ped_type;
     char* old_pixels;
     br_matrix34 old_camera_matrix;
     br_matrix34 old_mirror_cam_matrix;
     tU32 the_time;
-    br_vector3* car_pos;
-    br_vector3 pos;
-    char the_text[256];
-    tCar_spec* car;
 
 #ifdef DETHRACE_3DFX_PATCH
     if (gVoodoo_rush_mode >= 1) {
@@ -1910,22 +2029,7 @@ void RenderAFrame(int pDepth_mask_on) {
         gBack_screen->origin_y = 0;
         gBack_screen->base_x = 0;
         gBack_screen->base_y = 0;
-        if (gCurrent_race.map_image != NULL) {
-            if (gReal_graf_data_index) {
-                BrPixelmapRectangleFill(gBack_screen, 0, 0, 640, 40, 0);
-                BrPixelmapRectangleFill(gBack_screen, 0, 440, 640, 40, 0);
-
-                DRPixelmapDoubledCopy(
-                    gBack_screen,
-                    gCurrent_race.map_image,
-                    gCurrent_race.map_image->width,
-                    gCurrent_race.map_image->height,
-                    0,
-                    40);
-            } else {
-                DRPixelmapCopy(gBack_screen, gCurrent_race.map_image);
-            }
-        }
+        CopyMapImage();
 
 #ifdef DETHRACE_3DFX_PATCH
         // Added by dethrace
@@ -2156,93 +2260,7 @@ void RenderAFrame(int pDepth_mask_on) {
         gRendering_mirror = 0;
     }
     if (gMap_mode) {
-        if (gNet_mode == eNet_mode_none) {
-            GetTimerString(the_text, 0);
-            map_timer_width = DRTextWidth(&gFonts[kFont_BLUEHEAD], the_text);
-            map_timer_x = gCurrent_graf_data->map_timer_text_x - map_timer_width;
-            BrPixelmapRectangleFill(
-                gBack_screen,
-                map_timer_x - gCurrent_graf_data->map_timer_border_x,
-                gCurrent_graf_data->map_timer_text_y - gCurrent_graf_data->map_timer_border_y,
-                map_timer_width + 2 * gCurrent_graf_data->map_timer_border_x,
-                gFonts[kFont_BLUEHEAD].height + 2 * gCurrent_graf_data->map_timer_border_y,
-                0);
-            TransDRPixelmapText(
-                gBack_screen,
-                map_timer_x,
-                gCurrent_graf_data->map_timer_text_y,
-                &gFonts[kFont_BLUEHEAD],
-                the_text,
-                gBack_screen->width);
-        }
-        the_time = PDGetTotalTime();
-        if (gNet_mode != eNet_mode_none) {
-            if (gCurrent_net_game->type == eNet_game_type_checkpoint) {
-                flags = gNet_players[gThis_net_player_index].score;
-                for (i = 0; gCurrent_race.check_point_count > i; ++i) {
-                    if ((flags & 1) != 0) {
-                        FlashyMapCheckpoint(i, the_time);
-                    }
-                    flags >>= 1;
-                }
-            } else if (gCurrent_net_game->type == eNet_game_type_sudden_death
-                && gNet_players[gThis_net_player_index].score >= 0) {
-                FlashyMapCheckpoint(
-                    gNet_players[gThis_net_player_index].score % gCurrent_race.check_point_count,
-                    the_time);
-            }
-        } else {
-            FlashyMapCheckpoint(gCheckpoint - 1, the_time);
-        }
-        if (gShow_peds_on_map || (gNet_mode != eNet_mode_none && gCurrent_net_game->options.show_powerups_on_map)) {
-            for (i = 0; i < GetPedCount(); i++) {
-                ped_type = GetPedPosition(i, &pos);
-                if (ped_type > 0 && gShow_peds_on_map) {
-                    DrawMapSmallBlip(the_time, &pos, 52);
-                } else if (ped_type < 0 && (gNet_mode != eNet_mode_none && gCurrent_net_game->options.show_powerups_on_map)) {
-                    DrawMapSmallBlip(the_time, &pos, 4);
-                }
-            }
-        }
-        if (gShow_opponents) {
-            cat = eVehicle_opponent;
-        } else {
-            cat = eVehicle_self;
-        }
-        while (cat >= eVehicle_self) {
-            if (cat) {
-                car_count = GetCarCount(cat);
-            } else {
-                car_count = 1;
-            }
-            for (i = 0; i < car_count; i++) {
-                if (cat) {
-                    car = GetCarSpec(cat, i);
-                } else {
-                    car = &gProgram_state.current_car;
-                }
-                if (gNet_mode == eNet_mode_none || (!car->knackered && !NetPlayerFromCar(car)->wasted)) {
-                    if (cat) {
-                        car_pos = &GetCarSpec(cat, i)->car_master_actor->t.t.euler.t;
-                    } else {
-                        car_pos = &gSelf->t.t.euler.t;
-                    }
-                    if (gNet_mode) {
-                        DrawMapBlip(
-                            car,
-                            the_time,
-                            &car->car_master_actor->t.t.mat,
-                            car_pos,
-                            car->shrapnel_material[0]->index_range + car->shrapnel_material[0]->index_base - 1);
-                    } else if (car->knackered) {
-                        DrawMapBlip(car, the_time, &car->car_master_actor->t.t.mat, car_pos, 0);
-                    } else {
-                        DrawMapBlip(car, the_time, &car->car_master_actor->t.t.mat, car_pos, gMap_colours[cat]);
-                    }
-                }
-            }
-            cat--;
-        }
+        DrawMapOverlay();
         gBack_screen->origin_x = real_origin_x;
         gBack_screen->origin_y = real_origin_y;
         gBack_screen->base_x = real_base_x;
@@ -3724,4 +3742,85 @@ void AuxCockpitRender_Register(void) {
     extern void SDL3GPUREND_SetAuxRenderCallback(struct _VIDEO* hVideo,
         void (*cb)(int viewIndex, void* ud), void* ud);
     SDL3GPUREND_SetAuxRenderCallback(NULL, AuxCockpitRender_cb, NULL);
+}
+
+/* Render callback for the detached map screen window. Runs inside the driver's
+ * Present for the map window, when the game back buffer's pixels are NULL
+ * (SwapBackScreen unlocks it before Present). Draws the map 2D content (map
+ * image + checkpoints + blips) into a dedicated scratch buffer instead, then
+ * uploads it via SDL3GPUREND_MapScreenUpload so the driver can composite it.
+ * The in-map PIP (3D scene) and the dim rectangle are skipped. */
+static br_uint_16 mapScratch565[640 * 480];
+static br_uint_32 mapScratchBGRA[640 * 480];
+
+static void MapScreenRender_cb(void* ud) {
+    (void)ud;
+    extern int SDL3GPUREND_MapScreenUpload(struct _VIDEO* hVideo, const void* bgra,
+        int width, int height);
+
+    if (!gBack_screen || gCurrent_race.map_image == NULL) {
+        /* No race map up: show an empty map window. */
+        memset(mapScratchBGRA, 0, sizeof(mapScratchBGRA));
+        SDL3GPUREND_MapScreenUpload(NULL, mapScratchBGRA, 640, 480);
+        return;
+    }
+
+    /* Point the back buffer's pixels at the scratch buffer for the duration of
+     * the draw. The scratch is always resident, so the pixel writes are safe
+     * even though the real back buffer is unlocked during Present. */
+    void* real_pixels = gBack_screen->pixels;
+    br_int_16 real_row_bytes = gBack_screen->row_bytes;
+    int real_origin_x = gBack_screen->origin_x;
+    int real_origin_y = gBack_screen->origin_y;
+    int real_base_x = gBack_screen->base_x;
+    int real_base_y = gBack_screen->base_y;
+
+    gBack_screen->pixels = mapScratch565;
+    gBack_screen->row_bytes = 640 * 2;
+    gBack_screen->origin_x = 0;
+    gBack_screen->origin_y = 0;
+    gBack_screen->base_x = 0;
+    gBack_screen->base_y = 0;
+
+    /* Start fully transparent so anything the map draw leaves untouched shows
+     * black in the map window. */
+    memset(mapScratch565, 0, sizeof(mapScratch565));
+
+    CopyMapImage();
+    DrawMapOverlay();
+
+    /* 565 -> BGRA8888, matching the flush conversion: magenta becomes fully
+     * transparent so the blended composite (and the overlay.frag discard)
+     * hides it. */
+    for (int y = 0; y < 480; y++) {
+        for (int x = 0; x < 640; x++) {
+            br_uint_16 p = mapScratch565[y * 640 + x];
+            if (p == BR_COLOUR_565(31, 0, 31)) {
+                mapScratchBGRA[y * 640 + x] = 0;
+            } else {
+                int r5 = (p >> 11) & 0x1F;
+                int g = (p >> 5) & 0x3F;
+                int b5 = p & 0x1F;
+                mapScratchBGRA[y * 640 + x] = (br_uint_32)((b5 * 255) / 31)
+                    | ((br_uint_32)((g * 255) / 63) << 8)
+                    | ((br_uint_32)((r5 * 255) / 31) << 16)
+                    | (0xFFu << 24);
+            }
+        }
+    }
+
+    gBack_screen->pixels = real_pixels;
+    gBack_screen->row_bytes = real_row_bytes;
+    gBack_screen->origin_x = real_origin_x;
+    gBack_screen->origin_y = real_origin_y;
+    gBack_screen->base_x = real_base_x;
+    gBack_screen->base_y = real_base_y;
+
+    SDL3GPUREND_MapScreenUpload(NULL, mapScratchBGRA, 640, 480);
+}
+
+void MapScreenRender_Register(void) {
+    extern void SDL3GPUREND_SetMapRenderCallback(struct _VIDEO* hVideo,
+        void (*cb)(void* ud), void* ud);
+    SDL3GPUREND_SetMapRenderCallback(NULL, MapScreenRender_cb, NULL);
 }

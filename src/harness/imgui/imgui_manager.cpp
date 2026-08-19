@@ -30,6 +30,7 @@ extern int gDisable_lod;
 extern int gNo_view_distance;
 extern int gAnisotropy_level;
 extern int g3window_cockpit;
+extern int gMap_screen_detach;
 static ImGuiManager_Callbacks g_callbacks;
 
 static bool g_cheat_freeze_time = false;
@@ -194,6 +195,9 @@ static void DrawMenuBar(void)
             bool wc = g3window_cockpit != 0;
             if (ImGui::MenuItem("WIP 3-Window Cockpit View (SDL3GPU)", NULL, &wc))
                 g3window_cockpit = wc ? 1 : 0;
+            bool ms = gMap_screen_detach != 0;
+            if (ImGui::MenuItem("Map view screen (SDL3GPU)", NULL, &ms))
+                gMap_screen_detach = ms ? 1 : 0;
             ImGui::EndMenu();
         }
 

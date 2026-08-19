@@ -483,6 +483,10 @@ void PDAllocateScreenAndBack(void) {
                         extern void AuxCockpitRender_Register(void);
                         AuxCockpitRender_Register();
                     }
+                    {
+                        extern void MapScreenRender_Register(void);
+                        MapScreenRender_Register();
+                    }
                 }
 #endif
             }

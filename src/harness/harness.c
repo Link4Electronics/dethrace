@@ -61,6 +61,8 @@ int gAnisotropy_level = 0;
 
 int g3window_cockpit = 0;
 
+int gMap_screen_detach = 0;
+
 int gHarness_sw_widescreen = 0;
 int gHarness_gl_viewport_override = 0;
 
