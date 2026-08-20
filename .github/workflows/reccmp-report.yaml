@@ -1,0 +1,57 @@
+name: reccmp-report
+
+on:
+  push:
+    branches:
+      - "main"
+    # The report files are committed back to this repo by this workflow; ignore
+    # those commits so they do not retrigger a new run.
+    paths-ignore:
+      - "reccmp-report/**"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  report:
+    name: Generate and publish reccmp report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          submodules: recursive
+      - name: Fetch latest report
+        run: |
+          curl -fsSL -o reccmp-report-report.json https://raw.githubusercontent.com/Link4Electronics/dethrace/refs/heads/main/reccmp-report/report.json \
+            || curl -fsSL -o reccmp-report-report.json https://raw.githubusercontent.com/dethrace-labs/reccmp-report/refs/heads/main/report.json
+      - uses: dethrace-labs/reccmp-action@main
+        name: Build
+        with:
+          cmake_flags: -G Ninja -DCMAKE_BUILD_TYPE=Debug -DMSVC_42_FOR_RECCMP=on
+          build_only: true
+      - uses: dethrace-labs/reccmp-action@main
+        name: Run reccmp
+        with:
+          cmake_flags: -G Ninja -DCMAKE_BUILD_TYPE=Debug -DMSVC_42_FOR_RECCMP=on
+          target: CARM95
+          diff_report_filename: ${{ github.workspace}}/reccmp-report-report.json
+          report_filename: ${{ github.workspace}}/new-reccmp-report.json
+          original_binary_url: https://archive.org/download/carm-95/CARM95.EXE
+          original_binary_filename: CARM95.EXE
+          reccmp_output_filename: ${{ github.workspace}}/reccmp-output.txt
+          status_png_icon_filename: ${{ github.workspace}}/reccmp/carma_32x32_4.png
+          status_svg_filename: ${{ github.workspace}}/new-reccmp-progress.svg
+      - name: Publish reccmp report
+        run: |
+          cp new-reccmp-progress.svg reccmp-report/progress.svg
+          cp new-reccmp-report.json reccmp-report/report.json
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reccmp-report/progress.svg reccmp-report/report.json
+          git commit -m "Update reccmp report from ${GITHUB_SHA::7}" || echo "No changes to commit"
+          git push

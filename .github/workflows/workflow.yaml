@@ -296,34 +296,3 @@ jobs:
             artifacts/**/*.tar.gz
             artifacts/**/*.AppImage
             artifacts/**/*.zsync
-
-  reccmp:
-    name: Verify decomp
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-    steps:
-      - uses: actions/checkout@v4
-        name: Checkout
-        with:
-          submodules: recursive
-      - name: Fetch latest report
-        run: |
-          curl -Lo reccmp-report-report.json https://raw.githubusercontent.com/dethrace-labs/reccmp-report/refs/heads/main/report.json
-      - uses: dethrace-labs/reccmp-action@main
-        name: Build
-        with:
-          cmake_flags: -G Ninja -DCMAKE_BUILD_TYPE=Debug -DMSVC_42_FOR_RECCMP=on
-          build_only: true
-      - uses: dethrace-labs/reccmp-action@main
-        name: Run reccmp
-        with:
-          cmake_flags: -G Ninja -DCMAKE_BUILD_TYPE=Debug -DMSVC_42_FOR_RECCMP=on
-          target: CARM95
-          diff_report_filename: ${{ github.workspace}}/reccmp-report-report.json
-          report_filename: ${{ github.workspace}}/new-reccmp-report.json
-          original_binary_url: https://archive.org/download/carm-95/CARM95.EXE
-          original_binary_filename: CARM95.EXE
-          reccmp_output_filename: ${{ github.workspace}}/reccmp-output.txt
-          status_png_icon_filename: ${{ github.workspace}}/reccmp/carma_32x32_4.png
-          status_svg_filename: ${{ github.workspace}}/new-reccmp-progress.svg

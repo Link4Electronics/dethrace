@@ -3,4 +3,7 @@
 .vscode
 reccmp-user.yml
 reccmp-build.yml
-reccmp-report*
+reccmp-report-report.json
+reccmp-report-main.json
+reccmp-report.html
+reccmp-report-etag.txt

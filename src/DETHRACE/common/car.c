@@ -1782,13 +1782,15 @@ void ControlCar4(tCar_spec* c, br_scalar dt) {
             c->turn_speed = 0.f;
         }
         if (c->velocity_car_space.v[2] > 0.f) {
-            c->turn_speed += dt * 0.01f / (PHYSICS_STEP_TIME / 1000.0f) / 2.f * 2.f;
-        } else if ((c->curvature >= 0.f && c->omega.v[1] >= -.001f) || c->turn_speed != 0.f) {
-            c->turn_speed += dt / (PHYSICS_STEP_TIME / 1000.0f) * (0.05f / (BrVector3Length(&c->v) + 5.f)) / 2.f * .5f;
+            c->turn_speed += dt * 0.01 / (PHYSICS_STEP_TIME / 1000.0) / 2.0 * 2.0;
         } else {
-            c->turn_speed = dt / (PHYSICS_STEP_TIME / 1000.0f) * (.05f / (BrVector3Length(&c->v) + 5.f)) * 4.f / 2.f * .5f;
-            if (c->omega.v[1] < -.01f) {
-                c->turn_speed -= dt * .01f / (PHYSICS_STEP_TIME / 1000.f) / 2.f * c->omega.v[1] * 2.f;
+            if (!((c->curvature >= 0.f && c->omega.v[1] >= -0.001) || c->turn_speed != 0.f)) {
+                c->turn_speed = dt / (PHYSICS_STEP_TIME / 1000.0f) * (.05f / ((float)sqrt(c->v.v[1] * c->v.v[1] + c->v.v[2] * c->v.v[2] + c->v.v[0] * c->v.v[0]) + 5.f)) * 4.f / 2.f * 0.5;
+                if (c->omega.v[1] < -0.01) {
+                    c->turn_speed -= dt * 0.01 / (PHYSICS_STEP_TIME / 1000.0) / 2.0 * c->omega.v[1] * 2.0;
+                }
+            } else {
+                c->turn_speed += dt / (PHYSICS_STEP_TIME / 1000.0f) * (0.05f / ((float)sqrt(c->v.v[1] * c->v.v[1] + c->v.v[2] * c->v.v[2] + c->v.v[0] * c->v.v[0]) + 5.f)) / 2.f * 0.5;
             }
         }
     }
@@ -1797,26 +1799,30 @@ void ControlCar4(tCar_spec* c, br_scalar dt) {
             c->turn_speed = 0.f;
         }
         if (c->velocity_car_space.v[2] > 0.f) {
-            c->turn_speed -= dt * .01f / (PHYSICS_STEP_TIME / 1000.0f) / 2.f * 2.f;
-        } else if ((c->curvature <= 0.f && c->omega.v[1] <= .001f) || c->turn_speed != 0.f) {
-            c->turn_speed -= dt / (PHYSICS_STEP_TIME / 1000.0f) * (.05f / (BrVector3Length(&c->v) + 5.f)) / 2.f * .5f;
+            c->turn_speed -= dt * 0.01 / (PHYSICS_STEP_TIME / 1000.0) / 2.0 * 2.0;
         } else {
-            c->turn_speed = dt / (PHYSICS_STEP_TIME / 1000.0f) * (.05f / (BrVector3Length(&c->v) + 5.f)) * -4.f / 2.f * .5f;
-            if (c->omega.v[1] < -.01f) {
-                c->turn_speed -= dt * .01f / (PHYSICS_STEP_TIME / 1000.f) / 2.f * c->omega.v[1] * 2.f;
+            if (!((c->curvature <= 0.f && c->omega.v[1] <= 0.001) || c->turn_speed != 0.f)) {
+                c->turn_speed = dt / (PHYSICS_STEP_TIME / 1000.0f) * (.05f / ((float)sqrt(c->v.v[1] * c->v.v[1] + c->v.v[2] * c->v.v[2] + c->v.v[0] * c->v.v[0]) + 5.f)) * -4.f / 2.f * 0.5;
+                if (c->omega.v[1] < -0.01) {
+                    c->turn_speed -= dt * 0.01 / (PHYSICS_STEP_TIME / 1000.0) / 2.0 * c->omega.v[1] * 2.0;
+                }
+            } else {
+                c->turn_speed -= dt / (PHYSICS_STEP_TIME / 1000.0f) * (.05f / ((float)sqrt(c->v.v[1] * c->v.v[1] + c->v.v[2] * c->v.v[2] + c->v.v[0] * c->v.v[0]) + 5.f)) / 2.f * 0.5;
             }
         }
     }
     if (!c->keys.left && !c->keys.right) {
         c->turn_speed = 0.f;
-    } else if (fabs(c->turn_speed) < fabs(dt * 2.f * c->curvature) && c->curvature * c->turn_speed < 0.f) {
-        c->turn_speed = -(dt * 2.f * c->curvature);
+    } else if (fabs(c->turn_speed) < fabs((dt * 2.f) * c->curvature) && c->curvature * c->turn_speed < 0.f) {
+        c->turn_speed = -((dt * 2.f) * c->curvature);
     }
     c->curvature += c->turn_speed;
     if (c->joystick.left > 0) {
-        c->curvature = (float)c->joystick.left * (float)c->joystick.left / 4294967300.f * c->maxcurve;
+        ts = (float)c->joystick.left * (float)c->joystick.left / 4294967300.f;
+        c->curvature = ts * c->maxcurve;
     } else if (c->joystick.right >= 0) {
-        c->curvature = -((float)c->joystick.right * (float)c->joystick.right / 4294967300.f) * c->maxcurve;
+        ts = (float)c->joystick.right * (float)c->joystick.right / 4294967300.f;
+        c->curvature = c->maxcurve * -1 * ts;
     }
     if (c->curvature > c->maxcurve) {
         c->curvature = c->maxcurve;
@@ -2075,10 +2081,8 @@ void SteeringSelfCentre(tCar_spec* c, br_scalar dt, br_vector3* n) {
     if (c->keys.left || c->joystick.left > 0 || c->keys.right || c->joystick.right > 0 || c->keys.holdw) {
         return;
     }
-    if (c->susp_height[1] <= c->oldd[2]) {
-        if (c->susp_height[1] <= c->oldd[3]) {
-            return;
-        }
+    if (c->susp_height[1] <= c->oldd[2] && c->susp_height[1] <= c->oldd[3]) {
+        return;
     }
     ts = -((c->omega.v[1] * n->v[1] + c->omega.v[2] * n->v[2] + c->omega.v[0] * n->v[0]) * (dt / (c->wpos[0].v[2] - c->wpos[2].v[2])));
     ts2 = -(c->curvature * dt);

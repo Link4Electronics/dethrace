@@ -405,47 +405,49 @@ int DoOnePlayerStart(void) {
     int merrily_looping;
     tProgram_state saved_state;
 
-    if (OriginalCarmaCDinDrive()) {
-        memcpy(&saved_state, &gProgram_state, sizeof(tProgram_state));
-        do {
-            merrily_looping = FrankieOrAnnie();
-            if (!merrily_looping) {
-                memcpy(&gProgram_state, &saved_state, sizeof(tProgram_state));
-                return 0;
-            }
-            if ((harness_game_info.mode == eGame_carmageddon_demo || harness_game_info.mode == eGame_splatpack_demo || harness_game_info.mode == eGame_splatpack_xmas_demo) && gProgram_state.frank_or_anniness != eFrankie) {
-                DoFeatureUnavailableInDemo();
-                memset(&gProgram_state, 0, sizeof(gProgram_state));
-                return 0;
-            }
-
-            if (SelectSkillLevel()) {
-                DoGoToRaceAnimation();
-                StartLoadingScreen();
-                AboutToLoadFirstCar();
-                PrintMemoryDump(0, "JUST BEFORE LOADING YOUR CAR");
-                SwitchToRealResolution();
-                LoadCar(
-                    gBasic_car_names[gProgram_state.frank_or_anniness],
-                    eDriver_local_human,
-                    &gProgram_state.current_car,
-                    gProgram_state.frank_or_anniness,
-                    gProgram_state.player_name[gProgram_state.frank_or_anniness],
-                    &gOur_car_storage_space);
-                SwitchToLoresMode();
-                SetCarStorageTexturingLevel(&gOur_car_storage_space, GetCarTexturingLevel(), eCTL_full);
-                PrintMemoryDump(0, "IMMEDIATELY AFTER LOADING YOUR CAR");
-                gNet_mode = eNet_mode_none;
-                InitGame(0);
-                merrily_looping = 0;
-            }
-        } while (merrily_looping);
-        UnlockBunchOfFlics(4);
-        return 1;
-    } else {
+    if (!OriginalCarmaCDinDrive()) {
         DoErrorInterface(kMiscString_PLEASE_INSERT_THE_CARMAGEDDON_CD);
         return 0;
     }
+    memcpy(&saved_state, &gProgram_state, sizeof(tProgram_state));
+    do {
+        merrily_looping = 1;
+        if (!FrankieOrAnnie()) {
+            memcpy(&gProgram_state, &saved_state, sizeof(tProgram_state));
+            return 0;
+        }
+#ifdef DETHRACE_FIX_BUGS
+        if ((harness_game_info.mode == eGame_carmageddon_demo || harness_game_info.mode == eGame_splatpack_demo || harness_game_info.mode == eGame_splatpack_xmas_demo) && gProgram_state.frank_or_anniness != eFrankie) {
+            DoFeatureUnavailableInDemo();
+            memset(&gProgram_state, 0, sizeof(gProgram_state));
+            return 0;
+        }
+#endif
+
+        if (!SelectSkillLevel()) {
+        } else {
+            DoGoToRaceAnimation();
+            StartLoadingScreen();
+            AboutToLoadFirstCar();
+            PrintMemoryDump(0, "JUST BEFORE LOADING YOUR CAR");
+            SwitchToRealResolution();
+            LoadCar(
+                gBasic_car_names[gProgram_state.frank_or_anniness],
+                eDriver_local_human,
+                &gProgram_state.current_car,
+                gProgram_state.frank_or_anniness,
+                gProgram_state.player_name[gProgram_state.frank_or_anniness],
+                &gOur_car_storage_space);
+            SwitchToLoresMode();
+            SetCarStorageTexturingLevel(&gOur_car_storage_space, GetCarTexturingLevel(), eCTL_full);
+            PrintMemoryDump(0, "IMMEDIATELY AFTER LOADING YOUR CAR");
+            gNet_mode = eNet_mode_none;
+            InitGame(0);
+            merrily_looping = 0;
+        }
+    } while (merrily_looping);
+    UnlockBunchOfFlics(4);
+    return 1;
 }
 
 // IDA: int __usercall NewNetGameUp@<EAX>(int *pCurrent_choice@<EAX>, int *pCurrent_mode@<EDX>)

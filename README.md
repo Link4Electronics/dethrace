@@ -1,12 +1,12 @@
 # Dethrace
 
-[![Workflow](https://github.com/dethrace-labs/dethrace/actions/workflows/workflow.yaml/badge.svg)](https://github.com/dethrace-labs/dethrace/actions/workflows/workflow.yml)
+[![Workflow](https://github.com/Link4Electronics/dethrace/actions/workflows/workflow.yaml/badge.svg)](https://github.com/Link4Electronics/dethrace/actions/workflows/workflow.yml)
 
 Dethrace is an attempt to learn how the 1997 driving/mayhem game [Carmageddon](https://en.wikipedia.org/wiki/Carmageddon) works behind the scenes and rebuild it to run natively on modern systems.
 
 ## Status
 
-<img width="50%" src="https://raw.githubusercontent.com/Link4Electronics/reccmp-report/refs/heads/main/progress.svg">
+<img width="50%" src="https://raw.githubusercontent.com/Link4Electronics/dethrace/refs/heads/main/reccmp-report/progress.svg">
 
 ## Building
 
