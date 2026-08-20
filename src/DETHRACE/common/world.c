@@ -2600,7 +2600,11 @@ void LoadTrack(char* pFile_name, tTrack_spec* pTrack_spec, tRace_info* pRace_inf
     br_vector3 v1;
     br_vector3 v2;
     br_vector3 temp_v;
+    #ifdef DETHRACE_FIX_BUGS
     br_bounds temp_bounds = {{{0}}, {{0}}};
+#else
+    br_bounds temp_bounds;
+#endif
     tPed_subs* ped_subs;
     br_pixelmap* sky;
     br_material* material;

@@ -1932,7 +1932,7 @@ void LoadCar(char* pCar_name, tDriver pDriver, tCar_spec* pCar_spec, int pOwner,
     if (gGroove_funk_offset < 0) {
         FatalError(kFatalError_NoFunkGrooveSlotBunchesLeft);
     }
-    if (!CAR_HAS_BUILTIN_PROX_RAY(pCar_spec)) {
+    if (strcmp(pCar_name, "STELLA.TXT") != 0) {
         pCar_spec->proxy_ray_distance = 0.0f;
     } else {
         pCar_spec->proxy_ray_distance = CAR_PROX_RAY_DISTANCE;

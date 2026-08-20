@@ -656,6 +656,8 @@ tRace_result MainGameLoop(void) {
 #ifdef DETHRACE_FIX_BUGS
         if (gNo_view_distance) {
             ((br_camera*)gCamera->type_data)->yon_z = 100000.f;
+        } else {
+            ((br_camera*)gCamera->type_data)->yon_z = gYon_multiplier * gCamera_yon;
         }
 #endif
         gYon_squared = ((br_camera*)gCamera->type_data)->yon_z * ((br_camera*)gCamera->type_data)->yon_z
