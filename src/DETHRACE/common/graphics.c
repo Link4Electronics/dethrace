@@ -268,8 +268,13 @@ tConcussion gConcussion;
 // GLOBAL: CARM95 0x0053f080
 tClip_details gShadow_clip_planes[8];
 
+#ifdef DETHRACE_FIX_BUGS
 // GLOBAL: CARM95 0x0053e5f8
 br_actor* gLollipops[2000];
+#else
+// GLOBAL: CARM95 0x0053e5f8
+br_actor* gLollipops[100];
+#endif
 
 // GLOBAL: CARM95 0x0053f8d8
 tWobble_spec gWobble_array[5];
@@ -540,7 +545,11 @@ void DrawNumberAt(br_pixelmap* gImage, int pX, int pY, int pX_pitch, int pY_pitc
 void BuildColourTable(br_pixelmap* pPalette) {
     int i;
     int j;
+#ifdef DETHRACE_FIX_BUGS
     int nearest_index = 0;
+#else
+    int nearest_index;
+#endif
     int red;
     int green;
     int blue;
@@ -553,9 +562,9 @@ void BuildColourTable(br_pixelmap* pPalette) {
         green = (gRGB_colours[i] >> 8) & 0xFF;
         blue = gRGB_colours[i] & 0xFF;
         for (j = 0; j < 256; j++) {
-            distance = sqr(((br_uint_8*)pPalette->pixels)[4 * j + 2] - red)
-                + sqr(((br_uint_8*)pPalette->pixels)[4 * j + 1] - green)
-                + sqr(((br_uint_8*)pPalette->pixels)[4 * j] - blue);
+            distance = sqr((double)(signed int)(*((br_uint_8*)pPalette->pixels + 4 * j + 2) - red))
+                + sqr((double)(signed int)(*((br_uint_8*)pPalette->pixels + 4 * j) - blue))
+                + sqr((double)(signed int)(*((br_uint_8*)pPalette->pixels + 4 * j + 1) - green));
 
             if (distance < nearest_distance) {
                 nearest_distance = distance;
@@ -688,7 +697,11 @@ void CopyStripImage(br_pixelmap* pDest, br_int_16 pDest_x, br_int_16 pOffset_x, 
     int old_x_byte;
     int x_byte;
     int off_the_left;
+#ifdef DETHRACE_FIX_BUGS
+    int destn_width = 0;
+#else
     int destn_width;
+#endif
     int chunk_length;
     char* destn_ptr;
     char* destn_ptr2;
@@ -1810,7 +1823,11 @@ void RenderShadows(br_actor* pWorld, tTrack_spec* pTrack_spec, br_actor* pCamera
     int car_count;
     tCar_spec* the_car;
     br_vector3 camera_to_car;
+#ifdef DETHRACE_FIX_BUGS
     br_scalar distance_factor = 0;
+#else
+    br_scalar distance_factor;
+#endif
 
     if (gShadow_level != eShadow_none) {
         for (cat = eVehicle_self; cat <= (gShadow_level == eShadow_everyone ? 4 : gShadow_level == eShadow_us_and_opponents ? 3 : 0); ++cat) {
@@ -2190,6 +2207,7 @@ void RenderAFrame(int pDepth_mask_on) {
     BrPixelmapFlush(gBack_screen);
 #endif
 
+    #ifdef DETHRACE_FIX_BUGS
     gHarness_sw_widescreen = 0;
 
     if (gWidescreen_mode) {
@@ -2202,6 +2220,7 @@ void RenderAFrame(int pDepth_mask_on) {
             gHarness_sw_widescreen = 1;
         }
     }
+#endif
 
 #if !defined(DETHRACE_FIX_BUGS)
     // in map mode, the scene is rendered 3 times. We have no idea why.
@@ -2228,11 +2247,13 @@ void RenderAFrame(int pDepth_mask_on) {
         RenderShadows(gUniverse_actor, &gProgram_state.track_spec, gCamera, &gCamera_to_world);
     }
 
+    #ifdef DETHRACE_FIX_BUGS
     if (gWidescreen_mode) {
         br_camera* cam = (br_camera*)gCamera->type_data;
         cam->aspect = (double)gWidth / (double)gHeight;
         gHarness_gl_viewport_override = 0;
     }
+#endif
 #ifdef DETHRACE_3DFX_PATCH
     PDLockRealBackScreen(1);
 #endif
@@ -3315,7 +3336,7 @@ void DisposeFont(int pFont_ID) {
 void InitDRFonts(void) {
     int i;
 
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i < 21; i++) {
         gFonts[i].images = NULL;
         gFonts[i].file_read_once = 0;
     }

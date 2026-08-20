@@ -177,7 +177,11 @@ int DoInterfaceScreen(tInterface_spec* pSpec, int pOptions, int pCurrent_choice)
     tProg_status entry_status; //
     int x_coord;               //
     int y_coord;               //
+#ifdef DETHRACE_FIX_BUGS
     int mouse_in_somewhere = 0;
+#else
+    int mouse_in_somewhere;
+#endif
     int i; //
     int key2;
     int mouse_was_started;
@@ -191,7 +195,11 @@ int DoInterfaceScreen(tInterface_spec* pSpec, int pOptions, int pCurrent_choice)
     int the_max;
     int mouse_down;     //
     int new_mouse_down; //
+#ifdef DETHRACE_FIX_BUGS
     int last_mouse_down = 0;
+#else
+    int last_mouse_down;
+#endif
     int defeat_mode_change; //
     int selection_changed;  //
     char the_str[256];
@@ -200,7 +208,11 @@ int DoInterfaceScreen(tInterface_spec* pSpec, int pOptions, int pCurrent_choice)
     tU32 last_right_press;
     tU32 last_up_press;
     tU32 last_down_press;
+#ifdef DETHRACE_FIX_BUGS
     br_pixelmap** copy_areas = NULL;        //
+#else
+    br_pixelmap** copy_areas;        //
+#endif
     br_pixelmap* old_current_splash; //
     void* pixels_copy;
     void* palette_copy;
@@ -492,7 +504,7 @@ int DoInterfaceScreen(tInterface_spec* pSpec, int pOptions, int pCurrent_choice)
                 if (!go_ahead) {
                     the_key = PDAnyKeyDown();
                     if (the_key != -1 && (!gAlways_typing || (the_key != KEY_LEFT && the_key != KEY_RIGHT && the_key != KEY_UP && the_key != KEY_DOWN))) {
-                        if (gCurrent_choice != gTyping_slot && !gAlways_typing) {
+                        if (gTyping_slot != gCurrent_choice && !gAlways_typing) {
                             ChangeSelection(pSpec, &gCurrent_choice, &gTyping_slot, gCurrent_mode, 0);
                             for (i = 0; i < 2; i++) {
                                 if (pSpec->typeable[i]) {

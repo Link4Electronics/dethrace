@@ -170,7 +170,7 @@ void ReinitialiseForwardCamera(void) {
         gCamera->t.t.mat.m[2][1] = tandeg(the_angle / 2.0f) * d * 2.0f / w;
         camera_ptr->aspect = (float)gWidth / (float)gHeight;
         camera_ptr->yon_z = gYon_multiplier * gCamera_yon;
-        switch (gProgram_state.which_view) {
+        switch ((int)gProgram_state.which_view) {
         case eView_left:
             DRMatrix34PostRotateY(
                 &gCamera->t.t.mat,
@@ -180,8 +180,6 @@ void ReinitialiseForwardCamera(void) {
             DRMatrix34PostRotateY(
                 &gCamera->t.t.mat,
                 BrDegreeToAngle(gProgram_state.current_car.head_right_angle));
-            break;
-        default:
             break;
         }
         gCamera->t.t.mat.m[3][0] = gProgram_state.current_car.driver_x_offset;

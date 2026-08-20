@@ -2106,7 +2106,11 @@ void UndoSkidAdjustment(tPipe_chunk** pChunk, tPipe_chunk* pPrev_chunk) {
 // FUNCTION: CARM95 0x0042b0a6
 int UndoPipedSession(tU8** pPtr) {
     tPipe_chunk* chunk_ptr;
+#ifdef DETHRACE_FIX_BUGS
     tPipe_chunk* prev_chunk = NULL;
+#else
+    tPipe_chunk* prev_chunk;
+#endif
     tU8* temp_ptr;
     tU8* pushed_end_of_session;
     int i;

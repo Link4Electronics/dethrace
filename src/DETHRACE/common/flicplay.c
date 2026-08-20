@@ -1370,9 +1370,17 @@ void DoMini(tFlic_descriptor* pFlic_info, tU32 chunk_length) {
 void DrawTranslations(tFlic_descriptor* pFlic_info, int pLast_frame) {
     tTranslation_record* trans;
     int i;
+#ifdef DETHRACE_FIX_BUGS
     int x = 0;
+#else
+    int x;
+#endif
     int width;
+#ifdef DETHRACE_FIX_BUGS
     int right_edge = 0;
+#else
+    int right_edge;
+#endif
 
     for (i = 0, trans = gTranslations; i < gTranslation_count; i++, trans++) {
         if (trans->flic_index == pFlic_info->the_index) {

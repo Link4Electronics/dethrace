@@ -146,9 +146,15 @@ void UsePathFileToDetermineIfFullInstallation(void) {
 void InitSound(void) {
     tPath_name the_path;
     tS3_sound_tag tag;
+#ifdef DETHRACE_FIX_BUGS
     int engine_channel_count = 0;
     int car_channel_count = 0;
     int ped_channel_count = 0;
+#else
+    int engine_channel_count;
+    int car_channel_count;
+    int ped_channel_count;
+#endif
 
     if (gVirgin_pass) {
         PathCat(the_path, gApplication_path, "SOUND");

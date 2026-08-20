@@ -2816,7 +2816,11 @@ int GetCarCount(tVehicle_type pCategory) {
         return 0;
 
     case eVehicle_not_really:
+#ifdef DETHRACE_FIX_BUGS
         return gDisable_lod;
+#else
+        return gNum_active_non_cars;
+#endif
     }
 
     return 0;
@@ -3885,8 +3889,13 @@ int ConsistencyCheck(void) {
     tS16 section_no_index1;
     int found_how_many;
     int failed;
+    #ifdef DETHRACE_FIX_BUGS
     tU8* nodes_referenced_by_sections_array = NULL;
     tU8* sections_referenced_by_nodes_array = NULL;
+#else
+    tU8* nodes_referenced_by_sections_array;
+    tU8* sections_referenced_by_nodes_array;
+#endif
 
     failed = 0;
     if (gProgram_state.AI_vehicles.number_of_path_nodes != 0) {

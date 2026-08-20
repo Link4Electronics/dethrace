@@ -993,7 +993,11 @@ tS8* ConvertPixToStripMap(br_pixelmap* pThe_br_map) {
     tU8* current_strip_pointer;
     tU8* temp_strip_image;
     tU8 new_line[800];
+#ifdef DETHRACE_FIX_BUGS
     tU8 the_byte = 0;
+#else
+    tU8 the_byte;
+#endif
 
     the_strip_image = BrMemAllocate(pThe_br_map->row_bytes * pThe_br_map->height, kMem_strip_image);
     current_strip_pointer = the_strip_image;

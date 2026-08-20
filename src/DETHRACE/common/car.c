@@ -178,7 +178,7 @@ float gCar_simplification_factor[2][5] = {
 // GLOBAL: CARM95 0x00514e28
 int gCar_simplification_level = 0;
 
-// GLOBAL: CARM95 0x00514e2c
+// GLOBAL:
 int gDisable_lod = 0;
 
 // GLOBAL: CARM95 0x00514e2c
@@ -861,7 +861,11 @@ void RememberSafePosition(tCar_spec* car, tU32 pTime) {
     static tU32 time_count;
     int j;
     br_vector3 r;
+#ifdef DETHRACE_FIX_BUGS
+    br_scalar ts = 0;
+#else
     br_scalar ts;
+#endif
 
     if (car->disabled) {
         return;
@@ -4552,7 +4556,11 @@ void MungeCarGraphics(tU32 pFrame_period) {
             } else {
                 the_car = GetCarSpec(cat, i);
             }
+            #ifdef DETHRACE_FIX_BUGS
             if (the_car->driver == eDriver_local_human || gNo_view_distance || !PointOutOfSight(&the_car->pos, gYon_squared)) {
+#else
+            if (the_car->driver == eDriver_local_human || !PointOutOfSight(&the_car->pos, gYon_squared)) {
+#endif
                 the_car->car_master_actor->render_style = BR_RSTYLE_DEFAULT;
             } else {
                 the_car->car_master_actor->render_style = BR_RSTYLE_NONE;
@@ -4711,7 +4719,11 @@ void MungeCarGraphics(tU32 pFrame_period) {
             MungeSpecialVolume((tCollision_info*)the_car);
         }
 
+        #ifdef DETHRACE_FIX_BUGS
         if (the_car->driver != eDriver_local_human && the_car->car_model_variable && !gDisable_lod) {
+#else
+        if (the_car->driver != eDriver_local_human && the_car->car_model_variable) {
+#endif
             distance_from_camera = Vector3DistanceSquared(&the_car->car_master_actor->t.t.translate.t, (br_vector3*)gCamera_to_world.m[3]);
             distance_from_camera /= gCar_simplification_factor[gGraf_spec_index][gCar_simplification_level * 1];
 #ifdef DETHRACE_FIX_BUGS
@@ -4732,9 +4744,13 @@ void MungeCarGraphics(tU32 pFrame_period) {
                     break;
                 }
             }
+#ifdef DETHRACE_FIX_BUGS
         } else if (the_car->driver != eDriver_local_human && gDisable_lod) {
             SwitchCarActor(the_car, the_car->principal_car_actor);
         }
+#else
+        }
+#endif
         if (the_car->screen_material != NULL) {
             car_x = the_car->car_master_actor->t.t.translate.t.v[0];
             car_z = the_car->car_master_actor->t.t.translate.t.v[2];

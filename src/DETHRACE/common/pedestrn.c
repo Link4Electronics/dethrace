@@ -733,19 +733,23 @@ void KillPedestrian(tPedestrian_data* pPedestrian) {
             gProgram_state.peds_killed++;
         }
         pPedestrian->hit_points = -100;
-        if (IsActionReplayAvailable() && !gNo_view_distance) {
-            AddPedestrianToPipingSession(
-                GET_PEDESTRIAN_INDEX(pPedestrian),
-                &pPedestrian->actor->t.t.mat,
-                pPedestrian->current_action,
-                pPedestrian->current_frame,
-                pPedestrian->hit_points,
-                pPedestrian->done_initial,
-                (pPedestrian->actor->parent == gDont_render_actor) ? (tU16)-1 : pPedestrian->killers_ID,
-                pPedestrian->spin_period,
-                pPedestrian->jump_magnitude,
-                &pPedestrian->offset);
-        }
+#ifdef DETHRACE_FIX_BUGS
+    if (IsActionReplayAvailable() && !gNo_view_distance) {
+#else
+    if (IsActionReplayAvailable()) {
+#endif
+        AddPedestrianToPipingSession(
+            GET_PEDESTRIAN_INDEX(pPedestrian),
+            &pPedestrian->actor->t.t.mat,
+            pPedestrian->current_action,
+            pPedestrian->current_frame,
+            pPedestrian->hit_points,
+            pPedestrian->done_initial,
+            (pPedestrian->actor->parent == gDont_render_actor) ? (tU16)-1 : pPedestrian->killers_ID,
+            pPedestrian->spin_period,
+            pPedestrian->jump_magnitude,
+            &pPedestrian->offset);
+    }
     }
     if (pPedestrian->actor->parent != gDont_render_actor) {
         pPedestrian->actor->render_style = BR_RSTYLE_NONE;
@@ -2367,7 +2371,11 @@ void DoPedestrian(tPedestrian_data* pPedestrian, int pIndex) {
             CheckPedestrianDeathScenario(pPedestrian);
         }
         SetPedPos(pPedestrian);
+#ifdef DETHRACE_FIX_BUGS
     if (IsActionReplayAvailable() && !gNo_view_distance) {
+#else
+    if (IsActionReplayAvailable()) {
+#endif
         AddPedestrianToPipingSession(pIndex,
             &pPedestrian->actor->t.t.mat,
             pPedestrian->current_action,
@@ -2503,7 +2511,11 @@ void GroundPedestrian(tPedestrian_data* pPedestrian) {
         pPedestrian->done_initial = 1;
     }
     BrVector3Set(&pPedestrian->offset, 0.f, 0.f, 0.f);
+#ifdef DETHRACE_FIX_BUGS
     if (IsActionReplayAvailable() && !gNo_view_distance) {
+#else
+    if (IsActionReplayAvailable()) {
+#endif
         AddPedestrianToPipingSession(GET_PEDESTRIAN_INDEX(pPedestrian),
             &pPedestrian->actor->t.t.mat,
             pPedestrian->current_action,
@@ -2585,8 +2597,13 @@ void MungePedestrians(tU32 pFrame_period) {
     gVesuvians_this_time = 0;
     gNumber_of_ped_gibs = 32;
     camera_ptr = gCamera->type_data;
+    #ifdef DETHRACE_FIX_BUGS
     max_distance = gNo_view_distance ? 1000.f : ACTIVE_PED_DXDZ;
     gMax_distance_squared = gNo_view_distance ? 1000000.f : 121.f;
+#else
+    max_distance = ACTIVE_PED_DXDZ;
+    gMax_distance_squared = 121.f;
+#endif
     if (!gAction_replay_mode) {
         MungePedGibs(pFrame_period);
     }

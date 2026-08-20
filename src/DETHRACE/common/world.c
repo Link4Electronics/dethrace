@@ -4279,7 +4279,11 @@ void GrooveThisDelic(tGroovidelic_spec* pGroove, tU32 pTime, int pInterrupt_it) 
     the_actor = pGroove->actor;
     pGroove->done_this_frame = 1;
     CalcActorGlobalPos(&actor_pos, the_actor);
+    #ifdef DETHRACE_FIX_BUGS
+    if (!gNo_view_distance && PointOutOfSight(&actor_pos, pGroove->mode == eGroove_mode_distance ? gYon_squared : 36.f)) {
+#else
     if (PointOutOfSight(&actor_pos, pGroove->mode == eGroove_mode_distance ? gYon_squared : 36.f)) {
+#endif
         return;
     }
 

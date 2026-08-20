@@ -1157,7 +1157,11 @@ void DoBouncey(tPowerup* pPowerup, tU32 pPeriod) {
 // FUNCTION: CARM95 0x0042e986
 int HitMine(tPowerup* pPowerup, tCar_spec* pCar) {
     int i;
+#ifdef DETHRACE_FIX_BUGS
     float fudge_multiplier = 0.f;
+#else
+    float fudge_multiplier;
+#endif
 
     pCar->v.v[1] = FRandomBetween(pPowerup->float_params[0], pPowerup->float_params[1]) / pCar->M + pCar->v.v[1];
     pCar->omega.v[2] += FRandomPosNeg(pPowerup->float_params[2]) * TAU / pCar->M;

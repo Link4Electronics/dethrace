@@ -36,7 +36,11 @@ extern int gMap_colours[4];
 extern br_vector3 gShadow_points[8];
 extern tConcussion gConcussion;
 extern tClip_details gShadow_clip_planes[8];
+#ifdef DETHRACE_FIX_BUGS
 extern br_actor* gLollipops[2000];
+#else
+extern br_actor* gLollipops[100];
+#endif
 extern tWobble_spec gWobble_array[5];
 extern tSaved_table gSaved_shade_tables[100];
 extern tCursor_giblet gCursor_giblets[45];
