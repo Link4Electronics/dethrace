@@ -3098,29 +3098,30 @@ int NewCursorGiblet(int pX_coord, int pY_coord, float pX_speed, float pY_speed, 
     int sequence_number;
 
     sequence_number = IRandomBetween(0, COUNT_OF(gCursor_giblet_sequences) - 1);
-    if (pY_coord < gGraf_data[gGraf_data_index].height && pX_coord < gGraf_data[gGraf_data_index].width && pY_coord >= 0 && pX_coord >= 0) {
-        for (i = 0; i < COUNT_OF(gCursor_giblets); i++) {
-            if (gCursor_giblets[i].current_giblet == -1) {
-                the_width = gCursor_giblet_images[gCursor_giblet_sequences[sequence_number][1]]->width;
-                the_height = gCursor_giblet_images[gCursor_giblet_sequences[sequence_number][1]]->height;
-                gCursor_giblets[i].transient_index = AllocateTransientBitmap(the_width, the_height, 1);
-                gCursor_giblets[i].current_giblet = 1;
-                gCursor_giblets[i].sequence_index = sequence_number;
-                gCursor_giblets[i].landed = 0;
+    if (!(pY_coord < gGraf_data[gGraf_data_index].height && pX_coord < gGraf_data[gGraf_data_index].width && pY_coord >= 0 && pX_coord >= 0)) {
+        return -1;
+    }
+    for (i = 0; i < COUNT_OF(gCursor_giblets); i++) {
+        if (gCursor_giblets[i].current_giblet == -1) {
+            the_width = gCursor_giblet_images[gCursor_giblet_sequences[sequence_number][1]]->width;
+            the_height = gCursor_giblet_images[gCursor_giblet_sequences[sequence_number][1]]->height;
+            gCursor_giblets[i].transient_index = AllocateTransientBitmap(the_width, the_height, 1);
+            gCursor_giblets[i].current_giblet = 1;
+            gCursor_giblets[i].sequence_index = sequence_number;
+            gCursor_giblets[i].landed = 0;
 #ifdef DETHRACE_FIX_BUGS
-                gCursor_giblets[i].x_coord = sequence_number * gGraf_specs[gGraf_spec_index].total_width / 640 - the_width / 2 + pX_coord;
-                gCursor_giblets[i].y_coord = FRandomPosNeg(6.f) * gGraf_specs[gGraf_spec_index].total_height / 480 - the_height / 2 + pY_coord;
+            gCursor_giblets[i].x_coord = sequence_number * gGraf_specs[gGraf_spec_index].total_width / 640 - the_width / 2 + pX_coord;
+            gCursor_giblets[i].y_coord = FRandomPosNeg(6.f) * gGraf_specs[gGraf_spec_index].total_height / 480 - the_height / 2 + pY_coord;
 #else
-                gCursor_giblets[i].x_coord = (unsigned int)((int)FRandomPosNeg(10.f) * gGraf_specs[gGraf_spec_index].total_width) / 640 - the_width / 2 + pX_coord;
-                gCursor_giblets[i].y_coord = (unsigned int)((int)FRandomPosNeg(6.f) * gGraf_specs[gGraf_spec_index].total_height) / 480 - the_height / 2 + pY_coord;
+            gCursor_giblets[i].x_coord = (unsigned int)((int)FRandomPosNeg(10.f) * gGraf_specs[gGraf_spec_index].total_width) / 640 - the_width / 2 + pX_coord;
+            gCursor_giblets[i].y_coord = (unsigned int)((int)FRandomPosNeg(6.f) * gGraf_specs[gGraf_spec_index].total_height) / 480 - the_height / 2 + pY_coord;
 #endif
-                gCursor_giblets[i].x_speed = pX_speed;
-                gCursor_giblets[i].y_speed = pY_speed;
-                gCursor_giblets[i].last_giblet_change = 0;
-                gCursor_giblets[i].giblet_change_period = 1000;
-                gCursor_giblets[i].e_t_a = PDGetTotalTime() + pDrop_time;
-                return i;
-            }
+            gCursor_giblets[i].x_speed = pX_speed;
+            gCursor_giblets[i].y_speed = pY_speed;
+            gCursor_giblets[i].last_giblet_change = 0;
+            gCursor_giblets[i].giblet_change_period = 1000;
+            gCursor_giblets[i].e_t_a = PDGetTotalTime() + pDrop_time;
+            return i;
         }
     }
     return -1;

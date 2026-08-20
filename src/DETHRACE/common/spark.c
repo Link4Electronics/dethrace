@@ -1327,7 +1327,7 @@ void SmokeCircle3D(br_vector3* o, br_scalar r, br_scalar strength, br_scalar pAs
     BrMatrix34TApplyV(&p, &tv, &gSmoke_camera_to_world);
 
     if (-p.v[2] >= cam->hither_z && -p.v[2] <= cam->yon_z) {
-        scaled_r = gCameraToScreen.m[0][0] * r / -p.v[2];
+        scaled_r = gCameraToScreen.m[0][0] * r / (0.0f - p.v[2]);
         extra_z = gCameraToScreen.m[3][2] * r / (p.v[2] * p.v[2]);
         BrMatrix4ApplyP(&o2, &p, &gCameraToScreen);
         BrVector3InvScale(&p, &o2, o2.v[3]);
