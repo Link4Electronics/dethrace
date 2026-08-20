@@ -363,6 +363,7 @@ static void SDL2_Harness_CreateWindow(const char* title, int width, int height, 
     }
 
     if (window_type == eWindow_type_opengl) {
+        SDL2_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
         window = SDL2_CreateWindow(title,
             SDL_WINDOWPOS_CENTERED,

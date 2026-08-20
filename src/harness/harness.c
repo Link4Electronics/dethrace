@@ -295,6 +295,7 @@ int Harness_Init(int* argc, char* argv[]) {
     // this setting runs physics every frame, smoothing movement out.
     // disabled by default for now until we are happy it doesn't cause other issues
     harness_game_config.physics_per_frame = 0;
+    harness_game_config.fix_ped_spasm = 0;
     // limit to 60 fps by default
     harness_game_config.fps = 60;
     // do not freeze timer
@@ -565,6 +566,8 @@ static int Harness_Ini_Callback(void* user, const char* section, const char* nam
         harness_game_config.physics_per_frame = i < PHYSICS_STEP_TIME;
     } else if (MATCH("Developers", "InstallSignalHandler")) {
         harness_game_config.install_signalhandler = (value[0] == '1');
+    } else if (MATCH("General", "FixPedSpasm")) {
+        harness_game_config.fix_ped_spasm = (value[0] == '1');
     }
 
     else {

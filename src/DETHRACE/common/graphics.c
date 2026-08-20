@@ -13,6 +13,7 @@
 #include "globvrbm.h"
 #include "globvrpb.h"
 #include "grafdata.h"
+#include "harness/config.h"
 #include "harness/hooks.h"
 #include "harness/os.h"
 #include "harness/trace.h"
@@ -1476,6 +1477,9 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
     br_material* material;
     br_vertex verts[48];
     br_face faces[16];
+#if defined(DETHRACE_FIX_BUGS)
+    br_uint_16 saved_shadow_modes[LEN(faces)] = {0};
+#endif
 
 #if defined(DETHRACE_FIX_BUGS)
     ray_length = 0.f;
@@ -1619,6 +1623,13 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
                 if (list_ptr->v[0].v[1] >= first_poly_below || list_ptr->v[1].v[1] >= first_poly_below || list_ptr->v[2].v[1] >= first_poly_below) {
                     if (gFancy_shadow) {
                         faces[f_num].material = list_ptr->material;
+#if defined(DETHRACE_FIX_BUGS)
+                        if (list_ptr->material) {
+                            saved_shadow_modes[f_num] = list_ptr->material->mode;
+                            list_ptr->material->mode = (list_ptr->material->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_LE;
+                            BrMaterialUpdate(list_ptr->material, BR_MATU_RENDERING);
+                        }
+#endif
 #ifdef DETHRACE_3DFX_PATCH
                         if (gShade_tables_do_not_work) {
                             list_ptr->material->ka = 0.75f;
@@ -1628,6 +1639,9 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
                         {
                             if (list_ptr->material && list_ptr->material->colour_map && (list_ptr->material->flags & BR_MATF_LIGHT) == 0) {
                                 list_ptr->material->flags |= BR_MATF_SMOOTH | BR_MATF_LIGHT;
+#if defined(DETHRACE_FIX_BUGS)
+                                list_ptr->material->flags |= BR_MATF_INHIBIT_DEPTH_WRITE;
+#endif
                                 BrMaterialUpdate(list_ptr->material, BR_MATU_RENDERING);
                             }
                         }
@@ -1694,9 +1708,31 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
             if (camera_hither_fudge < 0.0002) {
                 camera_hither_fudge = 0.0002;
             }
+#if defined(DETHRACE_FIX_BUGS)
+            if (harness_game_config.opengl_3dfx_mode) {
+                // Shadow renders after the main scene with GL_LEQUAL; applying a
+                // hither fudge would make shadow depths smaller than skid depths,
+                // causing the shadow to overwrite skid marks. Skip the adjustment.
+                camera_hither_fudge = 0.0f;
+            } else {
+                camera_ptr->hither_z += camera_hither_fudge;
+            }
+#else
             camera_ptr->hither_z += camera_hither_fudge;
+#endif
         }
         if (f_num) {
+#if defined(DETHRACE_FIX_BUGS)
+            br_uint_32 dethrace_saved_shadow_flags = 0;
+            br_uint_16 dethrace_saved_shadow_mode = 0;
+            if (!gFancy_shadow) {
+                dethrace_saved_shadow_flags = gShadow_material->flags;
+                dethrace_saved_shadow_mode = gShadow_material->mode;
+                gShadow_material->flags |= BR_MATF_INHIBIT_DEPTH_WRITE;
+                gShadow_material->mode = (gShadow_material->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_LE;
+                BrMaterialUpdate(gShadow_material, BR_MATU_RENDERING);
+            }
+#endif
 #ifdef DETHRACE_3DFX_PATCH
             DisableLights();
 #endif
@@ -1725,12 +1761,23 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
                 }
             }
             BrZbSceneRenderEnd();
+#if defined(DETHRACE_FIX_BUGS)
+            if (!gFancy_shadow) {
+                gShadow_material->flags = dethrace_saved_shadow_flags;
+                gShadow_material->mode = dethrace_saved_shadow_mode;
+                BrMaterialUpdate(gShadow_material, BR_MATU_RENDERING);
+            }
+#endif
         }
         camera_ptr->hither_z -= camera_hither_fudge;
         for (i = 0; i < f_num; i++) {
             if (gFancy_shadow) {
                 material = gShadow_model->faces[i].material;
                 if (material) {
+#if defined(DETHRACE_FIX_BUGS)
+                    material->mode = saved_shadow_modes[i];
+                    BrMaterialUpdate(material, BR_MATU_RENDERING);
+#endif
 #ifdef DETHRACE_3DFX_PATCH
                     if (gShade_tables_do_not_work) {
                         material->ka = 1.0f;
@@ -1740,6 +1787,9 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
 #endif
                     if (material->colour_map && (material->flags & BR_MATF_LIGHT) != 0) {
                         material->flags &= ~(BR_MATF_LIGHT | BR_MATF_PRELIT | BR_MATF_SMOOTH);
+#if defined(DETHRACE_FIX_BUGS)
+                        material->flags &= ~BR_MATF_INHIBIT_DEPTH_WRITE;
+#endif
                         BrMaterialUpdate(material, BR_MATU_RENDERING);
                     }
                 }
@@ -2160,7 +2210,6 @@ void RenderAFrame(int pDepth_mask_on) {
     for (i = 0; i < (gMap_mode && !gSmall_frames_are_slow ? 3 : 1); i++)
 #endif
     {
-        RenderShadows(gUniverse_actor, &gProgram_state.track_spec, gCamera, &gCamera_to_world);
         BrZbSceneRenderBegin(gUniverse_actor, gCamera, gRender_screen, gDepth_buffer);
         ProcessNonTrackActors(gRender_screen, gDepth_buffer, gCamera, &gCamera_to_world, &old_camera_matrix);
         ProcessTrack(gUniverse_actor, &gProgram_state.track_spec, gCamera, &gCamera_to_world, 0);
@@ -2176,6 +2225,7 @@ void RenderAFrame(int pDepth_mask_on) {
         RenderSparks(gRender_screen, gDepth_buffer, gCamera, &gCamera_to_world, gFrame_period);
         RenderProximityRays(gRender_screen, gDepth_buffer, gCamera, &gCamera_to_world, gFrame_period);
         BrZbSceneRenderEnd();
+        RenderShadows(gUniverse_actor, &gProgram_state.track_spec, gCamera, &gCamera_to_world);
     }
 
     if (gWidescreen_mode) {

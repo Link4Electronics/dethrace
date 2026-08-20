@@ -824,6 +824,11 @@ void GetFacesInBox(tCollision_info* c) {
             }
         }
     } else {
+#ifdef DETHRACE_FIX_BUGS
+        if (c->water_d != 10000.0f && c->auto_special_volume != NULL) {
+            TestAutoSpecialVolume(c);
+        }
+#endif
         c->water_d = 10000.0;
         if (c->driver == eDriver_local_human) {
             if (gInTheSea == 1) {
@@ -1431,6 +1436,10 @@ void MungeSpecialVolume(tCollision_info* pCar) {
     car = (tCar_spec*)pCar;
     if (car->auto_special_volume != NULL && (new_special_volume == NULL || new_special_volume->gravity_multiplier == 1.f)) {
         if (car->water_d == 10000.f && pCar->water_depth_factor != 1.f) {
+            // Face not found and car is partially submerged (factor < 1): the car
+            // exited laterally while partially in water. Clear water physics.
+            // When factor==1.f (fully submerged or deep dive), we preserve water
+            // so the car can float back up naturally with correct physics.
             car->auto_special_volume = NULL;
         } else {
             new_special_volume = car->auto_special_volume;
@@ -1502,7 +1511,11 @@ void TestAutoSpecialVolume(tCollision_info* pCar) {
     mat = &pCar->car_master_actor->t.t.mat;
     highest_p = 0.0f;
     for (i = 0; i < 3; i++) {
+#ifdef DETHRACE_FIX_BUGS
+        highest_p += BrVector3Dot((br_vector3*)mat->m[i], &pCar->water_normal) * pCar->bounds[0].min.v[i];
+#else
         highest_p += BrVector3Dot((br_vector3*)mat->m[i], &pCar->water_normal);
+#endif
     }
     highest_p += BrVector3Dot((br_vector3*)mat->m[3], &pCar->water_normal) / WORLD_SCALE_D;
     lowest_p = highest_p;
@@ -1544,7 +1557,11 @@ void TestAutoSpecialVolume(tCollision_info* pCar) {
                 DisablePlingMaterials();
                 FindFloorInBoxBU(&lp, &dir, &tv, &d, pCar);
                 EnablePlingMaterials();
+#ifdef DETHRACE_FIX_BUGS
+                FindFloorInBoxBU(&lp, &dir, &tv, &d2, pCar);
+#else
                 FindFloorInBoxBU(&pos, &dir, &tv, &d2, pCar);
+#endif
                 if (d2 > d) {
                     pCar->auto_special_volume = vol;
                 } else {

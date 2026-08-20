@@ -171,7 +171,7 @@ static void DrawMenuBar(void)
             if (ImGui::MenuItem("Disable LOD", NULL, &lod))
                 gDisable_lod = lod ? 1 : 0;
             bool nvd = gNo_view_distance != 0;
-            if (ImGui::MenuItem("No View Distance (WIP: z-fighting sky)", NULL, &nvd))
+            if (ImGui::MenuItem("No View Distance", NULL, &nvd))
                 gNo_view_distance = nvd ? 1 : 0;
             ImGui::Separator();
             ImGui::Text("Anisotropic Filtering");
