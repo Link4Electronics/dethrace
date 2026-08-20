@@ -2816,7 +2816,7 @@ int GetCarCount(tVehicle_type pCategory) {
         return 0;
 
     case eVehicle_not_really:
-        return gNum_active_non_cars;
+        return gDisable_lod;
     }
 
     return 0;
