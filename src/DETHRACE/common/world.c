@@ -1473,7 +1473,7 @@ void AddFunkotronics(FILE* pF, int pOwner, int pRef_offset) {
                     if (the_funk->proximity_array[j].v[0] == the_funk->proximity_array[i].v[0]
                         && the_funk->proximity_array[j].v[1] == the_funk->proximity_array[i].v[1]
                         && the_funk->proximity_array[j].v[2] == the_funk->proximity_array[i].v[2]) {
-                        memmove(
+                        memcpy(
                             &the_funk->proximity_array[j],
                             &the_funk->proximity_array[j + 1],
                             (the_funk->proximity_count - j - 1) * sizeof(br_vector3));
@@ -5542,8 +5542,8 @@ void DeleteSpecVol(void) {
     index = FindSpecVolIndex(gLast_actor);
     if (index >= 0) {
         DelSpecVolumeGraph(index);
-        memmove(&gProgram_state.special_volumes[index], &gProgram_state.special_volumes[index + 1], (gProgram_state.special_volume_count - index - 1) * sizeof(tSpecial_volume));
-        memmove(&gSpec_vol_actors[index], &gSpec_vol_actors[index + 1], (gProgram_state.special_volume_count - index - 1) * sizeof(br_actor*));
+        memcpy(&gProgram_state.special_volumes[index], &gProgram_state.special_volumes[index + 1], (gProgram_state.special_volume_count - index - 1) * sizeof(tSpecial_volume));
+        memcpy(&gSpec_vol_actors[index], &gSpec_vol_actors[index + 1], (gProgram_state.special_volume_count - index - 1) * sizeof(br_actor*));
         gProgram_state.special_volume_count--;
         NewTextHeadupSlot(eHeadupSlot_misc, 0, 2000, -kFont_BLUEHEAD, "There's been a special volumes MURDER!!");
         gLast_actor = NULL;

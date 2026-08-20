@@ -706,6 +706,7 @@ void CopyStripImage(br_pixelmap* pDest, br_int_16 pDest_x, br_int_16 pOffset_x, 
     char* destn_ptr;
     char* destn_ptr2;
 
+    #ifdef DETHRACE_FIX_BUGS
     if (gBack_screen->type == BR_PMT_RGB_565) {
         Copy8BitStripImageTo16Bit(
             pDest,
@@ -720,6 +721,7 @@ void CopyStripImage(br_pixelmap* pDest, br_int_16 pDest_x, br_int_16 pOffset_x, 
             pHeight);
         return;
     }
+#endif
 
     height = *(tU16*)pSource;
     pSource = pSource + 2;
