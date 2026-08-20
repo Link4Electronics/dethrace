@@ -6,7 +6,7 @@ Dethrace is an attempt to learn how the 1997 driving/mayhem game [Carmageddon](h
 
 ## Status
 
-<img width="50%" src="https://raw.githubusercontent.com/dethrace-labs/reccmp-report/refs/heads/main/progress.svg">
+<img width="50%" src="https://raw.githubusercontent.com/Link4Electronics/reccmp-report/refs/heads/main/progress.svg">
 
 ## Building
 
