@@ -316,7 +316,7 @@ void Win32FatalError(char* pStr_1, char* pStr_2) {
 // IDA: void __usercall PDFatalError(char *pThe_str@<EAX>)
 // FUNCTION: CARM95 0x004a633f
 void PDFatalError(char* pThe_str) {
-    dr_dprintf("FATAL ERROR: %s\n", pThe_str);
+    dr_dprintf("FATAL ERROR: %s", pThe_str);
     Win32FatalError(pThe_str, "");
 }
 

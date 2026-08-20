@@ -2335,12 +2335,6 @@ tNet_game_player_info* NetPlayerFromCar(tCar_spec* pCar) {
 // IDA: tU32 __usercall DoCheckSum@<EAX>(tNet_message *pMessage@<EAX>)
 // FUNCTION: CARM95 0x0044ae74
 tU32 DoCheckSum(tNet_message* pMessage) {
-    int i;
-    int j;
-    tU32 the_sum;
-    tU32* p;
-    tU8* q;
-
 #ifdef DETHRACE_FIX_BUGS
     return 0;
 #endif

@@ -713,11 +713,11 @@ void DoNetworkHeadups(int pCredits) {
         break;
     case eNet_game_type_foxy:
         TimerString(gCurrent_net_game->options.race_end_target, s2, 1, 1);
-        snprintf(s, sizeof(s), "%s \xf8%s\xfa", GetMiscString(kMiscString_TARGET_182), s2);
+        sprintf(s, "%s \xf8%s\xfa", GetMiscString(kMiscString_TARGET_182), s2);
         break;
     case eNet_game_type_tag:
         TimerString(gCurrent_net_game->options.race_end_target, s2, 1, 1);
-        snprintf(s, sizeof(s), "%s \xf8%s\xfa", GetMiscString(kMiscString_LIMIT), s2);
+        sprintf(s, "%s \xf8%s\xfa", GetMiscString(kMiscString_LIMIT), s2);
         break;
     default:
         s[0] = '\0';

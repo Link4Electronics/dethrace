@@ -4134,7 +4134,7 @@ int NewNodeOKHere(void) {
             &gProgram_state.AI_vehicles.path_nodes[gProgram_state.AI_vehicles.path_sections[gMobile_section].node_indices[1]].p,
             &gProgram_state.AI_vehicles.path_nodes[gProgram_state.AI_vehicles.path_sections[gMobile_section].node_indices[0]].p);
 
-        if (BrVector3Length(&last_node_to_this) == 0.f) {
+        if ((br_scalar)sqrt(last_node_to_this.v[2] * last_node_to_this.v[2] + last_node_to_this.v[1] * last_node_to_this.v[1] + last_node_to_this.v[0] * last_node_to_this.v[0]) == 0.f) {
             return 0;
         }
     }

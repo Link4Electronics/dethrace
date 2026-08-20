@@ -7064,7 +7064,10 @@ int DoCollide(tCollision_info* car1, tCollision_info* car2, br_vector3* r, br_ve
     br_vector3 torque2;
     br_scalar f[4];
     br_scalar d[4];
-    br_scalar ts = 0;
+    br_scalar ts;
+#ifdef DETHRACE_FIX_BUGS
+    ts = 0;
+#endif
     br_scalar tforce;
     int i;
     int j;
