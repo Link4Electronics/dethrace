@@ -1315,10 +1315,12 @@ void SmokeCircle3D(br_vector3* o, br_scalar r, br_scalar strength, br_scalar pAs
 
     cam = pCam->type_data;
 
+#ifdef DETHRACE_FIX_BUGS
     if (gNo_2d_effects) {
         RecordSmokeCircle(o, r, strength, pShade_table, pAspect);
         return;
     }
+#endif
 
     srand(o->v[2] * 16777216.0f + o->v[1] * 65536.0f + o->v[0] * 256.0f + r);
     BrVector3Sub(&tv, o, (br_vector3*)gSmoke_camera_to_world.m[3]);
