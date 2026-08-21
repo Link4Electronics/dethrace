@@ -576,9 +576,9 @@ void MultiRayCheckSingleFace(int pNum_rays, tFace_ref* pFace, br_vector3* ray_po
     for (i = 0; i < pNum_rays; ++i) {
         rt[i] = 100.0;
     }
-    if ((!this_material || (this_material->flags & (BR_MATF_TWO_SIDED | BR_MATF_ALWAYS_VISIBLE)) != 0 || d <= 0.0)
+    if ((!this_material || (this_material->flags & (BR_MATF_TWO_SIDED | BR_MATF_ALWAYS_VISIBLE)) != 0 || d <= 0.0f)
         && (!this_material || !this_material->identifier || *this_material->identifier != '!' || !gPling_materials)
-        && fabs(d) >= 0.00000023841858) {
+        && fabs(d) >= 0.00000023841858f) {
         for (i = 0;; ++i) {
             if (i >= pNum_rays) {
                 axis_m = fabs(pFace->normal.v[0]) < fabs(pFace->normal.v[1]);

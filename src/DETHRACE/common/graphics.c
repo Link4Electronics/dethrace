@@ -1527,7 +1527,7 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
     gShadow_points[7].v[2] = bounds_z_max;
     gShadow_clip_plane_count = 0;
     BrMatrix34TApplyV(&light_ray_car, &gShadow_light_ray, &pCar->car_master_actor->t.t.mat);
-    y_offset = (bounds_y_max + bounds_y_min) / 2.0;
+    y_offset = (bounds_y_max + bounds_y_min) / 2.0f;
     TryThisEdge(pCar, &light_ray_car, 2, 1.0, 1, 1.0, 0, 3, y_offset);
     TryThisEdge(pCar, &light_ray_car, 2, -1.0, 1, 1.0, 1, 2, y_offset);
     TryThisEdge(pCar, &light_ray_car, 2, -1.0, 1, -1.0, 6, 5, y_offset);
@@ -1610,10 +1610,10 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
                 poly_centre.v[0] = v2->v[0] + poly_centre.v[0];
                 poly_centre.v[1] = v2->v[1] + poly_centre.v[1];
                 poly_centre.v[2] = v2->v[2] + poly_centre.v[2];
-                poly_centre.v[0] = poly_centre.v[0] / 3.0;
-                poly_centre.v[1] = poly_centre.v[1] / 3.0;
-                poly_centre.v[2] = poly_centre.v[2] / 3.0;
-                poly_centre.v[1] = (v2->v[1] + v1->v[1] + list_ptr->v[0].v[1]) / 3.0;
+                poly_centre.v[0] = poly_centre.v[0] / 3.0f;
+                poly_centre.v[1] = poly_centre.v[1] / 3.0f;
+                poly_centre.v[2] = poly_centre.v[2] / 3.0f;
+                poly_centre.v[1] = (v2->v[1] + v1->v[1] + list_ptr->v[0].v[1]) / 3.0f;
                 if (poly_centre.v[1] > first_poly_below) {
                     car_to_poly.v[0] = poly_centre.v[0] - pCar->car_master_actor->t.t.mat.m[3][0];
                     car_to_poly.v[1] = poly_centre.v[1] - pCar->car_master_actor->t.t.mat.m[3][1];
@@ -1629,7 +1629,7 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
         }
         list_ptr = face_ref;
         for (i = 0; i < face_count; i++) {
-            if (list_ptr->d != 10000.0) {
+            if (list_ptr->d != 10000.0f) {
                 if (list_ptr->v[0].v[1] >= first_poly_below || list_ptr->v[1].v[1] >= first_poly_below || list_ptr->v[2].v[1] >= first_poly_below) {
                     if (gFancy_shadow) {
                         faces[f_num].material = list_ptr->material;
@@ -1710,11 +1710,11 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
 
         camera_ptr = (br_camera*)gCamera->type_data;
         DRMatrix34TApplyP(&pos_cam_space, &pCar->car_master_actor->t.t.euler.t, &gCamera_to_world);
-        if (pos_cam_space.v[2] >= 36.0 || pos_cam_space.v[2] >= camera_ptr->yon_z) {
+        if (pos_cam_space.v[2] >= 36.0f || pos_cam_space.v[2] >= camera_ptr->yon_z) {
             camera_hither_fudge = 0.0;
         } else {
             camera_angle_additional_fudge = sqr(camera_ptr->yon_z - camera_ptr->hither_z);
-            camera_hither_fudge = camera_angle_additional_fudge * (pos_cam_space.v[2] * 1.0) / ((pos_cam_space.v[2] - camera_ptr->yon_z) * camera_ptr->yon_z * 65536.0);
+            camera_hither_fudge = camera_angle_additional_fudge * (pos_cam_space.v[2] * 1.0) / ((pos_cam_space.v[2] - camera_ptr->yon_z) * camera_ptr->yon_z * 65536.0f);
             if (camera_hither_fudge < 0.0002) {
                 camera_hither_fudge = 0.0002;
             }

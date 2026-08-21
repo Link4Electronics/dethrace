@@ -244,12 +244,12 @@ void CrushModelPoint(tCar_spec* pCar, int pModel_index, br_model* pModel, int pC
             target_point = &pModel->vertices[neighbour_index].p;
             old_vector = *target_point;
             for (bend_axis = 0; bend_axis < 3; bend_axis++) {
-                target_point->v[bend_axis] += (1.0f - the_neighbour->factor / 256.0f) * movement.v[bend_axis];
+                target_point->v[bend_axis] += (1.0 - the_neighbour->factor / 256.0) * movement.v[bend_axis];
 
                 if (the_neighbour->factor <= 128) {
-                    v12 = the_neighbour->factor / 128.0f;
+                    v12 = the_neighbour->factor / 128.0;
                 } else {
-                    v12 = 2.0 - the_neighbour->factor / 128.0f;
+                    v12 = 2.0 - the_neighbour->factor / 128.0;
                 }
                 if (((int)((target_point->v[2] + target_point->v[1] + target_point->v[0]) * 63.0f) & 1) * v12 == 0.0) {
                     bend_amount = -default_bend_factor[bend_axis];

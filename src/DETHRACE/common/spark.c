@@ -603,14 +603,14 @@ void CreateSparks(br_vector3* pos, br_vector3* v, br_vector3* pForce, br_scalar 
     BrVector3InvScale(&normal, pForce, ts);
     ts2 = BrVector3Dot(pForce, v);
     if (ts2 >= 0) {
-        ts2 = 1.f / (10.f * ts);
+        ts2 = 1.0 / (10.f * ts);
     } else {
         ts2 = 1.f / (10.f * ts) - ts2 / (ts * ts);
     }
 
     BrVector3Scale(&norm, pForce, ts2);
     BrVector3Accumulate(v, &norm);
-    num = FRandomBetween(0.f, BrVector3Length(v) / 2.f + 0.7f) * sparkiness;
+    num = FRandomBetween(0.f, BrVector3Length(v) / 2.f + 0.7) * sparkiness;
 
     if (num > 10) {
         num = 10;
@@ -1122,7 +1122,7 @@ void SmokeCircle(br_vector3* o, br_scalar r, br_scalar extra_z, br_scalar streng
     depth_ptr = (tU16*)pDepth_buffer->pixels + ox + l * (pDepth_buffer->row_bytes / 2);
     osp = scr_ptr;
     odp = depth_ptr;
-    if (pRender_screen->height > oy && oy + ry >= 0.0) {
+    if (pRender_screen->height > oy && oy + ry >= 0.0f) {
         r_squared = r * r;
         inc = -r;
         y = 0;
@@ -1182,7 +1182,7 @@ void SmokeCircle(br_vector3* o, br_scalar r, br_scalar extra_z, br_scalar streng
             }
         }
     }
-    if (pAspect < 1.0) {
+    if (pAspect < 1.0f) {
         aspect_squared = 9.f;
         ry = r / 3.f;
     }
@@ -1237,11 +1237,11 @@ void SmokeCircle(br_vector3* o, br_scalar r, br_scalar extra_z, br_scalar streng
                 }
             }
             gOffset += IRandomBetween(-1, 1);
-            if (gOffset > r / 5.0) {
-                gOffset = r / 5.0;
+            if (gOffset > r / 5.0f) {
+                gOffset = r / 5.0f;
             }
-            if (gOffset < -(r / 5.0)) {
-                gOffset = -r / 5.0;
+            if (gOffset < -(r / 5.0f)) {
+                gOffset = -r / 5.0f;
             }
         } while (-y < y_limit);
     }

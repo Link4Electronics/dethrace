@@ -1472,7 +1472,7 @@ void MungePedestrianPath(tPedestrian_data* pPedestrian, float pDanger_level, br_
     if (pPedestrian->last_special_volume == NULL) {
         ped_gravity = 1.42029e-6f;
     } else {
-        ped_gravity = pPedestrian->last_special_volume->gravity_multiplier * 1.42029e-6f;
+        ped_gravity = pPedestrian->last_special_volume->gravity_multiplier * 1.420289855072464e-06;
     }
     ped_gravity *= gGravity_multiplier;
     if (gVesuvian_corpses
@@ -1545,7 +1545,7 @@ void MungePedestrianPath(tPedestrian_data* pPedestrian, float pDanger_level, br_
                         if (pPedestrian->hit_points < 0) {
                             BrVector3Copy(&pPedestrian->to_pos, &pPedestrian->pos);
                         }
-                        damage = (pPedestrian->falling_speed - 0.0015f) * 100000.f;
+                        damage = (pPedestrian->falling_speed - 0.0015) * 100000.0;
                         if (damage > 0 || pPedestrian->hit_points < 0) {
                             if (pPedestrian->hit_points >= 0 && (pPedestrian->hit_points -= damage, pPedestrian->hit_points > 0)) {
                                 if (pPedestrian->hit_points < damage) {
