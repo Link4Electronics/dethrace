@@ -3671,14 +3671,16 @@ int SwitchToRealResolution(void) {
 // IDA: int __cdecl SwitchToLoresMode()
 // FUNCTION: CARM95 0x004ba5e7
 int SwitchToLoresMode(void) {
-    if (!gGraf_data_index || gGraf_data_index != gReal_graf_data_index) {
-        return 0;
+    if (gGraf_data_index != 0) {
+        if (gReal_graf_data_index == gGraf_data_index) {
+            gGraf_data_index = 0;
+            gGraf_spec_index = 0;
+            gCurrent_graf_data = &gGraf_data[gGraf_data_index];
+            PDSwitchToLoresMode();
+            return 1;
+        }
     }
-    gGraf_data_index = 0;
-    gGraf_spec_index = 0;
-    gCurrent_graf_data = gGraf_data;
-    PDSwitchToLoresMode();
-    return 1;
+    return 0;
 }
 
 // IDA: void __usercall DRPixelmapDoubledCopy(br_pixelmap *pDestn@<EAX>, br_pixelmap *pSource@<EDX>, int pSource_width@<EBX>, int pSource_height@<ECX>, int pX_offset, int pY_offset)

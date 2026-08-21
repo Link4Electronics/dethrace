@@ -144,7 +144,11 @@ void PlaySmackerFile(char* pSmack_name) {
 void DoOpeningAnimation(void) {
 
     PlaySmackerFile("LOGO.SMK");
+#ifdef DETHRACE_FIX_BUGS
     PlaySmackerFile(harness_game_info.defines.INTRO_SMK_FILE);
+#else
+    PlaySmackerFile("MIX_INTR.SMK");
+#endif
     WaitForNoKeys();
 }
 
@@ -251,7 +255,11 @@ void StartLoadingScreen(void) {
 
     PossibleService();
     if (gProgram_state.sausage_eater_mode) {
+#ifdef DETHRACE_FIX_BUGS
         SplashScreenWith(harness_game_info.defines.GERMAN_LOADSCRN);
+#else
+        SplashScreenWith("LOADSCRN.PIX");
+#endif
     } else {
         SplashScreenWith("LOADSCRN.PIX");
     }

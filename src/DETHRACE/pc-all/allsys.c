@@ -887,7 +887,9 @@ void PDAllocateActionReplayBuffer(char** pBuffer, tU32* pBuffer_size) {
 // IDA: void __usercall PDDisposeActionReplayBuffer(char *pBuffer@<EAX>)
 // FUNCTION: CARM95 0x004a6906
 void PDDisposeActionReplayBuffer(char* pBuffer) {
+#ifdef DETHRACE_FIX_BUGS
     free(pBuffer);
+#endif
 }
 
 // IDA: void __usercall Usage(char *pProgpath@<EAX>)

@@ -1620,5 +1620,7 @@ void DoOptions(void) {
         break;
     }
     UnlockBunchOfFlics(1);
+#ifdef DETHRACE_FIX_BUGS
     PrintMemoryDump(0, "AFTER ENTERING OPTIONS");
+#endif
 }

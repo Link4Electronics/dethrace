@@ -1811,11 +1811,13 @@ int DoMultiPlayerStart(void) {
     int car_index;
     int race_index; // added by dethrace
 
+    #ifdef DETHRACE_FIX_BUGS
     if (harness_game_info.mode == eGame_carmageddon_demo || harness_game_info.mode == eGame_splatpack_demo || harness_game_info.mode == eGame_splatpack_xmas_demo) {
         SuspendPendingFlic();
         DoFeatureUnavailableInDemo();
         return 0;
     }
+#endif
 
     if (gAusterity_mode) {
         NetFullScreenMessage(kMiscString_NOT_ENOUGH_MEMORY, 0);
@@ -1829,7 +1831,11 @@ int DoMultiPlayerStart(void) {
     gSynch_race_start = 0;
     gPending_race = -1;
     gCurrent_race.number_of_racers = 0;
+#ifdef DETHRACE_FIX_BUGS
     gAsk_time = 0;
+#else
+    gLast_host_query = 0;
+#endif
     AboutToLoadFirstCar();
     result = JoinOrHostGame(&game_to_join);
     switch (result) {

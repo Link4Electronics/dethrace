@@ -568,16 +568,28 @@ void Init2DStuff(void) {
 // FUNCTION: CARM95 0x004bba54
 void InitialiseApplication(int pArgc, char** pArgv) {
 
+    #ifdef DETHRACE_FIX_BUGS
     if (harness_game_config.gore_check) {
         gProgram_state.sausage_eater_mode = gSausage_override ? 1 : (PDGetGorePassword() ? 0 : 1);
         PDDisplayGoreworthiness(!gProgram_state.sausage_eater_mode);
     } else {
         gProgram_state.sausage_eater_mode = gSausage_override;
     }
+#else
+    gProgram_state.sausage_eater_mode = gSausage_override;
+#endif
 
     MAMSInitMem();
+#ifdef DETHRACE_FIX_BUGS
     PrintMemoryDump(gSausage_override, *pArgv);
-    if (gAustere_override || PDDoWeLeadAnAustereExistance() != 0) {
+#endif
+    if (!gAustere_override) {
+        if (PDDoWeLeadAnAustereExistance()) {
+            gAusterity_mode = 1;
+        } else {
+            gAusterity_mode = 0;
+        }
+    } else {
         gAusterity_mode = 1;
     }
 
@@ -696,11 +708,14 @@ void InitGame(int pStart_race) {
     gNo_races_yet = 1;
     NetPlayerStatusChanged(ePlayer_status_loading);
     gProgram_state.current_race_index = pStart_race;
+#ifdef DETHRACE_FIX_BUGS
     if (harness_game_info.mode == eGame_carmageddon_demo || harness_game_info.mode == eGame_splatpack_demo || harness_game_info.mode == eGame_splatpack_xmas_demo) {
         gProgram_state.current_car.power_up_levels[0] = gDemo_armour;
         gProgram_state.current_car.power_up_levels[1] = gDemo_power;
         gProgram_state.current_car.power_up_levels[2] = gDemo_offensive;
-    } else {
+    } else
+#endif
+    {
         for (i = 0; i < COUNT_OF(gProgram_state.current_car.power_up_levels); i++) {
             gProgram_state.current_car.power_up_levels[i] = 0;
         }
@@ -720,9 +735,11 @@ void InitGame(int pStart_race) {
     gProgram_state.redo_race_index = -1;
     gWait_for_it = 0;
     SwitchToLoresMode();
+#ifdef DETHRACE_FIX_BUGS
 
     // added by dethrace to support --game-completed arg
     gProgram_state.game_completed = harness_game_config.game_completed;
+#endif
     // -
 }
 

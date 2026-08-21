@@ -204,19 +204,20 @@ void NonFatalError(int pStr_index, ...) {
 // This function is stripped from the retail binary, we've guessed at the implementation
 // FUNCTION: CARM95 0x0046162f
 void CloseDiagnostics(void) {
-
+#ifdef DETHRACE_FIX_BUGS
     if (harness_game_config.enable_diagnostics == 0) {
         return;
     }
 
     fclose(gDiagnostic_file);
+#endif
 }
 
 // IDA: void __cdecl OpenDiagnostics()
 // This function is stripped from the retail binary, we've guessed at the implementation
 // FUNCTION: CARM95 0x0046163a
 void OpenDiagnostics(void) {
-
+#ifdef DETHRACE_FIX_BUGS
     if (harness_game_config.enable_diagnostics == 0) {
         return;
     }
@@ -226,12 +227,14 @@ void OpenDiagnostics(void) {
     fputs("DIAGNOSTIC OUTPUT\n", gDiagnostic_file);
     // todo: generate a real date
     fprintf(gDiagnostic_file, "Date / time : %s\n\n\n", "Mon Mar 24 16 : 32 : 33 1997");
+#endif
 }
 
 // Renamed from dprintf to avoid collisions to stdio
 // This function is stripped from the retail binary, we've guessed at the implementation
 // FUNCTION: CARM95 0x00461645
 void dr_dprintf(char* fmt_string, ...) {
+#ifdef DETHRACE_FIX_BUGS
     static tU32 first_time = 0;
     va_list args;
     tU32 the_time;
@@ -262,6 +265,7 @@ void dr_dprintf(char* fmt_string, ...) {
     vprintf(fmt_string, args);
     va_end(args);
     printf("\n");
+#endif
 }
 
 // IDA: int __usercall DoErrorInterface@<EAX>(int pMisc_text_index@<EAX>)

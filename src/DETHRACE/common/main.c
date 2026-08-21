@@ -25,9 +25,11 @@
 // FUNCTION: CARM95 0x004a9ea0
 void QuitGame(void) {
 
+#ifdef DETHRACE_FIX_BUGS
     if (harness_game_info.mode == eGame_carmageddon_demo || harness_game_info.mode == eGame_splatpack_demo || harness_game_info.mode == eGame_splatpack_xmas_demo) {
         DoDemoGoodbye();
     }
+#endif
 
     gProgram_state.racing = 0;
     SaveOptions();
@@ -37,6 +39,8 @@ void QuitGame(void) {
     ShutdownNetIfRequired();
     if (gSound_available) {
         DRS3ShutDown();
+    }
+    if (gSound_override) {
     }
     if (gBr_initialized) {
 #ifdef DETHRACE_FIX_BUGS
@@ -49,6 +53,7 @@ void QuitGame(void) {
     }
     PDRevertPalette();
     StopMusic();
+#ifdef DETHRACE_FIX_BUGS
     if (gBrZb_initialized) {
         BrZbEnd();
     }
@@ -56,6 +61,7 @@ void QuitGame(void) {
     if (gBr_initialized) {
         BrV1dbEndWrapper();
     }
+#endif
 
 #ifdef DETHRACE_FIX_BUGS
     // Hack: not sure if this is a bug in the original code or if its something caused by dethrace.
@@ -64,6 +70,10 @@ void QuitGame(void) {
 #endif
 
     PDShutdownSystem();
+#ifndef DETHRACE_FIX_BUGS
+    CloseDiagnostics();
+    exit(0);
+#endif
 }
 
 // IDA: tU32 __cdecl TrackCount(br_actor *pActor, tU32 *pCount)
