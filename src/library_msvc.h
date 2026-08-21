@@ -593,7 +593,8 @@ int gS3_cda_enabled;
 // GLOBAL: CARM95 0x005520dc
 int gS3_midi_enabled;
 // GLOBAL: CARM95 0x00536848
-int gLocal_addr;// GLOBAL: CARM95 0x00550634
+int gLocal_addr;
+// GLOBAL: CARM95 0x00550634
 int gS3_tag_seed;
 // GLOBAL: CARM95 0x00544e2c
 int gCredits_won_headup;
@@ -601,12 +602,13 @@ int gCredits_won_headup;
 // LIBRARY: CARM95 0x004f9ef0
 // x_ismbbtype
 // GLOBAL: CARM95 0x004fac90
-void* __except_handler3_thunk;// LIBRARY: CARM95 0x00454c4c
-// MakeMessageToSend// LIBRARY: CARM95 0x0049d837
+void* __except_handler3_thunk;
+// LIBRARY: CARM95 0x00454c4c
+// MakeMessageToSend
+// LIBRARY: CARM95 0x0049d837
 // S3CreateTypeStructs
 // LIBRARY: CARM95 0x0049d84c
-// S3ReleaseTypeStructs// LIBRARY: CARM95 0x004d2900
-// BrMatrix34ToTransform
+// S3ReleaseTypeStructs
 // LIBRARY: CARM95 0x004d3920
 // BrMatrix23PostScale
 // LIBRARY: CARM95 0x004dcb20
@@ -662,14 +664,6 @@ unsigned char gJoy_info_ex1[56];
 // GLOBAL: CARM95 0x0053d8e0
 unsigned char gJoy_info_ex2[56];
 
-// LIBRARY: CARM95 0x00454c4c
-// MakeMessageToSend
-// LIBRARY: CARM95 0x0049d837
-// S3CreateTypeStructs
-// LIBRARY: CARM95 0x004d2900
-// BrMatrix34ToTransform
-// LIBRARY: CARM95 0x004d61b0
-// BrMapEnum
 // LIBRARY: CARM95 0x004f85c0
 // __sbh_alloc_block_from_page
 
