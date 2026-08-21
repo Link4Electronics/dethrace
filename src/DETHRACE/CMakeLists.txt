@@ -163,6 +163,7 @@ target_sources(dethrace_obj PRIVATE
     pd/sys.h
 
     pc-all/allsys.c
+    pc-all/crtsyms.c
 
     # original win95 sys and network
     # pc-win95/win95sys.c
@@ -190,7 +191,7 @@ if(MSVC_42_FOR_RECCMP)
     add_compile_definitions(_DEBUG)
     set_target_properties(dethrace PROPERTIES OUTPUT_NAME "CARM95")
     target_link_options(dethrace PRIVATE /INCREMENTAL:NO /subsystem:windows /ENTRY:mainCRTStartup)
-    target_link_libraries(dethrace PRIVATE ws2_32)
+    target_link_libraries(dethrace PRIVATE ws2_32 winmm)
 
     file(GLOB DETHRACE_COMMON_C_FILES "${CMAKE_CURRENT_SOURCE_DIR}/common/*.c")
     set_source_files_properties(${DETHRACE_COMMON_C_FILES} PROPERTIES COMPILE_FLAGS "/FAs")

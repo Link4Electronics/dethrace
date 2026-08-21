@@ -76,6 +76,8 @@ void CreateShrapnelShower(br_vector3* pos, br_vector3* v, br_vector3* pNormal, b
 
 void InitShrapnel(void);
 
+float GetShrapnelShear(void);
+
 void LoadInShrapnel(void);
 
 void KillShrapnel(int i);

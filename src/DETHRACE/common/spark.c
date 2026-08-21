@@ -861,12 +861,18 @@ void InitShrapnel(void) {
         gShrapnel[i].actor->t.type = BR_TRANSFORM_MATRIX34;
         gShrapnel[i].actor->material = BrMaterialFind("DEBRIS.MAT");
         gShrapnel[i].age = 0;
-        gShrapnel[i].shear1 = FRandomBetween(-2.f, 2.f);
-        gShrapnel[i].shear2 = FRandomBetween(-2.f, 2.f);
+        gShrapnel[i].shear1 = GetShrapnelShear();
+        gShrapnel[i].shear2 = GetShrapnelShear();
         BrVector3SetFloat(&gShrapnel[i].axis,
             FRandomBetween(-1.f, 1.f), FRandomBetween(-1.f, 1.f), FRandomBetween(-1.f, 1.f));
         BrVector3Normalise(&gShrapnel[i].axis, &gShrapnel[i].axis);
     }
+}
+
+// IDA: float __cdecl GetShrapnelShear()
+// FUNCTION: CARM95 0x0046eedf
+float GetShrapnelShear(void) {
+    return FRandomBetween(-2.f, 2.f);
 }
 
 // IDA: void __cdecl LoadInShrapnel()

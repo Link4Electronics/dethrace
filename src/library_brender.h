@@ -181,6 +181,36 @@
 // LIBRARY: CARM95 0x004d5a80
 // BrStrCpy
 
+// LIBRARY: CARM95 0x004d5960
+// BrMemCmp
+
+// LIBRARY: CARM95 0x004d5980
+// BrMemCpy
+
+// LIBRARY: CARM95 0x004d59f0
+// BrStrCat
+
+// LIBRARY: CARM95 0x004d5a30
+// BrStrCmp
+
+// LIBRARY: CARM95 0x004d5a60
+// BrStrICmp
+
+// LIBRARY: CARM95 0x004d5ab0
+// BrStrLen
+
+// LIBRARY: CARM95 0x004d5ad0
+// BrStrNCmp
+
+// LIBRARY: CARM95 0x004d5af0
+// BrStrNICmp
+
+// LIBRARY: CARM95 0x004d5b10
+// BrStrNCpy
+
+// LIBRARY: CARM95 0x004d5b30
+// BrStrChr
+
 // LIBRARY: CARM95 0x004d5b50
 // BrAbort
 

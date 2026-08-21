@@ -79,6 +79,8 @@ void PDShutdownSystem(void);
 
 void PDSaveOriginalPalette(void);
 
+void PDPreInitScreen(void);
+
 void PDRevertPalette(void);
 
 int PDInitScreenVars(int pArgc, char** pArgv);

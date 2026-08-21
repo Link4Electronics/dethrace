@@ -268,13 +268,8 @@ tConcussion gConcussion;
 // GLOBAL: CARM95 0x0053f080
 tClip_details gShadow_clip_planes[8];
 
-#ifdef DETHRACE_FIX_BUGS
 // GLOBAL: CARM95 0x0053e5f8
-br_actor* gLollipops[2000];
-#else
-// GLOBAL: CARM95 0x0053e5f8
-br_actor* gLollipops[100];
-#endif
+br_actor* gLollipops[GLOLLIPOP_COUNT];
 
 // GLOBAL: CARM95 0x0053f8d8
 tWobble_spec gWobble_array[5];

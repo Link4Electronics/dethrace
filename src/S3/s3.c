@@ -21,6 +21,7 @@
 
 extern int PDGetTotalTime(void);
 
+// GLOBAL: CARM95 0x00544d88
 int gS3_enabled;
 int gS3_noutlets;
 int gS3_nsound_sources;
@@ -1232,6 +1233,12 @@ int S3OutletSoundsPlaying(tS3_outlet* pOutlet) {
     return sound_count;
 }
 
+// IDA: int __cdecl null_unknown_libname_8(tS3_channel* pChannel)
+// FUNCTION: CARM95 0x0049e317
+int null_unknown_libname_8(tS3_channel* pChannel) {
+    return 0;
+}
+
 // FUNCTION: CARM95 0x0049C748
 int S3StopOutletSound(tS3_outlet* pOutlet) {
     tS3_channel* c; // [esp+Ch] [ebp-4h]
@@ -1240,7 +1247,7 @@ int S3StopOutletSound(tS3_outlet* pOutlet) {
         return 0;
     }
     for (c = pOutlet->channel_list; c; c = c->next) {
-        // null_unknown_libname_8();
+        null_unknown_libname_8(c);
         if (c->active) {
             c->spatial_sound = 0;
             S3StopChannel(c);
@@ -1261,9 +1268,23 @@ char* S3GetCurrentDir(void) {
     return gS3_current_dir;
 }
 
+// IDA: void __cdecl S3_nullsub_1()
+// FUNCTION: CARM95 0x0049CC45
+void S3_nullsub_1(void) {
+}
+
+// IDA: void __cdecl S3_nullsub_2()
+// FUNCTION: CARM95 0x0049CC61
+void S3_nullsub_2(void) {
+}
+
+// IDA: void __cdecl S3_nullsub_3()
+// FUNCTION: CARM95 0x0049CC70
+void S3_nullsub_3(void) {
+}
+
 // FUNCTION: CARM95 0x0049CB0E
-tS3_descriptor* S3GetDescriptorByID(tS3_sound_tag id) {
-    tS3_descriptor* d; // [esp+Ch] [ebp-4h]
+tS3_descriptor* S3GetDescriptorByID(tS3_sound_tag id) {    tS3_descriptor* d; // [esp+Ch] [ebp-4h]
 
     assert(id != 0);
 

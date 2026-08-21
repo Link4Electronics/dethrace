@@ -1879,6 +1879,12 @@ void GetPowerup(int pNum) {
     GotPowerup(&gProgram_state.current_car, pNum);
 }
 
+// IDA: void __cdecl CheckOtherKeys()
+// FUNCTION: CARM95 0x004a29aa
+void CheckOtherKeys(void) {
+    // empty function in the original binary
+}
+
 // IDA: void __usercall CheckSystemKeys(int pRacing@<EAX>)
 // FUNCTION: CARM95 0x004a293f
 void CheckSystemKeys(int pRacing) {
@@ -1888,6 +1894,7 @@ void CheckSystemKeys(int pRacing) {
     start_menu_time = PDGetTotalTime();
     CheckQuit();
     if (!gAction_replay_mode) {
+        CheckOtherKeys();
         CheckLoadSave();
     }
     AddLostTime(PDGetTotalTime() - start_menu_time);

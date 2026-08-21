@@ -44,8 +44,10 @@ tGraf_spec gGraf_specs[2] = {
     { 8, 1, 0, 640, 480, 0, 0, "64X48X8", "VESA,W:640,H:480,B:8", 640, 640, 480, NULL }
     // { 8, 1, 0, 1920, 1080, 0, 0, "64X48X8", "VESA,W:640,H:480,B:8", 640, 1920, 1080, NULL }
 };
+// GLOBAL: CARM95 0x0053e270
 int gASCII_table[128];
 tU32 gKeyboard_bits[8];
+// GLOBAL: CARM95 0x0053d6a8
 int gASCII_shift_table[128];
 char gNetwork_profile_fname[256];
 tS32 gJoystick_min1y;
@@ -118,8 +120,10 @@ static int sdl3_gpu_debug_mode(void) {
 
 // from win95sys.c
 int gShow_fatal_error;
+// GLOBAL: CARM95 0x0053dd20
 char gFatal_error_string[512];
 int gExit_code;
+// GLOBAL: CARM95 0x0053df30
 br_diaghandler gBr_diaghandler;
 
 // forward declare for `PDInitialiseSystem`
@@ -387,6 +391,12 @@ void PDShutdownSystem(void) {
 // IDA: void __cdecl PDSaveOriginalPalette()
 void PDSaveOriginalPalette(void) {
     NOT_IMPLEMENTED();
+}
+
+// IDA: void __cdecl PDPreInitScreen()
+// FUNCTION: CARM95 0x004a7097
+void PDPreInitScreen(void) {
+    // empty function in the original binary
 }
 
 // IDA: void __cdecl PDRevertPalette()
@@ -842,10 +852,23 @@ void PDGetMousePosition(int* pX_coord, int* pY_coord) {
     }
 }
 
+#ifndef DETHRACE_FIX_BUGS
+__declspec(dllimport) unsigned long __stdcall timeGetTime(void);
+#endif
+
+// IDA: void __cdecl PD_nullsub_1()
+// FUNCTION: CARM95 0x004A83DB
+void PD_nullsub_1(void) {
+}
+
 // IDA: int __cdecl PDGetTotalTime()
 // FUNCTION: CARM95 0x004a83c5
 int PDGetTotalTime(void) {
+#ifndef DETHRACE_FIX_BUGS
+    return timeGetTime();
+#else
     return gHarness_platform.GetTicks();
+#endif
 }
 
 // IDA: int __usercall PDServiceSystem@<EAX>(tU32 pTime_since_last_call@<EAX>)

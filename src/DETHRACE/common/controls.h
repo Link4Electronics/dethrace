@@ -148,6 +148,8 @@ void ConcussMe(void);
 
 void CheckHelp(void);
 
+void CheckOtherKeys(void);
+
 void CheckLoadSave(void);
 
 void CheckToggles(int pRacing);

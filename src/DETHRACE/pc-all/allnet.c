@@ -58,6 +58,7 @@ struct sockaddr_in gLast_received_addr;
 tCopyable_sockaddr_in gLocal_addr_copyable;
 tCopyable_sockaddr_in gLast_received_addr_copyable;
 
+// GLOBAL: CARM95 0x00510e84
 int gSocket;
 int gPlayer_id;
 

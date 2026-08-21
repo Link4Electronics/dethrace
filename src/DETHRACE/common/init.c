@@ -607,6 +607,7 @@ void InitialiseApplication(int pArgc, char** pArgv) {
         FatalError(kFatalError_UnsupportedScreenDepth);
     }
     CalcGrafDataIndex();
+    PDPreInitScreen();
     PDInitScreen();
     InitializeBRenderEnvironment();
     InitDRFonts();
