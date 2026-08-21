@@ -351,7 +351,7 @@ void ProcessOilSpills(tU32 pFrame_period) {
                     BrVector3Sub(&v, &gOily_spills[i].original_pos, &gOily_spills[i].car->pos);
 
                     if (gOily_spills[i].stop_time == 0) {
-                        if (BrVector3LengthSquared(&v) > 0.2f) {
+                        if (BR_SQR3(v.v[0], v.v[1], v.v[2]) > 0.2f) {
                             gOily_spills[i].stop_time = time;
                             continue;
                         }

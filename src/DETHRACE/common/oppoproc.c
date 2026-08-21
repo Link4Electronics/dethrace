@@ -40,7 +40,7 @@ void StraightestArcForCorner(float* p1, float* p2, float* p3, br_vector3* p4, br
     BrVector3Sub(&rel3, p4, p5);
     rel3.v[1] = 0.f;
     *p3 = BrVector3Length(&rel3);
-    if (*p3 <= BR_SCALAR_EPSILON) {
+    if (*p3 <= 1.1920928955078125e-06) {
         *p2 = 0.001f;
         *p3 = 0.001f;
     }

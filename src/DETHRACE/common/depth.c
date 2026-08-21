@@ -294,7 +294,7 @@ void MungeSkyModel(br_actor* pCamera, br_model* pModel) {
     sky_distance = camera_data->yon_z - 1.f;
     horizon_half_height = sky_distance * tan_half_fov;
     horizon_half_width = horizon_half_height * camera_data->aspect;
-    horizon_half_diag = sqrt(horizon_half_height * horizon_half_height + horizon_half_width * horizon_half_width);
+    horizon_half_diag = sqrt(horizon_half_width * horizon_half_width + horizon_half_height * horizon_half_height);
     half_diag_fov = BrRadianToAngle(atan2(horizon_half_diag, sky_distance));
     edge_u = EdgeU(gSky_image_width, 2 * half_diag_fov, BR_ANGLE_DEG(10));
     narrow_u = edge_u / 2.f;

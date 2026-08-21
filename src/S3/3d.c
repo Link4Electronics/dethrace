@@ -549,7 +549,7 @@ int S3Calculate3D(tS3_channel* chan, int pIs_ambient) {
 
     vol_multiplier = 1.0f / (dist / 6.0f + 1.0f);
     if (!gS3_inside_cockpit) {
-        vol_multiplier = vol_multiplier * 1.3f;
+        vol_multiplier = vol_multiplier * 1.3;
     }
     attenuation = (chan->position.z - gS3_listener_position_now.z) * gS3_listener_left_now.z
         + (chan->position.y - gS3_listener_position_now.y) * gS3_listener_left_now.y

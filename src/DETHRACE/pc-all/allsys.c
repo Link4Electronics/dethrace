@@ -120,6 +120,7 @@ static int sdl3_gpu_debug_mode(void) {
 #endif
 
 // from win95sys.c
+// GLOBAL: CARM95 0x0051d5bc
 int gShow_fatal_error;
 // GLOBAL: CARM95 0x0053dd20
 char gFatal_error_string[512];

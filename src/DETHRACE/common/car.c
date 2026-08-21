@@ -1896,20 +1896,20 @@ void ControlCar1(tCar_spec* c, br_scalar dt) {
         c->acc_force = 7.f * c->M;
     }
     if (c->keys.dec) {
-        c->acc_force = -7.f * c->M;
+        c->acc_force = -(7.f * c->M);
     }
     if (c->keys.left) {
         if (c->curvature >= 0.f) {
-            c->curvature += dt / (PHYSICS_STEP_TIME / 1000.0f) * 0.05f / (5.f + BrVector3Length(&c->v));
+            c->curvature += dt / (PHYSICS_STEP_TIME / 1000.0f) * (0.05f / (5.f + BrVector3Length(&c->v)));
         } else {
-            c->curvature += 0.01f * dt / (PHYSICS_STEP_TIME / 1000.0f);
+            c->curvature += 0.01 * dt / (PHYSICS_STEP_TIME / 1000.0);
         }
     }
     if (c->keys.right) {
         if (c->curvature <= 0.f) {
-            c->curvature -= dt / (PHYSICS_STEP_TIME / 1000.0f) * 0.05f / (5.f + BrVector3Length(&c->v));
+            c->curvature -= dt / (PHYSICS_STEP_TIME / 1000.0f) * (0.05f / (5.f + BrVector3Length(&c->v)));
         } else {
-            c->curvature -= 0.01f * dt / (PHYSICS_STEP_TIME / 1000.0f);
+            c->curvature -= 0.01 * dt / (PHYSICS_STEP_TIME / 1000.0);
         }
     }
     if (c->curvature > c->maxcurve) {
@@ -3189,7 +3189,7 @@ int CollCheck(tCollision_info* c, br_scalar dt) {
             if (gPinball_factor != 0.0f) {
                 BrVector3Scale(&p_vel, &p_vel, gPinball_factor);
                 point_vel = BrVector3LengthSquared(&p_vel);
-                if (point_vel > 10.0f) {
+                if (point_vel > 10.0) {
                     noise_defeat = 1;
                     if (c->driver == eDriver_local_human) {
                         DRS3StartSound(gCar_outlet, 9011);
@@ -3229,7 +3229,7 @@ int CollCheck(tCollision_info* c, br_scalar dt) {
                 max *= c->last_special_volume->gravity_multiplier;
             }
             if (BrVector3LengthSquared(&c->velocity_car_space) < 0.05f
-                && 0.1f * total_force > BrVector3Dot(&c->omega, &tv)
+                && 0.1 * total_force > BrVector3Dot(&c->omega, &tv)
                 && k >= 3
                 && norm.v[1] > min
                 && norm.v[1] < max) {
@@ -3291,7 +3291,7 @@ int CollCheck(tCollision_info* c, br_scalar dt) {
 #endif
                 {
                     for (i = 0; i < CAR(c)->car_actor_count; i++) {
-                        ts2 = (v_diff + 20.0f) * -0.01f;
+                        ts2 = (v_diff + 20.0f) * -0.01;
                         TotallySpamTheModel(CAR(c), i, CAR(c)->car_model_actors[i].actor, &CAR(c)->car_model_actors[i].crush_data, ts2);
                     }
                     for (i = 0; i < COUNT_OF(CAR(c)->damage_units); i++) {
@@ -5330,7 +5330,7 @@ int MoveCamToIncident(tCar_spec* c, tIncident_type* type, float* severity, tInci
                         *type = eNo_incident;
                     } else {
                         BrVector3Sub(&tv, &pos, &c->pos);
-                        if (BrVector3LengthSquared(&tv) > 102.91955471539592f) {
+                        if (BrVector3LengthSquared(&tv) > 102.91955471539592) {
                             *type = eNo_incident;
                         } else {
                             BrVector3Sub(&tv, &pos, &info->wall_info.pos);
@@ -5559,7 +5559,7 @@ void NormalPositionExternalCamera(tCar_spec* c, tU32 pTime) {
         if (gCar_flying || gCamera_reset || gCamera_mode == -2) {
             gCamera_mode = 0;
         }
-        d = sqrt(gCamera_zoom) + 4.f / WORLD_SCALE;
+        d = sqrt(gCamera_zoom) + 0.5797101259231567f;
         if (!gCamera_mode || gCamera_mode == -1) {
             BrVector3Copy(&vn, &c->direction);
             MoveWithWheels(c, &vn, manual_swing);
@@ -5719,7 +5719,7 @@ void SwingCamera(tCar_spec* c, br_matrix34* m1, br_matrix34* m2, br_vector3* vn,
                 BrVector3Negate(vn, vn);
             } else {
                 gCamera_sign = gCamera_sign == 0;
-                omega = BrDegreeToAngle(pTime * 0.03f);
+                omega = BrDegreeToAngle(pTime * 0.03);
                 if (gCamera_yaw <= 32760) {
                     yaw = gCamera_yaw;
                 } else {
@@ -5782,9 +5782,9 @@ void SwingCamera(tCar_spec* c, br_matrix34* m1, br_matrix34* m2, br_vector3* vn,
                     vn->v[0] = sin(ts) * gView_direction.v[2] + cos(ts) * gView_direction.v[0];
                     vn->v[2] = cos(ts) * gView_direction.v[2] - sin(ts) * gView_direction.v[0];
                 }
-                omega += BrDegreeToAngle(pTime * 0.03f);
-                if (BrDegreeToAngle(pTime * 0.1f) < omega) {
-                    omega = BrDegreeToAngle(pTime * 0.1f);
+                omega += BrDegreeToAngle(pTime * 0.03);
+                if (BrDegreeToAngle(pTime * 0.1) < omega) {
+                    omega = BrDegreeToAngle(pTime * 0.1);
                 }
                 if (omega < theta) {
                     omega = theta;
@@ -6981,7 +6981,7 @@ int FacePointCarCarCollide(tCollision_info* car1, tCollision_info* car2, br_matr
         BrMatrix34ApplyP(&bb, &a, pMoms);
         BrVector3Sub(&aa, &aa, &bb);
         dist = BrVector3Length(&aa);
-        if (dist >= 0.00001f) {
+        if (dist >= 0.00001) {
             BrVector3Scale(&a1, &aa, (0.05f / WORLD_SCALE) / dist); // 0.0072463769 * 6.9 = 0.05
             BrVector3Accumulate(&aa, &a1);
             BrVector3Accumulate(&aa, &bb);

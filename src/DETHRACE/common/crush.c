@@ -646,10 +646,10 @@ void CheckPiledriverBonus(tCar_spec* pCar, br_vector3* pImpact_point, br_vector3
     BrVector3Normalise(&norm_energy, pEnergy);
 
     for (child = pCar->car_master_actor->children; child != NULL; child = child->next) {
-        if (ActorIsPedestrian(child) && PedestrianActorIsPerson(child) && pCar->speed > 0.001f) {
+        if (ActorIsPedestrian(child) && PedestrianActorIsPerson(child) && pCar->speed > 0.001) {
             BrVector3Normalise(&norm_child, &child->t.t.translate.t);
             norm_child.v[1] = 0.f;
-            if (BrVector3Dot(&norm_child, &norm_impact) > 0.8f && BrVector3Dot(&norm_energy, &norm_child) < -.65) {
+            if (BrVector3Dot(&norm_child, &norm_impact) > 0.8 && BrVector3Dot(&norm_energy, &norm_child) < -.65) {
                 DoFancyHeadup(kFancyHeadupPileDriverBonus);
                 EarnCredits(((GetPedestrianValue(child) / 2 + 12) / 25) * 25);
                 return;

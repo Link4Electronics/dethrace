@@ -271,7 +271,7 @@ int DrawLine2D(br_vector3* o, br_vector3* p, br_pixelmap* pScreen, br_pixelmap* 
     x2 = pScreen->width / 2 + p->v[0];
     y1 = pScreen->height / 2 - o->v[1];
     y2 = pScreen->height / 2 - p->v[1];
-    if (brightness < 0.001 || brightness > 1.0) {
+    if (brightness < 0.001f || brightness > 1.0f) {
         return 0;
     }
     if (x1 < 0 || x2 < 0) {
@@ -865,7 +865,20 @@ void InitShrapnel(void) {
         gShrapnel[i].shear2 = GetShrapnelShear();
         BrVector3SetFloat(&gShrapnel[i].axis,
             FRandomBetween(-1.f, 1.f), FRandomBetween(-1.f, 1.f), FRandomBetween(-1.f, 1.f));
-        BrVector3Normalise(&gShrapnel[i].axis, &gShrapnel[i].axis);
+        {
+            br_scalar _scale;
+            _scale = (br_scalar)sqrt(BR_SQR3(gShrapnel[i].axis.v[0], gShrapnel[i].axis.v[1], gShrapnel[i].axis.v[2]));
+            if (_scale > 2.3841858e-07f) {
+                _scale = (br_scalar)(1.0 / _scale);
+                gShrapnel[i].axis.v[0] = BR_MUL(gShrapnel[i].axis.v[0], _scale);
+                gShrapnel[i].axis.v[1] = BR_MUL(gShrapnel[i].axis.v[1], _scale);
+                gShrapnel[i].axis.v[2] = BR_MUL(gShrapnel[i].axis.v[2], _scale);
+            } else {
+                gShrapnel[i].axis.v[0] = 1.0f;
+                gShrapnel[i].axis.v[1] = 0.0f;
+                gShrapnel[i].axis.v[2] = 0.0f;
+            }
+        }
     }
 }
 
@@ -1548,7 +1561,7 @@ void RenderSmoke(br_pixelmap* pRender_screen, br_pixelmap* pDepth_buffer, br_act
         if (gSmoke[i].pipe_me) {
             AddSmokeToPipingSession(i, gSmoke[i].type, &gSmoke[i].pos, gSmoke[i].radius, gSmoke[i].strength);
         }
-        gSmoke[i].radius = pTime / 1000.0f * gSmoke[i].strength * 0.5 + gSmoke[i].radius;
+        gSmoke[i].radius = pTime / 1000.0f * gSmoke[i].strength * 0.5000000000000001 + gSmoke[i].radius;
         gSmoke[i].strength = gSmoke[i].strength - pTime * gSmoke[i].decay_factor / 1000.0f;
         if (gSmoke[i].radius > 0.3f) {
             gSmoke[i].radius = 0.3f;
@@ -1913,8 +1926,8 @@ void DoSmokeColumn(int i, tU32 pTime, br_vector3* pRet_car_pos) {
 
     BrVector3Add(pRet_car_pos, &V11MODEL(actor->model)->groups[0].position[gSmoke_column[i].vertex_index], &actor->t.t.translate.t);
     if (gProgram_state.cockpit_on && c->driver == eDriver_local_human) {
-        if (c->driver_z_offset + 0.2f <= pRet_car_pos->v[2]) {
-            pRet_car_pos->v[1] -= -0.07f;
+        if (c->driver_z_offset + 0.2 <= pRet_car_pos->v[2]) {
+            pRet_car_pos->v[1] += 0.07;
         } else {
             BrMatrix34ApplyP(pRet_car_pos, &V11MODEL(actor->model)->groups[0].position[gSmoke_column[i].vertex_index], &bonny->t.t.mat);
         }
@@ -2630,27 +2643,27 @@ void CreateSplash(tCar_spec* pCar, tU32 pTime) {
     br_vector3 back_point[2];
     br_scalar back_val[2];
 
-    back_val[0] = 0.0;
-    back_val[1] = 0.0;
+    back_val[0] = 0.0f;
+    back_val[1] = 0.0f;
 #ifdef DETHRACE_FIX_BUGS
     BrVector3Set(&p, 0.f, 0.f, 0.f);
 #endif
-    if (pCar->v.v[2] * pCar->v.v[2] + pCar->v.v[1] * pCar->v.v[1] + pCar->v.v[0] * pCar->v.v[0] >= 1.0) {
+    if (pCar->v.v[2] * pCar->v.v[2] + pCar->v.v[1] * pCar->v.v[1] + pCar->v.v[0] * pCar->v.v[0] >= 1.0f) {
         BrMatrix34TApplyV(&normal_car_space, &pCar->water_normal, &pCar->car_master_actor->t.t.mat);
         BrMatrix34ApplyP(&tv, &pCar->bounds[0].min, &pCar->car_master_actor->t.t.mat);
         min = BrVector3Dot(&pCar->water_normal, &tv) - pCar->water_d;
         max = min;
         for (i = 0; i < 3; ++i) {
-            if (normal_car_space.v[i] <= 0.0) {
+            if (normal_car_space.v[i] <= 0.0f) {
                 max = (pCar->bounds[0].max.v[i] - pCar->bounds[0].min.v[i]) * normal_car_space.v[i] + max;
             } else {
                 min = (pCar->bounds[0].max.v[i] - pCar->bounds[0].min.v[i]) * normal_car_space.v[i] + min;
             }
         }
-        if (min * max <= 0.0) {
+        if (min * max <= 0.0f) {
             BrVector3InvScale(&back_point[0], &pCar->bounds[1].min, WORLD_SCALE);
             BrVector3InvScale(&back_point[1], &pCar->bounds[1].max, WORLD_SCALE);
-            back_point[0].v[1] = 0.01;
+            back_point[0].v[1] = 0.01f;
             ts = BrVector3Dot(&pCar->velocity_car_space, &normal_car_space);
             BrVector3Scale(&tv, &normal_car_space, ts);
             BrVector3Sub(&v_plane, &pCar->velocity_car_space, &tv);
@@ -2684,14 +2697,14 @@ void CreateSplash(tCar_spec* pCar, tU32 pTime) {
                             if (back_val[1] <= ts) {
                                 SingleSplash(pCar, &tv2, &normal_car_space, pTime);
                             } else {
-                                if (back_val[1] < 0.0) {
+                                if (back_val[1] < 0.0f) {
                                     SingleSplash(pCar, &pos2, &normal_car_space, pTime);
                                 }
                                 back_val[1] = ts;
                                 pos2 = tv2;
                             }
                         } else {
-                            if (back_val[1] < 0.0) {
+                            if (back_val[1] < 0.0f) {
                                 SingleSplash(pCar, &pos2, &normal_car_space, pTime);
                             }
                             back_val[1] = back_val[0];
@@ -2703,8 +2716,8 @@ void CreateSplash(tCar_spec* pCar, tU32 pTime) {
                 }
                 axis2 = axis1;
             }
-            if (back_val[1] >= 0.0) {
-                if (back_val[0] < 0.0) {
+            if (back_val[1] >= 0.0f) {
+                if (back_val[0] < 0.0f) {
                     SingleSplash(pCar, &p, &normal_car_space, pTime);
                 }
             } else {
@@ -2712,13 +2725,13 @@ void CreateSplash(tCar_spec* pCar, tU32 pTime) {
                 tv.v[1] = pos2.v[1] - p.v[1];
                 tv.v[2] = pos2.v[2] - p.v[2];
                 BrVector3Sub(&tv, &pos2, &p);
-                ts = SRandomBetween(0.4, 0.6);
+                ts = SRandomBetween(0.4f, 0.6f);
                 BrVector3Scale(&tv2, &tv, ts);
                 BrVector3Accumulate(&tv2, &p);
-                ts = SRandomBetween(0.2, 0.3);
+                ts = SRandomBetween(0.2f, 0.3f);
                 BrVector3Scale(&cm, &tv, ts);
                 BrVector3Accumulate(&p, &cm);
-                ts = -SRandomBetween(0.2, 0.3);
+                ts = -SRandomBetween(0.2f, 0.3f);
                 BrVector3Scale(&cm, &tv, ts);
                 BrVector3Accumulate(&pos2, &cm);
                 ts = BrVector3Dot(&pCar->velocity_car_space, &normal_car_space);
@@ -2741,12 +2754,12 @@ void CreateSplash(tCar_spec* pCar, tU32 pTime) {
                     - (pCar->extra_points[i].v[1] * normal_car_space.v[1]
                         + pCar->extra_points[i].v[2] * normal_car_space.v[2]
                         + pCar->extra_points[i].v[0] * normal_car_space.v[0]);
-                if ((dist > 0.0) != (dist2 > 0.0)) {
+                if ((dist > 0.0f) != (dist2 > 0.0f)) {
                     ts = dist / (dist - dist2);
                     BrVector3Sub(&tv, &pCar->extra_points[i], &pCar->cmpos);
                     BrVector3Scale(&tv, &tv, ts);
                     BrVector3Accumulate(&tv, &pCar->cmpos);
-                    if (pCar->bounds[1].max.v[1] - 0.028985508 > tv.v[1]
+                    if (pCar->bounds[1].max.v[1] - 0.028985508f > tv.v[1]
                         || pCar->bounds[1].min.v[0] > tv.v[0]
                         || pCar->bounds[1].max.v[0] < tv.v[1]
                         || pCar->bounds[1].min.v[2] > tv.v[2]

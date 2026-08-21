@@ -1108,7 +1108,7 @@ void CalculateWobblitude(tU32 pThe_time) {
                 } else {
                     cosine_over_angle = gCosine_array[(unsigned int)(mod_angle / DR_PI * 128.0)];
                 }
-                angle = cosine_over_angle / ((double)(pThe_time - gWobble_array[i].time_started) * 0.0035f + 1.0f);
+                angle = cosine_over_angle / ((double)(pThe_time - gWobble_array[i].time_started) * 0.0035 + 1.0f);
                 gScreen_wobble_x = (gWobble_array[i].amplitude_x * angle + gScreen_wobble_x);
                 gScreen_wobble_y = (gWobble_array[i].amplitude_y * angle + gScreen_wobble_y);
             }
@@ -1159,7 +1159,7 @@ void CalculateConcussion(tU32 pThe_time) {
                     } else {
                         cosine_over_angle = gCosine_array[(unsigned int)(mod_angle / DR_PI * 128.f)];
                     }
-                    angle = cosine_over_angle / ((double)time_difference * 0.02f + 1.0f);
+                    angle = cosine_over_angle / ((double)time_difference * 0.02 + 1.0f);
                     gCamera->t.t.mat.m[i][j] = angle * the_amplitude + gCamera->t.t.mat.m[i][j];
                     gRearview_camera->t.t.mat.m[i][j] = angle * the_amplitude + gRearview_camera->t.t.mat.m[i][j];
                 }
@@ -1578,7 +1578,7 @@ void ProcessShadow(tCar_spec* pCar, br_actor* pWorld, tTrack_spec* pTrack_spec, 
                 kev_bounds.original_bounds.min.v[2] = shadow_points_world[i].v[2];
             }
         }
-        kev_bounds.original_bounds.min.v[1] = kev_bounds.original_bounds.min.v[1] - 4.4000001;
+        kev_bounds.original_bounds.min.v[1] = kev_bounds.original_bounds.min.v[1] - 4.4f;
         kev_bounds.mat = &gIdentity34;
         face_count = FindFacesInBox(&kev_bounds, the_list, 100);
         face_ref = the_list;

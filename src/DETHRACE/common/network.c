@@ -2261,7 +2261,7 @@ void ResendGuaranteedMessages(void) {
                 gGuarantee_list[i].message->guarantee_number = gGuarantee_list[i].guarantee_number;
                 DoCheckSum(gGuarantee_list[i].message);
                 PDNetSendMessageToAddress(gCurrent_net_game, gGuarantee_list[i].message, &gGuarantee_list[i].pd_address);
-                gGuarantee_list[i].resend_period = (tU32)(gGuarantee_list[i].resend_period * 1.2f);
+                gGuarantee_list[i].resend_period = (tU32)(gGuarantee_list[i].resend_period * 1.2);
                 gGuarantee_list[i].next_resend_time += gGuarantee_list[i].resend_period;
             }
             i++;

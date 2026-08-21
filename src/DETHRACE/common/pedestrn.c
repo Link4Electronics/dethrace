@@ -1516,7 +1516,7 @@ void MungePedestrianPath(tPedestrian_data* pPedestrian, float pDanger_level, br_
                     }
                     if (pPedestrian->hit_points > 0
                         && pPedestrian->falling_sound >= 0
-                        && pPedestrian->falling_speed >= 0.0008f) {
+                        && pPedestrian->falling_speed >= 0.0008) {
                         DRS3StopSound(pPedestrian->last_sound);
                         the_pitch = 65536.f / gPed_scale_factor;
                         pPedestrian->last_sound = DRS3StartSound3D(gPedestrians_outlet,

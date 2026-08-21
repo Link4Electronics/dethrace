@@ -540,3 +540,49 @@
 // __IsZeroMan
 // LIBRARY: CARM95 0x004fb8f0
 // __ShrMan
+
+// CRT data symbols resolved from the debug CRT libraries.
+// GLOBAL: CARM95 0x0052d418
+// errno
+// GLOBAL: CARM95 0x00553a94
+// _crtheap
+// GLOBAL: CARM95 0x0052d3b0
+// _crtDbgFlag
+// GLOBAL: CARM95 0x0052d9f8
+// __small_block_heap
+// GLOBAL: CARM95 0x0052d3a0
+// __decimal_point
+// GLOBAL: CARM95 0x0052d444
+// __initenv
+// GLOBAL: CARM95 0x0052e210
+// __sbh_decommitable_pages
+// GLOBAL: CARM95 0x0052e20c
+// __sbh_p_starting_region
+// GLOBAL: CARM95 0x0052e9e4
+// _commode
+// GLOBAL: CARM95 0x0052e710
+// f_use
+// GLOBAL: CARM95 0x0053990c
+// count
+
+// Static CRT helpers referenced from matched functions.
+// LIBRARY: CARM95 0x004eafe0
+// shortsort
+// LIBRARY: CARM95 0x004f95d0
+// siglookup
+// LIBRARY: CARM95 0x004f1a60
+// write_char
+// LIBRARY: CARM95 0x004fe830
+// findenv
+// LIBRARY: CARM95 0x004f76d0
+// _heap_alloc_base
+// LIBRARY: CARM95 0x004ecbd0
+// _heap_alloc_dbg
+// LIBRARY: CARM95 0x004ecfc0
+// realloc_help
+// LIBRARY: CARM95 0x004f9c60
+// _XcptFilter
+// LIBRARY: CARM95 0x004f9ed0
+// _ismbblead
+// LIBRARY: CARM95 0x004f7da0
+// __sbh_release_region
