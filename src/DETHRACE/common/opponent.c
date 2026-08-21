@@ -882,7 +882,7 @@ void StunTheBugger(tOpponent_spec* pOpponent_spec, int pMilliseconds) {
     pOpponent_spec->car_spec->acc_force = 0.f;
     pOpponent_spec->car_spec->brake_force = 0.f;
     pOpponent_spec->car_spec->curvature = 0.f;
-    pOpponent_spec->stun_time_ends = MAX(gTime_stamp_for_this_munging + pMilliseconds, pOpponent_spec->stun_time_ends);
+    pOpponent_spec->stun_time_ends = MAX(pMilliseconds + gTime_stamp_for_this_munging, pOpponent_spec->stun_time_ends);
 }
 
 // IDA: void __usercall UnStunTheBugger(tOpponent_spec *pOpponent_spec@<EAX>)

@@ -951,7 +951,7 @@ void DRSetPalette2(br_pixelmap* pThe_palette, int pSet_current_palette) {
     if (!gFaded_palette) {
         PDSetPalette(pThe_palette);
     }
-    if (gRender_palette != pThe_palette) {
+    if (pThe_palette != gRender_palette) {
         gPalette_munged |= 1;
     } else {
     }
@@ -3652,7 +3652,7 @@ void ShadowMode(void) {
 // FUNCTION: CARM95 0x004ba581
 int SwitchToRealResolution(void) {
 
-    if (gGraf_data_index != gReal_graf_data_index) {
+    if (gReal_graf_data_index != gGraf_data_index) {
         gGraf_data_index = gReal_graf_data_index;
         gGraf_spec_index = gReal_graf_data_index;
         gCurrent_graf_data = &gGraf_data[gGraf_data_index];

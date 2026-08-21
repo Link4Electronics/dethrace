@@ -503,6 +503,7 @@
 // LIBRARY: CARM95 0x004f5520
 // _inc
 // LIBRARY: CARM95 0x004f60f9
+// crt_helper_4f60f9
 // LIBRARY: CARM95 0x004f7ab0
 // _heapchk
 // LIBRARY: CARM95 0x004f7fb0
@@ -592,4 +593,67 @@ int gS3_cda_enabled;
 // GLOBAL: CARM95 0x005520dc
 int gS3_midi_enabled;
 // GLOBAL: CARM95 0x00536848
-int gLocal_addr;
+int gLocal_addr;// GLOBAL: CARM95 0x00550634
+int gS3_tag_seed;
+// GLOBAL: CARM95 0x00544e2c
+int gCredits_won_headup;
+
+// LIBRARY: CARM95 0x004f9ef0
+// x_ismbbtype
+// GLOBAL: CARM95 0x004fac90
+void* __except_handler3_thunk;// LIBRARY: CARM95 0x00454c4c
+// MakeMessageToSend// LIBRARY: CARM95 0x0049d837
+// S3CreateTypeStructs
+// LIBRARY: CARM95 0x0049d84c
+// S3ReleaseTypeStructs// LIBRARY: CARM95 0x004d2900
+// BrMatrix34ToTransform
+// LIBRARY: CARM95 0x004d3920
+// BrMatrix23PostScale
+// LIBRARY: CARM95 0x004dcb20
+// BrV1dbRendererBegin
+// LIBRARY: CARM95 0x004df2c0
+// BrMemAlign
+// LIBRARY: CARM95 0x004dff60
+// BrDevLastBeginQuery
+// LIBRARY: CARM95 0x004eee80
+// CrtMessageWindow
+// LIBRARY: CARM95 0x004f71a0
+// store_dt
+// LIBRARY: CARM95 0x004f7b90
+// __sbh_new_region
+// LIBRARY: CARM95 0x004f80f0
+// __sbh_alloc_block
+// LIBRARY: CARM95 0x004f9020
+// xtoa
+// LIBRARY: CARM95 0x004f9b00
+// strncnt
+// LIBRARY: CARM95 0x004f9e60
+// xcptlookup
+// LIBRARY: CARM95 0x004fa170
+// parse_cmdline
+// LIBRARY: CARM95 0x004fcdf0
+// OS_fopen
+// LIBRARY: CARM95 0x004fdae0
+// cvtdate
+// LIBRARY: CARM95 0x004fe450
+// strncnt
+// LIBRARY: CARM95 0x0049cb0e
+// S3GetDescriptorByID
+// LIBRARY: CARM95 0x004c8ed1
+// S3SetOutletVolume
+// GLOBAL: CARM95 0x0051d5d4
+int gJoy1_enabled;
+// GLOBAL: CARM95 0x0051d5d8
+int gJoy2_enabled;
+// GLOBAL: CARM95 0x0053d8b0
+int gJoy1_x_axis;
+// GLOBAL: CARM95 0x0053d8b4
+int gJoy1_y_axis;
+// GLOBAL: CARM95 0x0053d8e8
+int gJoy2_x_axis;
+// GLOBAL: CARM95 0x0053d8ec
+int gJoy2_y_axis;
+// GLOBAL: CARM95 0x0053d8c8
+unsigned int gJoy1_buttons;
+// GLOBAL: CARM95 0x0053d900
+unsigned int gJoy2_buttons;

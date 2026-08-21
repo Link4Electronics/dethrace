@@ -759,7 +759,7 @@ void AddDamageToPipingSession(int pCar_ID, tS8* pDifferences) {
 // IDA: void __usercall AddSpecialToPipingSession(tSpecial_type pType@<EAX>)
 // FUNCTION: CARM95 0x00429003
 void AddSpecialToPipingSession(tSpecial_type pType) {
-    tPipe_special_data data = {0};
+    tPipe_special_data data;
 
     AddDataToSession(pType, &data, sizeof(tPipe_special_data));
 }
@@ -992,8 +992,8 @@ void PipeSingleSkidAdjustment(int pSkid_num, br_matrix34* pMatrix, int pMaterial
 // FUNCTION: CARM95 0x00429559
 void ResetPiping(void) {
 
-    gWall_severity = 0.f;
     gPipe_buffer_oldest = NULL;
+    gWall_severity = 0.f;
     gPipe_record_ptr = gPipe_buffer_start;
     gPipe_buffer_working_end = gPipe_buffer_phys_end;
     gReentrancy_count = 0;

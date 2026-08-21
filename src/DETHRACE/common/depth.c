@@ -1085,7 +1085,7 @@ int GetDepthCueingOn(void) {
 // IDA: void __usercall SetDepthCueingOn(int pOn@<EAX>)
 // FUNCTION: CARM95 0x00463bda
 void SetDepthCueingOn(int pOn) {
-    if (pOn != gDepth_cueing_on && gHorizon_material) {
+    if (gDepth_cueing_on != pOn && gHorizon_material) {
         ToggleDepthCueingQuietly();
     }
     gDepth_cueing_on = pOn;

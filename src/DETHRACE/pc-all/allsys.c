@@ -1077,80 +1077,122 @@ void PDReadJoySticks(void) {
     NOT_IMPLEMENTED();
 }
 
+
+int gJoy1_enabled;
+int gJoy2_enabled;
+tS32 gJoy1_x_axis;
+tS32 gJoy1_y_axis;
+tS32 gJoy2_x_axis;
+tS32 gJoy2_y_axis;
+unsigned int gJoy1_buttons;
+unsigned int gJoy2_buttons;
+
 // IDA: tS32 __cdecl PDGetJoy1X()
 // FUNCTION: CARM95 0x004a81b5
 tS32 PDGetJoy1X(void) {
-    tS32 joy;
-    NOT_IMPLEMENTED();
+    if (gJoy1_enabled != 0) {
+        return gJoy1_x_axis;
+    }
+    return -1;
 }
 
 // IDA: tS32 __cdecl PDGetJoy1Y()
 // FUNCTION: CARM95 0x004a81e1
 tS32 PDGetJoy1Y(void) {
-    tS32 joy;
-    NOT_IMPLEMENTED();
+    if (gJoy1_enabled != 0) {
+        return gJoy1_y_axis;
+    }
+    return -1;
 }
 
 // IDA: tS32 __cdecl PDGetJoy2X()
 // FUNCTION: CARM95 0x004a820d
 tS32 PDGetJoy2X(void) {
-    tS32 joy;
-    NOT_IMPLEMENTED();
+    if (gJoy2_enabled != 0) {
+        return gJoy2_x_axis;
+    }
+    return -1;
 }
 
 // IDA: tS32 __cdecl PDGetJoy2Y()
 // FUNCTION: CARM95 0x004a8239
 tS32 PDGetJoy2Y(void) {
-    tS32 joy;
-    NOT_IMPLEMENTED();
+    if (gJoy2_enabled != 0) {
+        return gJoy2_y_axis;
+    }
+    return -1;
 }
 
 // IDA: int __cdecl PDGetJoy1Button1()
 // FUNCTION: CARM95 0x004a8265
 int PDGetJoy1Button1(void) {
-    NOT_IMPLEMENTED();
+    if (gJoy1_enabled != 0) {
+        return gJoy1_buttons & 0x1;
+    }
+    return 0;
 }
 
 // IDA: int __cdecl PDGetJoy1Button2()
 // FUNCTION: CARM95 0x004a8291
 int PDGetJoy1Button2(void) {
-    NOT_IMPLEMENTED();
+    if (gJoy1_enabled != 0) {
+        return gJoy1_buttons & 0x2;
+    }
+    return 0;
 }
 
 // IDA: int __cdecl PDGetJoy1Button3()
 // FUNCTION: CARM95 0x004a82bd
 int PDGetJoy1Button3(void) {
-    NOT_IMPLEMENTED();
+    if (gJoy1_enabled != 0) {
+        return gJoy1_buttons & 0x4;
+    }
+    return 0;
 }
 
 // IDA: int __cdecl PDGetJoy1Button4()
 // FUNCTION: CARM95 0x004a82e9
 int PDGetJoy1Button4(void) {
-    NOT_IMPLEMENTED();
+    if (gJoy1_enabled != 0) {
+        return gJoy1_buttons & 0x8;
+    }
+    return 0;
 }
 
 // IDA: int __cdecl PDGetJoy2Button1()
 // FUNCTION: CARM95 0x004a8315
 int PDGetJoy2Button1(void) {
-    NOT_IMPLEMENTED();
+    if (gJoy2_enabled != 0) {
+        return gJoy2_buttons & 0x1;
+    }
+    return 0;
 }
 
 // IDA: int __cdecl PDGetJoy2Button2()
 // FUNCTION: CARM95 0x004a8341
 int PDGetJoy2Button2(void) {
-    NOT_IMPLEMENTED();
+    if (gJoy2_enabled != 0) {
+        return gJoy2_buttons & 0x2;
+    }
+    return 0;
 }
 
 // IDA: int __cdecl PDGetJoy2Button3()
 // FUNCTION: CARM95 0x004a836d
 int PDGetJoy2Button3(void) {
-    NOT_IMPLEMENTED();
+    if (gJoy2_enabled != 0) {
+        return gJoy2_buttons & 0x4;
+    }
+    return 0;
 }
 
 // IDA: int __cdecl PDGetJoy2Button4()
 // FUNCTION: CARM95 0x004a8399
 int PDGetJoy2Button4(void) {
-    NOT_IMPLEMENTED();
+    if (gJoy2_enabled != 0) {
+        return gJoy2_buttons & 0x8;
+    }
+    return 0;
 }
 
 // IDA: int __usercall PDFileUnlock@<EAX>(char *pThe_path@<EAX>)
