@@ -248,3 +248,295 @@
 
 // LIBRARY: CARM95 0x004EB430
 // _floor
+
+// Internal CRT helpers referenced from other CRT functions.
+// LIBRARY: CARM95 0x004ea810
+// __cfltcvt_init
+
+// LIBRARY: CARM95 0x004eb070
+// swap
+
+// LIBRARY: CARM95 0x004ebe30
+// _fsopen
+
+// LIBRARY: CARM95 0x004ecb60
+// _nh_malloc_dbg
+
+// LIBRARY: CARM95 0x004ed570
+// _free_dbg
+
+// LIBRARY: CARM95 0x004ee6b0
+// strtoxl
+
+// LIBRARY: CARM95 0x004eea90
+// _CrtDbgReport
+
+// LIBRARY: CARM95 0x004ef460
+// _cinit
+
+// LIBRARY: CARM95 0x004ef4d0
+// _exit
+
+// LIBRARY: CARM95 0x004ef4f0
+// doexit
+
+// LIBRARY: CARM95 0x004efa80
+// _amsg_exit
+
+// LIBRARY: CARM95 0x004efeb0
+// __ms_p5_mp_test_fdiv
+
+// LIBRARY: CARM95 0x004f0915
+// __ctrandisp1
+
+// LIBRARY: CARM95 0x004f0941
+// __fload
+
+// LIBRARY: CARM95 0x004f0a30
+// _flsbuf
+
+// LIBRARY: CARM95 0x004f0cd0
+// _output
+
+// LIBRARY: CARM95 0x004f1e40
+// _close
+
+// LIBRARY: CARM95 0x004f1f50
+// _freebuf
+
+// LIBRARY: CARM95 0x004f2060
+// _flush
+
+// LIBRARY: CARM95 0x004f2140
+// flsall
+
+// LIBRARY: CARM95 0x004f2240
+// _stbuf
+
+// LIBRARY: CARM95 0x004f2390
+// _ftbuf
+
+// LIBRARY: CARM95 0x004f2490
+// __ctrlfp
+
+// LIBRARY: CARM95 0x004f25a0
+// __sptype
+
+// LIBRARY: CARM95 0x004f27b0
+// __handle_qnan1
+
+// LIBRARY: CARM95 0x004f28a0
+// __except1
+
+// LIBRARY: CARM95 0x004f36d0
+// __frnd
+
+// LIBRARY: CARM95 0x004f36f0
+// _read
+
+// LIBRARY: CARM95 0x004f3b90
+// memcpy
+
+// LIBRARY: CARM95 0x004f3ce0
+// _write
+
+// LIBRARY: CARM95 0x004f3fe0
+// _lseek
+
+// LIBRARY: CARM95 0x004f4100
+// _input
+
+// LIBRARY: CARM95 0x004f5b50
+// _getbuf
+
+// LIBRARY: CARM95 0x004f5c10
+// _ioinit
+
+// LIBRARY: CARM95 0x004f5f40
+// __trandisp1
+
+// LIBRARY: CARM95 0x004f5fa7
+// __trandisp2
+
+// LIBRARY: CARM95 0x004f6b1c
+// __adj_fprem
+
+// LIBRARY: CARM95 0x004f6ea0
+// __crtGetStringTypeA
+
+// LIBRARY: CARM95 0x004f7630
+// _nh_malloc_base
+
+// LIBRARY: CARM95 0x004f7b30
+// _heap_init
+
+// LIBRARY: CARM95 0x004f9720
+// _dosmaperr
+
+// LIBRARY: CARM95 0x004f97e0
+// __crtLCMapStringA
+
+// LIBRARY: CARM95 0x004f9f60
+// _setenvp
+
+// LIBRARY: CARM95 0x004fa0a0
+// _setargv
+
+// LIBRARY: CARM95 0x004fa530
+// __crtGetEnvironmentStringsA
+
+// LIBRARY: CARM95 0x004fac70
+// __initmbctable
+
+// LIBRARY: CARM95 0x004fadd0
+// _NMSG_WRITE
+
+// LIBRARY: CARM95 0x004faff0
+// _mbsnbicoll
+
+// LIBRARY: CARM95 0x004fb060
+// __wtomb_environ
+
+// LIBRARY: CARM95 0x004fb130
+// __fltin
+
+// LIBRARY: CARM95 0x004fcb00
+// _commit
+
+// LIBRARY: CARM95 0x004fd3e0
+// __tzset
+
+// LIBRARY: CARM95 0x004fd770
+// _isindst
+
+// Internal CRT helpers, second layer.
+
+// Internal CRT helpers, second layer.
+// LIBRARY: CARM95 0x004ecb30
+// _malloc_dbg
+// LIBRARY: CARM95 0x004ecf10
+// _calloc_dbg
+// LIBRARY: CARM95 0x004eda30
+// _CrtCheckMemory
+// LIBRARY: CARM95 0x004eddb0
+// _CrtSetDbgFlag
+// LIBRARY: CARM95 0x004ede40
+// _CrtIsValidHeapPointer
+// LIBRARY: CARM95 0x004ee410
+// _CrtDumpMemoryLeaks
+// LIBRARY: CARM95 0x004eea70
+// _CrtDbgBreak
+// LIBRARY: CARM95 0x004ef5f0
+// _initterm
+// LIBRARY: CARM95 0x004efe50
+// __ms_p5_test_fdiv
+// LIBRARY: CARM95 0x004f2a60
+// __raise_exc
+// LIBRARY: CARM95 0x004f2fb0
+// __handle_exc
+// LIBRARY: CARM95 0x004f3340
+// __umatherr
+// LIBRARY: CARM95 0x004f3400
+// __set_errno
+// LIBRARY: CARM95 0x004f34c0
+// __errcode
+// LIBRARY: CARM95 0x004f5570
+// _un_inc
+// LIBRARY: CARM95 0x004f55a0
+// _whiteout
+// LIBRARY: CARM95 0x004f5670
+// _openfile
+// LIBRARY: CARM95 0x004f5a30
+// _getstream
+// LIBRARY: CARM95 0x004f6916
+// __fprem_common
+// LIBRARY: CARM95 0x004f7560
+// _callnewh
+// LIBRARY: CARM95 0x004f7a40
+// _free_base
+// LIBRARY: CARM95 0x004f8fc0
+// _itoa
+// LIBRARY: CARM95 0x004f91d0
+// _snprintf
+// LIBRARY: CARM95 0x004f92c0
+// _vsnprintf
+// LIBRARY: CARM95 0x004f9640
+// __crtMessageBoxA
+// LIBRARY: CARM95 0x004fa790
+// _setmbcp
+// LIBRARY: CARM95 0x004faac0
+// getSystemCP
+// LIBRARY: CARM95 0x004fad70
+// _FF_MSGBANNER
+// LIBRARY: CARM95 0x004fbc50
+// __ld12tod
+// LIBRARY: CARM95 0x004fc1c0
+// _isatty
+// LIBRARY: CARM95 0x004fc960
+// _free_osfhnd
+// LIBRARY: CARM95 0x004fca80
+// _get_osfhandle
+// LIBRARY: CARM95 0x004fdff0
+// __crtCompareStringA
+// LIBRARY: CARM95 0x004fe4c0
+// __crtsetenv
+// LIBRARY: CARM95 0x004fe9d0
+// ___strgtold12
+
+// Internal CRT helpers, third layer.
+// LIBRARY: CARM95 0x004ecf80
+// _realloc_dbg
+// LIBRARY: CARM95 0x004edde0
+// _CrtIsValidPointer
+// LIBRARY: CARM95 0x004edf10
+// _CrtMemCheckpoint
+// LIBRARY: CARM95 0x004ee050
+// _CrtMemDumpAllObjectsSince
+// LIBRARY: CARM95 0x004f2450
+// __statfp
+// LIBRARY: CARM95 0x004f2470
+// __clrfp
+// LIBRARY: CARM95 0x004f24d0
+// __set_statfp
+// LIBRARY: CARM95 0x004f2660
+// __decomp
+// LIBRARY: CARM95 0x004f5520
+// _inc
+// LIBRARY: CARM95 0x004f60f9
+// LIBRARY: CARM95 0x004f7ab0
+// _heapchk
+// LIBRARY: CARM95 0x004f7fb0
+// __sbh_find_block
+// LIBRARY: CARM95 0x004f8060
+// __sbh_free_block
+// LIBRARY: CARM95 0x004f8a80
+// __sbh_heap_check
+// LIBRARY: CARM95 0x004fab50
+// CPtoLCID
+// LIBRARY: CARM95 0x004fabf0
+// setSBCS
+// LIBRARY: CARM95 0x004fb9e0
+// __ld12cvt
+// LIBRARY: CARM95 0x004fcbe0
+// __matherr
+// LIBRARY: CARM95 0x004fe8d0
+// copy_environ
+// LIBRARY: CARM95 0x005006a0
+// _mbschr
+
+// Internal CRT helpers, fourth layer.
+
+// LIBRARY: CARM95 0x004f2550
+// __set_exp
+// LIBRARY: CARM95 0x004f7e30
+// __sbh_decommit_pages
+// LIBRARY: CARM95 0x004fb730
+// __RoundMan
+// LIBRARY: CARM95 0x004fb810
+// __CopyMan
+// LIBRARY: CARM95 0x004fb860
+// __FillZeroMan
+// LIBRARY: CARM95 0x004fb8a0
+// __IsZeroMan
+// LIBRARY: CARM95 0x004fb8f0
+// __ShrMan

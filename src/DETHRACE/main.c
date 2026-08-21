@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -31,6 +32,80 @@ void BR_CALLBACK _BrBeginHook(void) {
 
 void BR_CALLBACK _BrEndHook(void) {
 }
+
+#if _MSC_VER == 1020
+// The original CARM95.EXE links wincrt0.obj: WinMainCRTStartup calls WinMain.
+// This mirrors the original WinMain (command line flag parsing + GameMain).
+
+// Added by dethrace. Windows-specific. Original variable names unknown.
+
+// GLOBAL: CARM95 0x0053df28
+HINSTANCE gWin32_hinstance;
+// GLOBAL: CARM95 0x0053df20
+int gWin32_cmd_show;
+// Copied to gGraf_spec_index by PDInitScreenVars in the original
+// GLOBAL: CARM95 0x0051d600
+int gHires_specified;
+// Returned by WinMain; never written by game code
+// GLOBAL: CARM95 0x0051d5a4
+int gWin32_exit_code;
+
+extern char gNetwork_profile_fname[256];
+extern int gNetwork_profile_file_exists;
+extern int gCut_scene_override;
+extern void GameMain(int pArgc, char** pArgv);
+
+int __cdecl _CrtSetDbgFlag(int);
+
+// IDA: int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+// Local variable names are meaningless strings chosen so MSVC 4.2 assigns each
+// stack slot the same displacement as the original (allocation order depends on
+// the identifier). tj=argc, jcrz0=argv_str, pb=argv, eiuz2=dbg_flag, xb81l=cur_dir_len.
+// FUNCTION: CARM95 0x004a61ca
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    int tj;
+    char* jcrz0;
+    char** pb;
+    int eiuz2;
+    DWORD xb81l;
+
+    tj = 1;
+    jcrz0 = "Carmageddon";
+    pb = &jcrz0;
+
+    eiuz2 = _CrtSetDbgFlag(-1);
+    eiuz2 |= 0x01;
+    eiuz2 &= ~0x04;
+    eiuz2 &= ~0x20;
+    eiuz2 &= ~0x02;
+    _CrtSetDbgFlag(eiuz2);
+
+    if (strlen(lpCmdLine) > 0) {
+        if (strstr(lpCmdLine, "-hires") != NULL) {
+            gHires_specified = 1;
+        }
+    }
+    if (strlen(lpCmdLine) > 0) {
+        if (strstr(lpCmdLine, "-nocutscenes") != NULL) {
+            gCut_scene_override = 1;
+        }
+    }
+
+    gWin32_hinstance = hInstance;
+    gWin32_cmd_show = nCmdShow;
+
+    gNetwork_profile_fname[0] = '\0';
+    xb81l = GetCurrentDirectoryA(240, gNetwork_profile_fname);
+    if (xb81l != 0 && xb81l == strlen(gNetwork_profile_fname)) {
+        gNetwork_profile_file_exists = 1;
+        strcat(gNetwork_profile_fname, "\\");
+        strcat(gNetwork_profile_fname, "NETWORK.INI");
+    }
+
+    GameMain(tj, pb);
+    return gWin32_exit_code;
+}
+#endif
 
 int main(int argc, char* argv[]) {
     int result;

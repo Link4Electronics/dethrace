@@ -49,6 +49,7 @@ int gASCII_table[128];
 tU32 gKeyboard_bits[8];
 // GLOBAL: CARM95 0x0053d6a8
 int gASCII_shift_table[128];
+// GLOBAL: CARM95 0x00550250
 char gNetwork_profile_fname[256];
 tS32 gJoystick_min1y;
 tS32 gJoystick_min2y;
@@ -122,7 +123,10 @@ static int sdl3_gpu_debug_mode(void) {
 int gShow_fatal_error;
 // GLOBAL: CARM95 0x0053dd20
 char gFatal_error_string[512];
+// GLOBAL: CARM95 0x0051d5b8
 int gExit_code;
+// GLOBAL: CARM95 0x0051d5ec
+int gNetwork_profile_file_exists;
 // GLOBAL: CARM95 0x0053df30
 br_diaghandler gBr_diaghandler;
 
