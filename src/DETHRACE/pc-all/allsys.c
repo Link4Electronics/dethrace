@@ -1067,14 +1067,31 @@ tU32 ReadJoystickAxis(int pBit) {
     NOT_IMPLEMENTED();
 }
 
+extern int gJoy1_enabled;
+extern int gJoy2_enabled;
+#ifdef _WIN32
+unsigned char gJoy_info_ex1[56];
+unsigned char gJoy_info_ex2[56];
+__declspec(dllimport) unsigned int __stdcall joyGetPosEx(unsigned int uJoyID, void* pji);
+#endif
+
 // IDA: void __cdecl PDReadJoySticks()
 // FUNCTION: CARM95 0x004a8152
 void PDReadJoySticks(void) {
-    tU32 temp1x;
-    tU32 temp1y;
-    tU32 temp2x;
-    tU32 temp2y;
+#ifdef _WIN32
+    if (gJoy1_enabled != 0) {
+        if (joyGetPosEx(0, gJoy_info_ex1) != 0) {
+            gJoy1_enabled = 0;
+        }
+    }
+    if (gJoy2_enabled != 0) {
+        if (joyGetPosEx(1, gJoy_info_ex2) != 0) {
+            gJoy2_enabled = 0;
+        }
+    }
+#else
     NOT_IMPLEMENTED();
+#endif
 }
 
 

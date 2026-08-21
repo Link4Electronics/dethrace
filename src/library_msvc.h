@@ -657,3 +657,18 @@ int gJoy2_y_axis;
 unsigned int gJoy1_buttons;
 // GLOBAL: CARM95 0x0053d900
 unsigned int gJoy2_buttons;
+// GLOBAL: CARM95 0x0053d8a8
+unsigned char gJoy_info_ex1[56];
+// GLOBAL: CARM95 0x0053d8e0
+unsigned char gJoy_info_ex2[56];
+
+// LIBRARY: CARM95 0x00454c4c
+// MakeMessageToSend
+// LIBRARY: CARM95 0x0049d837
+// S3CreateTypeStructs
+// LIBRARY: CARM95 0x004d2900
+// BrMatrix34ToTransform
+// LIBRARY: CARM95 0x004d61b0
+// BrMapEnum
+// LIBRARY: CARM95 0x004f85c0
+// __sbh_alloc_block_from_page
