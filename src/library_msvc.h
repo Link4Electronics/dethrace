@@ -672,3 +672,121 @@ unsigned char gJoy_info_ex2[56];
 // BrMapEnum
 // LIBRARY: CARM95 0x004f85c0
 // __sbh_alloc_block_from_page
+
+
+// GLOBAL: CARM95 0x0050a1a4
+int gS3_listener_pos_ptr;
+// GLOBAL: CARM95 0x0050a1a8
+int gS3_listener_vel_ptr;
+// GLOBAL: CARM95 0x0050a1ac
+int gS3_listener_left_ptr;
+// GLOBAL: CARM95 0x00510e90
+int gJoinable_games;
+// GLOBAL: CARM95 0x00510e9c
+int next_broadcast_time;
+// GLOBAL: CARM95 0x0051acf8
+int gS3_opened_output_devices;
+// GLOBAL: CARM95 0x0052d124
+int _FPinit;
+// GLOBAL: CARM95 0x0052d3f8
+int eax;
+// GLOBAL: CARM95 0x0052d408
+int eax;
+// GLOBAL: CARM95 0x0052d414
+int pfnwsprintfA;
+// GLOBAL: CARM95 0x0052d41c
+int _doserrno;
+// GLOBAL: CARM95 0x0052d434
+int __argc;
+// GLOBAL: CARM95 0x0052d438
+int __argv;
+// GLOBAL: CARM95 0x0052d450
+int _pgmptr;
+// GLOBAL: CARM95 0x0052d45c
+int _C_Termination_Done;
+// GLOBAL: CARM95 0x0052d460
+int _C_Exit_Done;
+// GLOBAL: CARM95 0x0052d464
+int fExit;
+// GLOBAL: CARM95 0x0052d474
+int __error_mode;
+// GLOBAL: CARM95 0x0052d478
+int __app_type;
+// GLOBAL: CARM95 0x0052d9e4
+int f_use;
+// GLOBAL: CARM95 0x0052e214
+int __sbh_threshold;
+// GLOBAL: CARM95 0x0052e4b4
+int pfnMessageBoxA;
+// GLOBAL: CARM95 0x0052e4b8
+int pfnGetActiveWindow;
+// GLOBAL: CARM95 0x0052e4bc
+int pfnGetLastActivePopup;
+// GLOBAL: CARM95 0x0052e62c
+int f_use;
+// GLOBAL: CARM95 0x0052e6f0
+int f_use;
+// GLOBAL: CARM95 0x0052e7fc
+int __mbcodepage;
+// GLOBAL: CARM95 0x0052e800
+int __mblcid;
+// GLOBAL: CARM95 0x0052e814
+int fSystemSet;
+// GLOBAL: CARM95 0x0052e9a0
+int _adbgmsg;
+// GLOBAL: CARM95 0x0052ea88
+int dststart;
+// GLOBAL: CARM95 0x0052ea98
+int dstend;
+// GLOBAL: CARM95 0x0052eaa4
+int first_time;
+// GLOBAL: CARM95 0x0052eacc
+int eax;
+// GLOBAL: CARM95 0x0052eb40
+int f_use;
+// GLOBAL: CARM95 0x00531d80
+int gS3_listener_pos_is_brender;
+// GLOBAL: CARM95 0x00531d84
+int gS3_listener_left_is_brender;
+// GLOBAL: CARM95 0x00531d94
+int gS3_listener_vel_is_brender;
+// GLOBAL: CARM95 0x00531d9c
+int dword_531D9C;
+// GLOBAL: CARM95 0x00536438
+int gBroadcast_addr_ipx;
+// GLOBAL: CARM95 0x0053643c
+int gMsg_header_strlen;
+// GLOBAL: CARM95 0x00536878
+int gRemote_addr_ipx;
+// GLOBAL: CARM95 0x00536890
+int gLocal_addr_ipx;
+// GLOBAL: CARM95 0x00536894
+int gNumber_of_hosts;
+// GLOBAL: CARM95 0x00544b7c
+int _pnhHeap;
+// GLOBAL: CARM95 0x00544cd0
+int tzapiused;
+// GLOBAL: CARM95 0x00544e10
+int gS3_service_time_delta;
+// GLOBAL: CARM95 0x00550640
+int gS3_noutlets;
+// GLOBAL: CARM95 0x00550644
+int gS3_nsound_sources;
+// GLOBAL: CARM95 0x0055064c
+int gS3_outlets;
+// GLOBAL: CARM95 0x00550650
+int gS3_sound_sources;
+// GLOBAL: CARM95 0x00550660
+int gS3_last_error;
+// GLOBAL: CARM95 0x00551db8
+int gS3_inside_cockpit;
+// GLOBAL: CARM95 0x00553aa0
+int __pioinfo;
+// GLOBAL: CARM95 0x00553ba0
+int _nhandle;
+// GLOBAL: CARM95 0x00553ba8
+int __onexitend;
+// GLOBAL: CARM95 0x00553bac
+int __onexitbegin;
+// GLOBAL: CARM95 0x00553bb0
+int _pfnReportHook;
