@@ -586,3 +586,10 @@
 // _ismbblead
 // LIBRARY: CARM95 0x004f7da0
 // __sbh_release_region
+
+// GLOBAL: CARM95 0x0053d05c
+int gS3_cda_enabled;
+// GLOBAL: CARM95 0x005520dc
+int gS3_midi_enabled;
+// GLOBAL: CARM95 0x00536848
+int gLocal_addr;
