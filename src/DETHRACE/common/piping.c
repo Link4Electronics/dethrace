@@ -759,7 +759,7 @@ void AddDamageToPipingSession(int pCar_ID, tS8* pDifferences) {
 // IDA: void __usercall AddSpecialToPipingSession(tSpecial_type pType@<EAX>)
 // FUNCTION: CARM95 0x00429003
 void AddSpecialToPipingSession(tSpecial_type pType) {
-    tPipe_special_data data;
+    tPipe_special_data data = {0};
 
     AddDataToSession(pType, &data, sizeof(tPipe_special_data));
 }
