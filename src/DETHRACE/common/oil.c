@@ -231,12 +231,13 @@ void EnsureGroundDetailVisible(br_vector3* pNew_pos, br_vector3* pGround_normal,
     // Original approach lerps the mark toward the camera by 0.01*dist world
     // units, so the lift above the surface grows with camera distance. At
     // typical follow-cam ranges this floats marks above the wheel mesh and they
-    // render through wheels. Setting translation to the stored ground position
-    // avoids distance-dependent float; the per-geometry lift for skid marks is
-    // handled in StretchMark (mat.m[1] = normal * 0.005).
-    pNew_pos->v[0] = pOld_pos->v[0];
-    pNew_pos->v[1] = pOld_pos->v[1];
-    pNew_pos->v[2] = pOld_pos->v[2];
+    // render through wheels. Pinning to the stored ground position avoids that,
+    // but leaves the mark exactly coplanar with the road, which z-fights on
+    // depth-buffered renderers. Lift slightly along the ground normal (same
+    // magnitude StretchMark uses) so hardware depth precision can separate them.
+    pNew_pos->v[0] = pOld_pos->v[0] + pGround_normal->v[0] * 0.005f;
+    pNew_pos->v[1] = pOld_pos->v[1] + pGround_normal->v[1] * 0.005f;
+    pNew_pos->v[2] = pOld_pos->v[2] + pGround_normal->v[2] * 0.005f;
 #else
     br_scalar factor;
     br_scalar s;
