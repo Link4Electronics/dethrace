@@ -355,6 +355,10 @@ int S3PlaySample(tS3_channel* chan) {
 
 // this function was only called in DOS build
 int S3CreateTypeStructs(tS3_channel* chan) {
+#ifdef _WIN32
+    /* The Windows CARM95 executable contains only a `return 1;` stub here. */
+    return 1;
+#else
     void* result;
 
     result = AudioBackend_AllocateSampleTypeStruct();
@@ -365,9 +369,14 @@ int S3CreateTypeStructs(tS3_channel* chan) {
     chan->type_struct_cda = NULL;
     chan->type_struct_sample = (char*)result;
     return 1;
+#endif
 }
 
 int S3ReleaseTypeStructs(tS3_channel* chan) {
+#ifdef _WIN32
+    /* The Windows CARM95 executable contains only a `return 1;` stub here. */
+    return 1;
+#else
     if (chan->type_struct_sample) {
         S3MemFree(chan->type_struct_sample);
         chan->type_struct_sample = NULL;
@@ -377,6 +386,7 @@ int S3ReleaseTypeStructs(tS3_channel* chan) {
         chan->type_struct_cda = NULL;
     }
     return 1;
+#endif
 }
 
 // FUNCTION: CARM95 0x0049D22D

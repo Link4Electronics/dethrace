@@ -602,7 +602,7 @@ int gCredits_won_headup;
 // LIBRARY: CARM95 0x004f9ef0
 // x_ismbbtype
 // GLOBAL: CARM95 0x004fac90
-void* __except_handler3_thunk;
+void* __except_handler3;
 // LIBRARY: CARM95 0x00454c4c
 // MakeMessageToSend
 // LIBRARY: CARM95 0x0049d837
@@ -683,9 +683,9 @@ int gS3_opened_output_devices;
 // GLOBAL: CARM95 0x0052d124
 int _FPinit;
 // GLOBAL: CARM95 0x0052d3f8
-int eax;
+int _CrtDbgFile;
 // GLOBAL: CARM95 0x0052d408
-int eax;
+int _CrtDbgMode;
 // GLOBAL: CARM95 0x0052d414
 int pfnwsprintfA;
 // GLOBAL: CARM95 0x0052d41c
@@ -735,7 +735,7 @@ int dstend;
 // GLOBAL: CARM95 0x0052eaa4
 int first_time;
 // GLOBAL: CARM95 0x0052eacc
-int eax;
+int first_time;
 // GLOBAL: CARM95 0x0052eb40
 int f_use;
 // GLOBAL: CARM95 0x00531d80
@@ -839,6 +839,56 @@ int gLocal_ipx_addr_string;
 int gSend_buffer;
 // GLOBAL: CARM95 0x00544b80
 int _pgmname;
+// GLOBAL: CARM95 0x00544d90
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544da0
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544db8
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544de4
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544dec
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544e08
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00550580
+int gS3_hardware_info;
+// GLOBAL: CARM95 0x00550664
+int gS3_directory_separator;
+// GLOBAL: CARM95 0x00550668
+int gS3_directory_name;
+// GLOBAL: CARM95 0x00552110
+int v1db;
+// GLOBAL: CARM95 0x005525bc
+int v1db;
+// GLOBAL: CARM95 0x00552a80
+int __piob;
+// GLOBAL: CARM95 0x00553a90
+int _nstream;
+// GLOBAL: CARM95 0x00531d98
+int gS3_listener_unused;
+// GLOBAL: CARM95 0x00550648
+int gS3_next_outlet_id;
+// LIBRARY: CARM95 0x004fd410
+// _tzset
+// GLOBAL: CARM95 0x00507010
+int __xi_z;
+// GLOBAL: CARM95 0x00507008
+int __xi_a;
+// GLOBAL: CARM95 0x00507004
+int __xc_z;
+// GLOBAL: CARM95 0x00507000
+int __xc_a;
+// GLOBAL: CARM95 0x0050701c
+int __xp_z;
+// GLOBAL: CARM95 0x00507014
+int __xp_a;
+// GLOBAL: CARM95 0x00507024
+int __xt_z;
+// GLOBAL: CARM95 0x00507020
+int __xt_a;// GLOBAL: CARM95 0x00544cd4
+char tzinfo[176];
+
 // GLOBAL: CARM95 0x00544d1c
 int tzinfo;
 // GLOBAL: CARM95 0x00544d1e
@@ -871,33 +921,7 @@ int tzinfo;
 int tzinfo;
 // GLOBAL: CARM95 0x00544d7e
 int tzinfo;
-// GLOBAL: CARM95 0x00544d90
-int gS3_channel_template;
-// GLOBAL: CARM95 0x00544da0
-int gS3_channel_template;
-// GLOBAL: CARM95 0x00544db8
-int gS3_channel_template;
-// GLOBAL: CARM95 0x00544de4
-int gS3_channel_template;
-// GLOBAL: CARM95 0x00544dec
-int gS3_channel_template;
-// GLOBAL: CARM95 0x00544e08
-int gS3_channel_template;
-// GLOBAL: CARM95 0x00550580
-int gS3_hardware_info;
-// GLOBAL: CARM95 0x00550664
-int gS3_directory_separator;
-// GLOBAL: CARM95 0x00550668
-int gS3_directory_name;
-// GLOBAL: CARM95 0x00552110
-int v1db;
-// GLOBAL: CARM95 0x005525bc
-int v1db;
-// GLOBAL: CARM95 0x00552a80
-int __piob;
-// GLOBAL: CARM95 0x00553a90
-int _nstream;
-// GLOBAL: CARM95 0x00531d98
-int gS3_listener_unused;
-// GLOBAL: CARM95 0x00550648
-int gS3_next_outlet_id;
+// LIBRARY: CARM95 0x004ff7f0
+// ___mtold12
+// LIBRARY: CARM95 0x00500bc0
+// ___multtenpow12

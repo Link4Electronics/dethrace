@@ -1623,7 +1623,7 @@ void OoerrIveGotTextInMeBoxMissus(int pFont_index, char* pText, br_pixelmap* pPi
     if (font_needed_loading) {
         LoadFont(pFont_index);
     }
-    centre = (pRight + pLeft) / 2;
+    centre = (pLeft + pRight) / 2;
     line[0] = 0;
     input_str_index = 0;
     line_char_index = 0;
