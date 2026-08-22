@@ -784,3 +784,120 @@ int __onexitend;
 int __onexitbegin;
 // GLOBAL: CARM95 0x00553bb0
 int _pfnReportHook;
+
+// GLOBAL: CARM95 0x005065d8
+int __lookuptable;
+// GLOBAL: CARM95 0x0052d3e0
+int _crtAssertBusy;
+// GLOBAL: CARM95 0x0052d3e8
+int _CrtDbgMode;
+// GLOBAL: CARM95 0x0052d458
+int _exitflag;
+// GLOBAL: CARM95 0x0052e4c0
+int errtable;
+// GLOBAL: CARM95 0x0052e638
+int __lc_handle;
+// GLOBAL: CARM95 0x0052e660
+int _XcptActTab;
+// GLOBAL: CARM95 0x0052e6f8
+int _mbctype;
+// GLOBAL: CARM95 0x0052e808
+int __mbulinfo;
+// GLOBAL: CARM95 0x0052e818
+int __rgctypeflag;
+// GLOBAL: CARM95 0x0052e820
+int __rgcode_page_info;
+// GLOBAL: CARM95 0x0052e910
+int rterrs;
+// GLOBAL: CARM95 0x00531d50
+int gS3_listener_position_now;
+// GLOBAL: CARM95 0x00531d54
+int gS3_listener_position_now;
+// GLOBAL: CARM95 0x00531d58
+int gS3_listener_position_now;
+// GLOBAL: CARM95 0x00531d60
+int gS3_listener_left_now;
+// GLOBAL: CARM95 0x00531d70
+int gS3_listener_position_old;
+// GLOBAL: CARM95 0x00531d88
+int gS3_listener_vel_now;
+// GLOBAL: CARM95 0x00531d8c
+int gS3_listener_vel_now;
+// GLOBAL: CARM95 0x00531d90
+int gS3_listener_vel_now;
+// GLOBAL: CARM95 0x00536450
+int gReceive_buffer;
+// GLOBAL: CARM95 0x00536650
+int gRemote_addr;
+// GLOBAL: CARM95 0x00536664
+int gIpx_socket_num;
+// GLOBAL: CARM95 0x00536838
+int gBroadcast_addr;
+// GLOBAL: CARM95 0x00536858
+int gLocal_ipx_addr_string;
+// GLOBAL: CARM95 0x00536898
+int gSend_buffer;
+// GLOBAL: CARM95 0x00544b80
+int _pgmname;
+// GLOBAL: CARM95 0x00544d1c
+int tzinfo;
+// GLOBAL: CARM95 0x00544d1e
+int tzinfo;
+// GLOBAL: CARM95 0x00544d20
+int tzinfo;
+// GLOBAL: CARM95 0x00544d22
+int tzinfo;
+// GLOBAL: CARM95 0x00544d24
+int tzinfo;
+// GLOBAL: CARM95 0x00544d26
+int tzinfo;
+// GLOBAL: CARM95 0x00544d28
+int tzinfo;
+// GLOBAL: CARM95 0x00544d2a
+int tzinfo;
+// GLOBAL: CARM95 0x00544d70
+int tzinfo;
+// GLOBAL: CARM95 0x00544d72
+int tzinfo;
+// GLOBAL: CARM95 0x00544d74
+int tzinfo;
+// GLOBAL: CARM95 0x00544d76
+int tzinfo;
+// GLOBAL: CARM95 0x00544d78
+int tzinfo;
+// GLOBAL: CARM95 0x00544d7a
+int tzinfo;
+// GLOBAL: CARM95 0x00544d7c
+int tzinfo;
+// GLOBAL: CARM95 0x00544d7e
+int tzinfo;
+// GLOBAL: CARM95 0x00544d90
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544da0
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544db8
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544de4
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544dec
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00544e08
+int gS3_channel_template;
+// GLOBAL: CARM95 0x00550580
+int gS3_hardware_info;
+// GLOBAL: CARM95 0x00550664
+int gS3_directory_separator;
+// GLOBAL: CARM95 0x00550668
+int gS3_directory_name;
+// GLOBAL: CARM95 0x00552110
+int v1db;
+// GLOBAL: CARM95 0x005525bc
+int v1db;
+// GLOBAL: CARM95 0x00552a80
+int __piob;
+// GLOBAL: CARM95 0x00553a90
+int _nstream;
+// GLOBAL: CARM95 0x00531d98
+int gS3_listener_unused;
+// GLOBAL: CARM95 0x00550648
+int gS3_next_outlet_id;
